@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Ruta gastronómica</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <header class="hero">
+    <div class="hero__overlay"></div>
+    <div class="hero__content">
+      <p class="eyebrow">Un regalo para una persona muy importante</p>
+      <h1>Ruta gastronómica</h1>
+      <p class="hero__text">
+        Doce planes, doce momentos y una excusa perfecta para seguir creando recuerdos contigo.
+      </p>
+
+      <div class="top-widgets">
+        <div class="widget">
+          <span class="widget__label">Planes activados</span>
+          <span class="widget__value" id="contador-planes">0 / 12</span>
+        </div>
+
+        <div class="widget">
+          <span class="widget__label">Cuenta atrás</span>
+          <div class="countdown" id="countdown">
+            <div class="countdown__item">
+              <span id="dias">00</span>
+              <small>días</small>
+            </div>
+            <div class="countdown__item">
+              <span id="horas">00</span>
+              <small>horas</small>
+            </div>
+            <div class="countdown__item">
+              <span id="minutos">00</span>
+              <small>min</small>
+            </div>
+            <div class="countdown__item">
+              <span id="segundos">00</span>
+              <small>seg</small>
+            </div>
+          </div>
+          <p class="countdown__date" id="fecha-objetivo-texto">
+            Hasta el gran día
+          </p>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <main class="main-content">
+    <section class="intro">
+      <h2>Nuestra colección de planes</h2>
+      <p>
+        Cada tarjeta es una parada de esta ruta. Al entrar en cada una podrás descubrir
+        el plan, ver su foto y activarlo cuando toque.
+      </p>
+    </section>
+
+    <section class="cards-grid">
+      <a class="card" href="planes/plan1.html">
+        <img src="img/plan1.jpg" alt="Plan 1" class="card__image" />
+        <div class="card__content">
+          <p class="card__number">Plan 1</p>
+          <h3>Primera parada</h3>
+          <p>El inicio de esta ruta gastronómica.</p>
+          <span class="card__status" id="estado-plan1">Pendiente</span>
+        </div>
+      </a>
+
+      <a class="card" href="planes/plan2.html">
+        <img src="img/plan2.jpg" alt="Plan 2" class="card__image" />
+        <div class="card__content">
+          <p class="card__number">Plan 2</p>
+          <h3>Segunda parada</h3>
+          <p>Otro sitio para seguir saboreando el regalo.</p>
+          <span class="card__status" id="estado-plan2">Pendiente</span>
+        </div>
+      </a>
+
+      <a class="card" href="planes/plan3.html">
+        <img src="img/plan3.jpg" alt="Plan 3" class="card__image" />
+        <div class="card__content">
+          <p class="card__number">Plan 3</p>
+          <h3>Tercera parada</h3>
+          <p>Un plan pensado para seguir sumando momentos.</p>
+          <span class="card__status" id="estado-plan3">Pendiente</span>
+        </div>
+      </a>
+
+      <a class="card" href="planes/plan4.html">
+        <img src="img/plan4.jpg" alt="Plan 4" class="card__image" />
+        <div class="card__content">
+          <p class="card__number">Plan 4</p>
+          <h3>Cuarta parada</h3>
+          <p>Otra excusa para disfrutar juntos.</p>
+          <span class="card__status" id="estado-plan4">Pendiente</span>
+        </div>
+      </a>
+
+      <a class="card" href="planes/plan5.html">
+        <img src="img/plan5.jpg" alt="Plan 5" class="card__image" />
+        <div class="card__content">
+          <p class="card__number">Plan 5</p>
+          <h3>Quinta parada</h3>
+          <p>Porque una ruta así no se queda a medias.</p>
+          <span class="card__status" id="estado-plan5">Pendiente</span>
+        </div>
+      </a>
+
+      <a class="card" href="planes/plan6.html">
+        <img src="img/plan6.jpg" alt="Plan 6" class="card__image" />
+        <div class="card__content">
+          <p class="card__number">Plan 6</p>
+          <h3>Sexta parada</h3>
+          <p>Mitad del camino, pero no de la ilusión.</p>
+          <span class="card__status" id="estado-plan6">Pendiente</span>
+        </div>
+      </a>
+
+      <a class="card" href="planes/plan7.html">
+        <img src="img/plan7.jpg" alt="Plan 7" class="card__image" />
+        <div class="card__content">
+          <p class="card__number">Plan 7</p>
+          <h3>Séptima parada</h3>
+          <p>Seguimos con otra sorpresa preparada.</p>
+          <span class="card__status" id="estado-plan7">Pendiente</span>
+        </div>
+      </a>
+
+      <a class="card" href="planes/plan8.html">
+        <img src="img/plan8.jpg" alt="Plan 8" class="card__image" />
+        <div class="card__content">
+          <p class="card__number">Plan 8</p>
+          <h3>Octava parada</h3>
+          <p>Más comida, más recuerdos, más nosotros.</p>
+          <span class="card__status" id="estado-plan8">Pendiente</span>
+        </div>
+      </a>
+
+      <a class="card" href="planes/plan9.html">
+        <img src="img/plan9.jpg" alt="Plan 9" class="card__image" />
+        <div class="card__content">
+          <p class="card__number">Plan 9</p>
+          <h3>Novena parada</h3>
+          <p>Una ruta de este nivel merece seguir sorprendiendo.</p>
+          <span class="card__status" id="estado-plan9">Pendiente</span>
+        </div>
+      </a>
+
+      <a class="card" href="planes/plan10.html">
+        <img src="img/plan10.jpg" alt="Plan 10" class="card__image" />
+        <div class="card__content">
+          <p class="card__number">Plan 10</p>
+          <h3>Décima parada</h3>
+          <p>Ya queda poco para completar el recorrido.</p>
+          <span class="card__status" id="estado-plan10">Pendiente</span>
+        </div>
+      </a>
+
+      <a class="card" href="planes/plan11.html">
+        <img src="img/plan11.jpg" alt="Plan 11" class="card__image" />
+        <div class="card__content">
+          <p class="card__number">Plan 11</p>
+          <h3>Undécima parada</h3>
+          <p>La penúltima, pero no menos especial.</p>
+          <span class="card__status" id="estado-plan11">Pendiente</span>
+        </div>
+      </a>
+
+      <a class="card" href="planes/plan12.html">
+        <img src="img/plan12.jpg" alt="Plan 12" class="card__image" />
+        <div class="card__content">
+          <p class="card__number">Plan 12</p>
+          <h3>Última parada</h3>
+          <p>El cierre perfecto para esta ruta.</p>
+          <span class="card__status" id="estado-plan12">Pendiente</span>
+        </div>
+      </a>
+    </section>
+
+    <section class="final-message" id="mensaje-final" hidden>
+      <h2>Ruta completada ✨</h2>
+      <p>
+        Has desbloqueado todos los planes. Ahora toca disfrutar de todo lo que queda por vivir.
+      </p>
+    </section>
+  </main>
+
+  <script src="script.js"></script>
+</body>
+</html>
