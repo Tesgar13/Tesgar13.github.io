@@ -3,62 +3,81 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Ruta gastronómica</title>
+  <title>RUTITA GASTRONÓMICA</title>
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
+
   <header class="hero">
     <div class="hero__overlay"></div>
     <div class="hero__content">
-      <p class="eyebrow">Un regalo para una persona muy importante</p>
-      <h1>Ruta gastronómica</h1>
+      <p class="eyebrow">Qué mejor plan que comer juntos</p>
+      <h1>Creemos recuerdos comiendo</h1>
       <p class="hero__text">
-        Doce planes, doce momentos y una excusa perfecta para seguir creando recuerdos contigo.
+        Durante estos 3 años hemos creado innumerables recuerdos juntos.
+        ¿Qué te parece si en los próximos 3 recreamos algunos de ellos y seguimos sumando muchos más?
       </p>
 
       <div class="top-widgets">
+
         <div class="widget">
           <span class="widget__label">Planes activados</span>
-          <span class="widget__value" id="contador-planes">0 / 12</span>
+          <span class="widget__value" id="contador-planes">0 / 10</span>
         </div>
 
         <div class="widget">
-          <span class="widget__label">Cuenta atrás</span>
+          <span class="widget__label">Quedan</span>
+
           <div class="countdown" id="countdown">
+
             <div class="countdown__item">
               <span id="dias">00</span>
               <small>días</small>
             </div>
+
             <div class="countdown__item">
               <span id="horas">00</span>
               <small>horas</small>
             </div>
+
             <div class="countdown__item">
               <span id="minutos">00</span>
               <small>min</small>
             </div>
+
             <div class="countdown__item">
               <span id="segundos">00</span>
               <small>seg</small>
             </div>
+
           </div>
+
           <p class="countdown__date" id="fecha-objetivo-texto">
-            Hasta el gran día
+            para completar todos los planes
           </p>
+
         </div>
+
       </div>
     </div>
   </header>
 
+
   <main class="main-content">
+
     <section class="intro">
-      <h2>Nuestra colección de planes</h2>
+      <h2>Recuerdos creados, recuerdos por crear</h2>
       <p>
-        Cada tarjeta es una parada de esta ruta. Al entrar en cada una podrás descubrir
-        el plan, ver su foto y activarlo cuando toque.
+        Cada tarjeta representa un momento especial vivido juntos.
+        Al entrar en cada una podrás descubrir el plan,
+        recordar lo vivido y activarlo cuando volvamos a repetirlo.
       </p>
     </section>
 
+
+    <section class="cards-grid">
+
+      <!-- PLAN 1 -->
       <a class="card" href="planes/plan1.html">
         <img src="img/GH.jpg" alt="Plan 1" class="card__image" />
         <div class="card__content">
@@ -69,26 +88,32 @@
         </div>
       </a>
 
+
+      <!-- PLAN 2 -->
       <a class="card" href="planes/plan2.html">
         <img src="img/Marias.jpg" alt="Plan 2" class="card__image" />
         <div class="card__content">
           <p class="card__number">Plan 2</p>
           <h3>¿Hay sitio para aparcar?</h3>
-          <p>Uno de tus sitios favoritos, primera vez cenando juntos, ¿Dónde será?</p>
+          <p>Uno de tus sitios favoritos, primera vez cenando juntos, ¿dónde será?</p>
           <span class="card__status" id="estado-plan2">Pendiente</span>
         </div>
       </a>
 
+
+      <!-- PLAN 3 -->
       <a class="card" href="planes/plan3.html">
         <img src="img/Lentejas.jpg" alt="Plan 3" class="card__image" />
         <div class="card__content">
           <p class="card__number">Plan 3</p>
           <h3>¿Comida de viejas o de Naroa?</h3>
-          <p>Ummm... ¿qué puede ser?</p>
+          <p>Ummm… ¿qué puede ser?</p>
           <span class="card__status" id="estado-plan3">Pendiente</span>
         </div>
       </a>
 
+
+      <!-- PLAN 4 -->
       <a class="card" href="planes/plan4.html">
         <img src="img/BocadilloJ.jpg" alt="Plan 4" class="card__image" />
         <div class="card__content">
@@ -99,42 +124,50 @@
         </div>
       </a>
 
+
+      <!-- PLAN 5 -->
       <a class="card" href="planes/plan5.html">
-        <img src="img/plan5.jpg" alt="Plan 5" class="card__image" />
+        <img src="img/MC.jpg" alt="Plan 5" class="card__image" />
         <div class="card__content">
           <p class="card__number">Plan 5</p>
-          <h3>Quinta parada</h3>
-          <p>Porque una ruta así no se queda a medias.</p>
+          <h3>¿Paso con el coche y comemos?</h3>
+          <p>Pausa para comer, llevo comida, un paseo.</p>
           <span class="card__status" id="estado-plan5">Pendiente</span>
         </div>
       </a>
 
+
+      <!-- PLAN 6 -->
       <a class="card" href="planes/plan6.html">
-        <img src="img/plan6.jpg" alt="Plan 6" class="card__image" />
+        <img src="img/DY.jpg" alt="Plan 6" class="card__image" />
         <div class="card__content">
           <p class="card__number">Plan 6</p>
-          <h3>Sexta parada</h3>
-          <p>Mitad del camino, pero no de la ilusión.</p>
+          <h3>Desayuno de muerte</h3>
+          <p>De los mejores desayunos, pero susto de muerte al pagar</p>
           <span class="card__status" id="estado-plan6">Pendiente</span>
         </div>
       </a>
 
+
+      <!-- PLAN 7 -->
       <a class="card" href="planes/plan7.html">
-        <img src="img/plan7.jpg" alt="Plan 7" class="card__image" />
+        <img src="img/H.jpg" alt="Plan 7" class="card__image" />
         <div class="card__content">
           <p class="card__number">Plan 7</p>
-          <h3>Séptima parada</h3>
-          <p>Seguimos con otra sorpresa preparada.</p>
+          <h3>¿Te apetece una hamburguesa?</h3>
+          <p>Cuántas veces hemos comido hamburguesas juntos… y en qué sitios tan ricos.</p>
           <span class="card__status" id="estado-plan7">Pendiente</span>
         </div>
       </a>
 
+
+      <!-- PLAN 8 -->
       <a class="card" href="planes/plan8.html">
-        <img src="img/plan8.jpg" alt="Plan 8" class="card__image" />
+        <img src="img/Aceitunas.jpg" alt="Plan 8" class="card__image" />
         <div class="card__content">
           <p class="card__number">Plan 8</p>
-          <h3>Octava parada</h3>
-          <p>Más comida, más recuerdos, más nosotros.</p>
+          <h3>Unas aceitunas</h3>
+          <p>Aceitunas, vinito, algún juego y la mejor compañía. ¿Qué más se puede pedir?</p>
           <span class="card__status" id="estado-plan8">Pendiente</span>
         </div>
       </a>
