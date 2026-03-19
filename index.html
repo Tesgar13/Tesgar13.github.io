@@ -10,377 +10,455 @@
   <link rel="stylesheet" href="style.css" />
   <script src="access.js"></script>
 </head>
-<body>
-  <header class="hero">
-    <div class="hero__overlay"></div>
-    <div class="hero__content">
-      <p class="eyebrow">Que mejor plan que comer juntos</p>
-      <h1>Creemos recuerdos comiendo</h1>
-      <p class="hero__text">
-        Durante estos 3 anos hemos creado innumerables recuerdos juntos.
-        Que te parece si en los proximos 3 recreamos algunos de ellos y seguimos sumando muchos mas?
+<body class="access-pending">
+  <div class="access-screen" id="access-screen" aria-hidden="true">
+    <div class="access-screen__backdrop"></div>
+    <section class="access-card" aria-labelledby="access-title">
+      <p class="access-card__eyebrow">Entrada privada</p>
+      <h2 id="access-title">Antes de entrar, escribe vuestra clave</h2>
+      <p class="access-card__text">
+        Este rincon guarda recuerdos bonitos. La pagina no se abrira hasta que la contrasena sea correcta.
       </p>
+      <form id="access-form" class="access-form">
+        <label class="access-form__label" for="access-password">Contrasena</label>
+        <input
+          id="access-password"
+          class="access-form__input"
+          name="password"
+          type="password"
+          autocomplete="current-password"
+          placeholder="Escribe la contrasena"
+          required
+        />
+        <p id="access-error" class="access-form__error" hidden>La contrasena no es correcta. Intentalo otra vez.</p>
+        <button class="access-form__button" type="submit">Entrar</button>
+      </form>
+    </section>
+  </div>
 
-      <div class="top-widgets">
-        <div class="widget">
-          <span class="widget__label">Planes activados</span>
-          <span class="widget__value" id="contador-planes">0 / 10</span>
-        </div>
+  <div class="site-shell">
+    <header class="hero">
+      <div class="hero__overlay"></div>
+      <div class="hero__content">
+        <p class="eyebrow">Que mejor plan que comer juntos</p>
+        <h1>Creemos recuerdos comiendo</h1>
+        <p class="hero__text">
+          Durante estos 3 anos hemos creado innumerables recuerdos juntos.
+          Que te parece si en los proximos 3 recreamos algunos de ellos y seguimos sumando muchos mas?
+        </p>
 
-        <div class="widget">
-          <span class="widget__label">Quedan</span>
-
-          <div class="countdown" id="countdown">
-            <div class="countdown__item">
-              <span id="dias">00</span>
-              <small>dias</small>
-            </div>
-
-            <div class="countdown__item">
-              <span id="horas">00</span>
-              <small>horas</small>
-            </div>
-
-            <div class="countdown__item">
-              <span id="minutos">00</span>
-              <small>min</small>
-            </div>
-
-            <div class="countdown__item">
-              <span id="segundos">00</span>
-              <small>seg</small>
-            </div>
+        <div class="top-widgets">
+          <div class="widget">
+            <span class="widget__label">Planes activados</span>
+            <span class="widget__value" id="contador-planes">0 / 10</span>
           </div>
 
-          <p class="countdown__date" id="fecha-objetivo-texto">
-            para completar todos los planes
-          </p>
+          <div class="widget">
+            <span class="widget__label">Quedan</span>
+
+            <div class="countdown" id="countdown">
+              <div class="countdown__item">
+                <span id="dias">00</span>
+                <small>dias</small>
+              </div>
+
+              <div class="countdown__item">
+                <span id="horas">00</span>
+                <small>horas</small>
+              </div>
+
+              <div class="countdown__item">
+                <span id="minutos">00</span>
+                <small>min</small>
+              </div>
+
+              <div class="countdown__item">
+                <span id="segundos">00</span>
+                <small>seg</small>
+              </div>
+            </div>
+
+            <p class="countdown__date" id="fecha-objetivo-texto">
+              para completar todos los planes
+            </p>
+          </div>
         </div>
       </div>
-    </div>
-  </header>
+    </header>
 
-  <main class="main-content">
-    <section class="intro">
-      <h2>Recuerdos creados, recuerdos por crear</h2>
-      <p>
-        Cada tarjeta representa un momento especial vivido juntos.
-        Ahora cada una se abre aqui mismo: gira, se amplia y deja ver el plan
-        sin salir de la ruta.
-      </p>
-    </section>
+    <main class="main-content">
+      <section class="intro">
+        <h2>Recuerdos creados, recuerdos por crear</h2>
+        <p>
+          Cada tarjeta representa un momento especial vivido juntos.
+          Ahora cada una se abre aqui mismo y, cuando la completeis, necesitara
+          una foto para guardar el recuerdo como parte de vuestra ruta.
+        </p>
+      </section>
 
-    <section class="cards-grid">
-      <article class="card" data-plan="plan1">
-        <div class="card__inner">
-          <div class="card__face card__face--front">
-            <img src="img/GH.jpg" alt="Plan 1" class="card__image" />
-            <div class="card__content">
-              <p class="card__number">Plan 1</p>
-              <h3>Donde todo empezo</h3>
-              <p>Recuerdas donde fue nuestra primera comida juntos?</p>
-              <span class="card__status" id="estado-plan1">Pendiente</span>
+      <section class="cards-grid">
+        <article class="card" data-plan="plan1" data-plan-title="Donde todo empezo">
+          <div class="card__inner">
+            <div class="card__face card__face--front">
+              <img src="img/GH.jpg" alt="Plan 1" class="card__image" />
+              <div class="card__content">
+                <p class="card__number">Plan 1</p>
+                <h3>Donde todo empezo</h3>
+                <p>Recuerdas donde fue nuestra primera comida juntos?</p>
+                <span class="card__status" id="estado-plan1">Pendiente</span>
+              </div>
             </div>
-          </div>
 
-          <div class="card__face card__face--back">
-            <div class="card__details">
-              <p class="card__number">Plan 1</p>
-              <h3>Donde todo empezo</h3>
-              <p class="card__detail-text">
-                Nuestra primera comida juntos merece repetirse. Esta vez sin nervios, con tiempo y disfrutando del sitio.
-              </p>
-              <p class="card__detail-meta"><strong>Pista:</strong> Uno de tus sitios favoritos.</p>
-              <p id="mensaje-plan1" class="plan-message">
-                Cuando llegue el momento, activa este plan para marcarlo como realizado.
-              </p>
-              <div class="card__actions">
-                <button id="boton-plan1" class="activate-button" type="button" onclick="activarPlan('plan1')">Activar plan</button>
-                <button class="card__close" type="button" data-close-card>Cerrar</button>
+            <div class="card__face card__face--back">
+              <div class="card__details">
+                <p class="card__number">Plan 1</p>
+                <h3>Donde todo empezo</h3>
+                <p class="card__detail-text">
+                  Nuestra primera comida juntos merece repetirse. Esta vez sin nervios, con tiempo y disfrutando del sitio.
+                </p>
+                <p class="card__detail-meta"><strong>Pista:</strong> Uno de tus sitios favoritos.</p>
+                <p id="mensaje-plan1" class="plan-message">
+                  Para completarlo, sube una foto y guarda el recuerdo.
+                </p>
+                <div class="card__actions">
+                  <button id="boton-plan1" class="activate-button" type="button" onclick="activarPlan('plan1')">Completar con foto</button>
+                  <button class="card__close" type="button" data-close-card>Cerrar</button>
+                </div>
               </div>
             </div>
           </div>
-        </div>
-      </article>
+        </article>
 
-      <article class="card" data-plan="plan2">
-        <div class="card__inner">
-          <div class="card__face card__face--front">
-            <img src="img/Marias.jpg" alt="Plan 2" class="card__image" />
-            <div class="card__content">
-              <p class="card__number">Plan 2</p>
-              <h3>Hay sitio para aparcar?</h3>
-              <p>Uno de tus sitios favoritos, primera vez cenando juntos, donde sera?</p>
-              <span class="card__status" id="estado-plan2">Pendiente</span>
+        <article class="card" data-plan="plan2" data-plan-title="Hay sitio para aparcar">
+          <div class="card__inner">
+            <div class="card__face card__face--front">
+              <img src="img/Marias.jpg" alt="Plan 2" class="card__image" />
+              <div class="card__content">
+                <p class="card__number">Plan 2</p>
+                <h3>Hay sitio para aparcar?</h3>
+                <p>Uno de tus sitios favoritos, primera vez cenando juntos, donde sera?</p>
+                <span class="card__status" id="estado-plan2">Pendiente</span>
+              </div>
             </div>
-          </div>
 
-          <div class="card__face card__face--back">
-            <div class="card__details">
-              <p class="card__number">Plan 2</p>
-              <h3>Hay sitio para aparcar?</h3>
-              <p class="card__detail-text">
-                Toca volver a ese sitio que ya tiene historia entre nosotros y que siempre apetece repetir.
-              </p>
-              <p class="card__detail-meta"><strong>Plan:</strong> Cena tranquila y volver a disfrutarlo como la primera vez.</p>
-              <p id="mensaje-plan2" class="plan-message">Activalo cuando vuelva a pasar.</p>
-              <div class="card__actions">
-                <button id="boton-plan2" class="activate-button" type="button" onclick="activarPlan('plan2')">Activar plan</button>
-                <button class="card__close" type="button" data-close-card>Cerrar</button>
+            <div class="card__face card__face--back">
+              <div class="card__details">
+                <p class="card__number">Plan 2</p>
+                <h3>Hay sitio para aparcar?</h3>
+                <p class="card__detail-text">
+                  Toca volver a ese sitio que ya tiene historia entre nosotros y que siempre apetece repetir.
+                </p>
+                <p class="card__detail-meta"><strong>Plan:</strong> Cena tranquila y volver a disfrutarlo como la primera vez.</p>
+                <p id="mensaje-plan2" class="plan-message">Para completarlo, sube una foto y guarda el recuerdo.</p>
+                <div class="card__actions">
+                  <button id="boton-plan2" class="activate-button" type="button" onclick="activarPlan('plan2')">Completar con foto</button>
+                  <button class="card__close" type="button" data-close-card>Cerrar</button>
+                </div>
               </div>
             </div>
           </div>
-        </div>
-      </article>
+        </article>
 
-      <article class="card" data-plan="plan3">
-        <div class="card__inner">
-          <div class="card__face card__face--front">
-            <img src="img/Lentejas.jpg" alt="Plan 3" class="card__image" />
-            <div class="card__content">
-              <p class="card__number">Plan 3</p>
-              <h3>Comida de viejas o de Naroa?</h3>
-              <p>Ummm... que puede ser?</p>
-              <span class="card__status" id="estado-plan3">Pendiente</span>
+        <article class="card" data-plan="plan3" data-plan-title="Comida de viejas o de Naroa">
+          <div class="card__inner">
+            <div class="card__face card__face--front">
+              <img src="img/Lentejas.jpg" alt="Plan 3" class="card__image" />
+              <div class="card__content">
+                <p class="card__number">Plan 3</p>
+                <h3>Comida de viejas o de Naroa?</h3>
+                <p>Ummm... que puede ser?</p>
+                <span class="card__status" id="estado-plan3">Pendiente</span>
+              </div>
             </div>
-          </div>
 
-          <div class="card__face card__face--back">
-            <div class="card__details">
-              <p class="card__number">Plan 3</p>
-              <h3>Comida de viejas o de Naroa?</h3>
-              <p class="card__detail-text">
-                Un plato de esos que ya forman parte del recuerdo y que toca reivindicar con una nueva cita.
-              </p>
-              <p class="card__detail-meta"><strong>Pista:</strong> Casero, reconocible y con mucha personalidad.</p>
-              <p id="mensaje-plan3" class="plan-message">Activalo cuando repitamos ese clasico.</p>
-              <div class="card__actions">
-                <button id="boton-plan3" class="activate-button" type="button" onclick="activarPlan('plan3')">Activar plan</button>
-                <button class="card__close" type="button" data-close-card>Cerrar</button>
+            <div class="card__face card__face--back">
+              <div class="card__details">
+                <p class="card__number">Plan 3</p>
+                <h3>Comida de viejas o de Naroa?</h3>
+                <p class="card__detail-text">
+                  Un plato de esos que ya forman parte del recuerdo y que toca reivindicar con una nueva cita.
+                </p>
+                <p class="card__detail-meta"><strong>Pista:</strong> Casero, reconocible y con mucha personalidad.</p>
+                <p id="mensaje-plan3" class="plan-message">Para completarlo, sube una foto y guarda el recuerdo.</p>
+                <div class="card__actions">
+                  <button id="boton-plan3" class="activate-button" type="button" onclick="activarPlan('plan3')">Completar con foto</button>
+                  <button class="card__close" type="button" data-close-card>Cerrar</button>
+                </div>
               </div>
             </div>
           </div>
-        </div>
-      </article>
+        </article>
 
-      <article class="card" data-plan="plan4">
-        <div class="card__inner">
-          <div class="card__face card__face--front">
-            <img src="img/BocadilloJ.jpg" alt="Plan 4" class="card__image" />
-            <div class="card__content">
-              <p class="card__number">Plan 4</p>
-              <h3>Solo para darle sabor</h3>
-              <p>Una de las cosas que mas veces hemos comido, en uno de los sitios donde mas hemos estado.</p>
-              <span class="card__status" id="estado-plan4">Pendiente</span>
+        <article class="card" data-plan="plan4" data-plan-title="Solo para darle sabor">
+          <div class="card__inner">
+            <div class="card__face card__face--front">
+              <img src="img/BocadilloJ.jpg" alt="Plan 4" class="card__image" />
+              <div class="card__content">
+                <p class="card__number">Plan 4</p>
+                <h3>Solo para darle sabor</h3>
+                <p>Una de las cosas que mas veces hemos comido, en uno de los sitios donde mas hemos estado.</p>
+                <span class="card__status" id="estado-plan4">Pendiente</span>
+              </div>
             </div>
-          </div>
 
-          <div class="card__face card__face--back">
-            <div class="card__details">
-              <p class="card__number">Plan 4</p>
-              <h3>Solo para darle sabor</h3>
-              <p class="card__detail-text">
-                Un clasico de los nuestros: sencillo, repetido y por eso mismo imposible de quitar de la ruta.
-              </p>
-              <p class="card__detail-meta"><strong>Plan:</strong> Volver a ese sitio donde tantas veces hemos acabado.</p>
-              <p id="mensaje-plan4" class="plan-message">Activalo cuando vuelva a tocarnos este imprescindible.</p>
-              <div class="card__actions">
-                <button id="boton-plan4" class="activate-button" type="button" onclick="activarPlan('plan4')">Activar plan</button>
-                <button class="card__close" type="button" data-close-card>Cerrar</button>
+            <div class="card__face card__face--back">
+              <div class="card__details">
+                <p class="card__number">Plan 4</p>
+                <h3>Solo para darle sabor</h3>
+                <p class="card__detail-text">
+                  Un clasico de los nuestros: sencillo, repetido y por eso mismo imposible de quitar de la ruta.
+                </p>
+                <p class="card__detail-meta"><strong>Plan:</strong> Volver a ese sitio donde tantas veces hemos acabado.</p>
+                <p id="mensaje-plan4" class="plan-message">Para completarlo, sube una foto y guarda el recuerdo.</p>
+                <div class="card__actions">
+                  <button id="boton-plan4" class="activate-button" type="button" onclick="activarPlan('plan4')">Completar con foto</button>
+                  <button class="card__close" type="button" data-close-card>Cerrar</button>
+                </div>
               </div>
             </div>
           </div>
-        </div>
-      </article>
+        </article>
 
-      <article class="card" data-plan="plan5">
-        <div class="card__inner">
-          <div class="card__face card__face--front">
-            <img src="img/MC.jpg" alt="Plan 5" class="card__image" />
-            <div class="card__content">
-              <p class="card__number">Plan 5</p>
-              <h3>Paso con el coche y comemos?</h3>
-              <p>Pausa para comer, llevo comida, un paseo.</p>
-              <span class="card__status" id="estado-plan5">Pendiente</span>
+        <article class="card" data-plan="plan5" data-plan-title="Paso con el coche y comemos">
+          <div class="card__inner">
+            <div class="card__face card__face--front">
+              <img src="img/GH.jpg" alt="Plan 5" class="card__image" />
+              <div class="card__content">
+                <p class="card__number">Plan 5</p>
+                <h3>Paso con el coche y comemos?</h3>
+                <p>Pausa para comer, llevo comida, un paseo.</p>
+                <span class="card__status" id="estado-plan5">Pendiente</span>
+              </div>
             </div>
-          </div>
 
-          <div class="card__face card__face--back">
-            <div class="card__details">
-              <p class="card__number">Plan 5</p>
-              <h3>Paso con el coche y comemos?</h3>
-              <p class="card__detail-text">
-                Uno de esos planes faciles que siempre funcionan: recogerte, comer algo rico y alargarlo con un paseo.
-              </p>
-              <p class="card__detail-meta"><strong>Tipo:</strong> Improvisado, comodo y muy nuestro.</p>
-              <p id="mensaje-plan5" class="plan-message">Activalo cuando volvamos a hacer esta pausa perfecta.</p>
-              <div class="card__actions">
-                <button id="boton-plan5" class="activate-button" type="button" onclick="activarPlan('plan5')">Activar plan</button>
-                <button class="card__close" type="button" data-close-card>Cerrar</button>
+            <div class="card__face card__face--back">
+              <div class="card__details">
+                <p class="card__number">Plan 5</p>
+                <h3>Paso con el coche y comemos?</h3>
+                <p class="card__detail-text">
+                  Uno de esos planes faciles que siempre funcionan: recogerte, comer algo rico y alargarlo con un paseo.
+                </p>
+                <p class="card__detail-meta"><strong>Tipo:</strong> Improvisado, comodo y muy nuestro.</p>
+                <p id="mensaje-plan5" class="plan-message">Para completarlo, sube una foto y guarda el recuerdo.</p>
+                <div class="card__actions">
+                  <button id="boton-plan5" class="activate-button" type="button" onclick="activarPlan('plan5')">Completar con foto</button>
+                  <button class="card__close" type="button" data-close-card>Cerrar</button>
+                </div>
               </div>
             </div>
           </div>
-        </div>
-      </article>
+        </article>
 
-      <article class="card" data-plan="plan6">
-        <div class="card__inner">
-          <div class="card__face card__face--front">
-            <img src="img/DY.jpg" alt="Plan 6" class="card__image" />
-            <div class="card__content">
-              <p class="card__number">Plan 6</p>
-              <h3>Desayuno de muerte</h3>
-              <p>De los mejores desayunos, pero susto de muerte al pagar.</p>
-              <span class="card__status" id="estado-plan6">Pendiente</span>
+        <article class="card" data-plan="plan6" data-plan-title="Desayuno de muerte">
+          <div class="card__inner">
+            <div class="card__face card__face--front">
+              <img src="img/Marias.jpg" alt="Plan 6" class="card__image" />
+              <div class="card__content">
+                <p class="card__number">Plan 6</p>
+                <h3>Desayuno de muerte</h3>
+                <p>De los mejores desayunos, pero susto de muerte al pagar.</p>
+                <span class="card__status" id="estado-plan6">Pendiente</span>
+              </div>
             </div>
-          </div>
 
-          <div class="card__face card__face--back">
-            <div class="card__details">
-              <p class="card__number">Plan 6</p>
-              <h3>Desayuno de muerte</h3>
-              <p class="card__detail-text">
-                Merece la pena repetir ese desayuno top, aunque luego toque recordar el susto en la cuenta.
-              </p>
-              <p class="card__detail-meta"><strong>Pista:</strong> Mucho nivel y precio para no olvidarlo.</p>
-              <p id="mensaje-plan6" class="plan-message">Activalo cuando volvamos a desayunar a lo grande.</p>
-              <div class="card__actions">
-                <button id="boton-plan6" class="activate-button" type="button" onclick="activarPlan('plan6')">Activar plan</button>
-                <button class="card__close" type="button" data-close-card>Cerrar</button>
+            <div class="card__face card__face--back">
+              <div class="card__details">
+                <p class="card__number">Plan 6</p>
+                <h3>Desayuno de muerte</h3>
+                <p class="card__detail-text">
+                  Merece la pena repetir ese desayuno top, aunque luego toque recordar el susto en la cuenta.
+                </p>
+                <p class="card__detail-meta"><strong>Pista:</strong> Mucho nivel y precio para no olvidarlo.</p>
+                <p id="mensaje-plan6" class="plan-message">Para completarlo, sube una foto y guarda el recuerdo.</p>
+                <div class="card__actions">
+                  <button id="boton-plan6" class="activate-button" type="button" onclick="activarPlan('plan6')">Completar con foto</button>
+                  <button class="card__close" type="button" data-close-card>Cerrar</button>
+                </div>
               </div>
             </div>
           </div>
-        </div>
-      </article>
+        </article>
 
-      <article class="card" data-plan="plan7">
-        <div class="card__inner">
-          <div class="card__face card__face--front">
-            <img src="img/H.jpg" alt="Plan 7" class="card__image" />
-            <div class="card__content">
-              <p class="card__number">Plan 7</p>
-              <h3>Te apetece una hamburguesa?</h3>
-              <p>Cuantas veces hemos comido hamburguesas juntos... y en que sitios tan ricos.</p>
-              <span class="card__status" id="estado-plan7">Pendiente</span>
+        <article class="card" data-plan="plan7" data-plan-title="Te apetece una hamburguesa">
+          <div class="card__inner">
+            <div class="card__face card__face--front">
+              <img src="img/Lentejas.jpg" alt="Plan 7" class="card__image" />
+              <div class="card__content">
+                <p class="card__number">Plan 7</p>
+                <h3>Te apetece una hamburguesa?</h3>
+                <p>Cuantas veces hemos comido hamburguesas juntos... y en que sitios tan ricos.</p>
+                <span class="card__status" id="estado-plan7">Pendiente</span>
+              </div>
             </div>
-          </div>
 
-          <div class="card__face card__face--back">
-            <div class="card__details">
-              <p class="card__number">Plan 7</p>
-              <h3>Te apetece una hamburguesa?</h3>
-              <p class="card__detail-text">
-                No podia faltar una parada de hamburguesa. Han salido demasiadas veces bien como para dejarla fuera.
-              </p>
-              <p class="card__detail-meta"><strong>Plan:</strong> Elegir una de nuestras favoritas y repetir sin pensarlo mucho.</p>
-              <p id="mensaje-plan7" class="plan-message">Activalo cuando caiga otra hamburguesa memorable.</p>
-              <div class="card__actions">
-                <button id="boton-plan7" class="activate-button" type="button" onclick="activarPlan('plan7')">Activar plan</button>
-                <button class="card__close" type="button" data-close-card>Cerrar</button>
+            <div class="card__face card__face--back">
+              <div class="card__details">
+                <p class="card__number">Plan 7</p>
+                <h3>Te apetece una hamburguesa?</h3>
+                <p class="card__detail-text">
+                  No podia faltar una parada de hamburguesa. Han salido demasiadas veces bien como para dejarla fuera.
+                </p>
+                <p class="card__detail-meta"><strong>Plan:</strong> Elegir una de nuestras favoritas y repetir sin pensarlo mucho.</p>
+                <p id="mensaje-plan7" class="plan-message">Para completarlo, sube una foto y guarda el recuerdo.</p>
+                <div class="card__actions">
+                  <button id="boton-plan7" class="activate-button" type="button" onclick="activarPlan('plan7')">Completar con foto</button>
+                  <button class="card__close" type="button" data-close-card>Cerrar</button>
+                </div>
               </div>
             </div>
           </div>
-        </div>
-      </article>
+        </article>
 
-      <article class="card" data-plan="plan8">
-        <div class="card__inner">
-          <div class="card__face card__face--front">
-            <img src="img/Aceitunas.jpg" alt="Plan 8" class="card__image" />
-            <div class="card__content">
-              <p class="card__number">Plan 8</p>
-              <h3>Unas aceitunas</h3>
-              <p>Aceitunas, vinito, algun juego y la mejor compania. Que mas se puede pedir?</p>
-              <span class="card__status" id="estado-plan8">Pendiente</span>
+        <article class="card" data-plan="plan8" data-plan-title="Unas aceitunas">
+          <div class="card__inner">
+            <div class="card__face card__face--front">
+              <img src="img/Aceitunas.jpg" alt="Plan 8" class="card__image" />
+              <div class="card__content">
+                <p class="card__number">Plan 8</p>
+                <h3>Unas aceitunas</h3>
+                <p>Aceitunas, vinito, algun juego y la mejor compania. Que mas se puede pedir?</p>
+                <span class="card__status" id="estado-plan8">Pendiente</span>
+              </div>
             </div>
-          </div>
 
-          <div class="card__face card__face--back">
-            <div class="card__details">
-              <p class="card__number">Plan 8</p>
-              <h3>Unas aceitunas</h3>
-              <p class="card__detail-text">
-                De los planes mas simples y mas bonitos: picoteo, vino, juegos y rato largo juntos.
-              </p>
-              <p class="card__detail-meta"><strong>Tipo:</strong> Tarde-noche sin prisa y con la mejor compania.</p>
-              <p id="mensaje-plan8" class="plan-message">Activalo cuando montemos otra de esas noches.</p>
-              <div class="card__actions">
-                <button id="boton-plan8" class="activate-button" type="button" onclick="activarPlan('plan8')">Activar plan</button>
-                <button class="card__close" type="button" data-close-card>Cerrar</button>
+            <div class="card__face card__face--back">
+              <div class="card__details">
+                <p class="card__number">Plan 8</p>
+                <h3>Unas aceitunas</h3>
+                <p class="card__detail-text">
+                  De los planes mas simples y mas bonitos: picoteo, vino, juegos y rato largo juntos.
+                </p>
+                <p class="card__detail-meta"><strong>Tipo:</strong> Tarde-noche sin prisa y con la mejor compania.</p>
+                <p id="mensaje-plan8" class="plan-message">Para completarlo, sube una foto y guarda el recuerdo.</p>
+                <div class="card__actions">
+                  <button id="boton-plan8" class="activate-button" type="button" onclick="activarPlan('plan8')">Completar con foto</button>
+                  <button class="card__close" type="button" data-close-card>Cerrar</button>
+                </div>
               </div>
             </div>
           </div>
-        </div>
-      </article>
+        </article>
 
-      <article class="card" data-plan="plan9">
-        <div class="card__inner">
-          <div class="card__face card__face--front">
-            <img src="img/GH.jpg" alt="Plan 9" class="card__image" />
-            <div class="card__content">
-              <p class="card__number">Plan 9</p>
-              <h3>Plan sorpresa</h3>
-              <p>Una parada mas para seguir sumando recuerdos a la ruta.</p>
-              <span class="card__status" id="estado-plan9">Pendiente</span>
+        <article class="card" data-plan="plan9" data-plan-title="Plan sorpresa">
+          <div class="card__inner">
+            <div class="card__face card__face--front">
+              <img src="img/GH.jpg" alt="Plan 9" class="card__image" />
+              <div class="card__content">
+                <p class="card__number">Plan 9</p>
+                <h3>Plan sorpresa</h3>
+                <p>Una parada mas para seguir sumando recuerdos a la ruta.</p>
+                <span class="card__status" id="estado-plan9">Pendiente</span>
+              </div>
             </div>
-          </div>
 
-          <div class="card__face card__face--back">
-            <div class="card__details">
-              <p class="card__number">Plan 9</p>
-              <h3>Plan sorpresa</h3>
-              <p class="card__detail-text">
-                Este hueco queda reservado para una nueva parada especial, de esas que todavia no tienen nombre pero acabaran siendo recuerdo.
-              </p>
-              <p class="card__detail-meta"><strong>Pista:</strong> Algo nuevo que merezca entrar en la lista.</p>
-              <p id="mensaje-plan9" class="plan-message">Activalo cuando estrenemos esta nueva parada.</p>
-              <div class="card__actions">
-                <button id="boton-plan9" class="activate-button" type="button" onclick="activarPlan('plan9')">Activar plan</button>
-                <button class="card__close" type="button" data-close-card>Cerrar</button>
+            <div class="card__face card__face--back">
+              <div class="card__details">
+                <p class="card__number">Plan 9</p>
+                <h3>Plan sorpresa</h3>
+                <p class="card__detail-text">
+                  Este hueco queda reservado para una nueva parada especial, de esas que todavia no tienen nombre pero acabaran siendo recuerdo.
+                </p>
+                <p class="card__detail-meta"><strong>Pista:</strong> Algo nuevo que merezca entrar en la lista.</p>
+                <p id="mensaje-plan9" class="plan-message">Para completarlo, sube una foto y guarda el recuerdo.</p>
+                <div class="card__actions">
+                  <button id="boton-plan9" class="activate-button" type="button" onclick="activarPlan('plan9')">Completar con foto</button>
+                  <button class="card__close" type="button" data-close-card>Cerrar</button>
+                </div>
               </div>
             </div>
           </div>
-        </div>
-      </article>
+        </article>
 
-      <article class="card" data-plan="plan10">
-        <div class="card__inner">
-          <div class="card__face card__face--front">
-            <img src="img/Marias.jpg" alt="Plan 10" class="card__image" />
-            <div class="card__content">
-              <p class="card__number">Plan 10</p>
-              <h3>Cierre perfecto</h3>
-              <p>La ultima tarjeta para rematar la ruta como se merece.</p>
-              <span class="card__status" id="estado-plan10">Pendiente</span>
+        <article class="card" data-plan="plan10" data-plan-title="Cierre perfecto">
+          <div class="card__inner">
+            <div class="card__face card__face--front">
+              <img src="img/Marias.jpg" alt="Plan 10" class="card__image" />
+              <div class="card__content">
+                <p class="card__number">Plan 10</p>
+                <h3>Cierre perfecto</h3>
+                <p>La ultima tarjeta para rematar la ruta como se merece.</p>
+                <span class="card__status" id="estado-plan10">Pendiente</span>
+              </div>
             </div>
-          </div>
 
-          <div class="card__face card__face--back">
-            <div class="card__details">
-              <p class="card__number">Plan 10</p>
-              <h3>Cierre perfecto</h3>
-              <p class="card__detail-text">
-                La ultima parada tiene que sentirse especial: una cita para cerrar esta ruta y abrir la siguiente.
-              </p>
-              <p class="card__detail-meta"><strong>Plan:</strong> Elegir un sitio que merezca el broche final.</p>
-              <p id="mensaje-plan10" class="plan-message">Activalo cuando completemos la ruta.</p>
-              <div class="card__actions">
-                <button id="boton-plan10" class="activate-button" type="button" onclick="activarPlan('plan10')">Activar plan</button>
-                <button class="card__close" type="button" data-close-card>Cerrar</button>
+            <div class="card__face card__face--back">
+              <div class="card__details">
+                <p class="card__number">Plan 10</p>
+                <h3>Cierre perfecto</h3>
+                <p class="card__detail-text">
+                  La ultima parada tiene que sentirse especial: una cita para cerrar esta ruta y abrir la siguiente.
+                </p>
+                <p class="card__detail-meta"><strong>Plan:</strong> Elegir un sitio que merezca el broche final.</p>
+                <p id="mensaje-plan10" class="plan-message">Para completarlo, sube una foto y guarda el recuerdo.</p>
+                <div class="card__actions">
+                  <button id="boton-plan10" class="activate-button" type="button" onclick="activarPlan('plan10')">Completar con foto</button>
+                  <button class="card__close" type="button" data-close-card>Cerrar</button>
+                </div>
               </div>
             </div>
           </div>
-        </div>
-      </article>
-    </section>
+        </article>
+      </section>
 
-    <section class="final-message" id="mensaje-final" hidden>
-      <h2>Ruta completada</h2>
-      <p>
-        Has desbloqueado todos los planes. Ahora toca disfrutar de todo lo que queda por vivir.
-      </p>
-    </section>
-  </main>
+      <section class="timeline-section">
+        <div class="timeline-section__intro">
+          <p class="eyebrow eyebrow--soft">Linea del tiempo</p>
+          <h2>Vuestro album cronologico</h2>
+          <p>
+            Aqui puedes ir anadiendo fechas importantes con una foto, un titulo y una descripcion.
+            Los planes completados tambien se guardaran automaticamente en esta linea del tiempo.
+          </p>
+        </div>
+
+        <div class="timeline-layout">
+          <section class="timeline-form-card">
+            <h3>Anadir recuerdo manualmente</h3>
+            <form id="timeline-form" class="timeline-form">
+              <label class="field">
+                <span>Fecha</span>
+                <input id="timeline-date" type="date" required />
+              </label>
+              <label class="field">
+                <span>Titulo</span>
+                <input id="timeline-title" type="text" maxlength="60" placeholder="Por ejemplo: Nuestro primer viaje" required />
+              </label>
+              <label class="field">
+                <span>Descripcion</span>
+                <textarea id="timeline-description" rows="4" maxlength="220" placeholder="Escribe algo bonito sobre ese dia"></textarea>
+              </label>
+              <label class="field">
+                <span>Foto</span>
+                <input id="timeline-image" type="file" accept="image/*" required />
+              </label>
+              <div class="timeline-form__preview" id="timeline-form-preview" hidden>
+                <img id="timeline-form-preview-image" alt="Vista previa del recuerdo" />
+              </div>
+              <button class="timeline-form__button" type="submit">Guardar en la linea del tiempo</button>
+            </form>
+          </section>
+
+          <section class="timeline-card">
+            <div class="timeline-card__header">
+              <h3>Recuerdos guardados</h3>
+              <p>Se ordenan por fecha y se quedan guardados en esta pagina.</p>
+            </div>
+            <div class="timeline-empty" id="timeline-empty">
+              Todavia no hay recuerdos en la linea del tiempo.
+            </div>
+            <div class="timeline" id="timeline"></div>
+          </section>
+        </div>
+      </section>
+
+      <section class="final-message" id="mensaje-final" hidden>
+        <h2>Ruta completada</h2>
+        <p>
+          Habeis completado toda la ruta y cada parada ha quedado guardada con su foto.
+          Ya no es solo una lista: es vuestro album de recuerdos.
+        </p>
+      </section>
+    </main>
+  </div>
 
   <script src="script.js"></script>
 </body>
