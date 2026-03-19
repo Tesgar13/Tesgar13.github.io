@@ -1,23 +1,11 @@
-// =============================
-// CONFIGURACIÓN
-// =============================
-
 const fechaObjetivo = new Date("2029-01-11T23:59:00");
 
-// lista de planes
 const planes = [
-  "plan1","plan2","plan3","plan4",
-  "plan5","plan6","plan7","plan8",
-  "plan9","plan10","plan11","plan12"
+  "plan1", "plan2", "plan3", "plan4", "plan5",
+  "plan6", "plan7", "plan8", "plan9", "plan10"
 ];
 
-
-// =============================
-// CONTADOR REGRESIVO
-// =============================
-
 function actualizarCountdown() {
-
   const ahora = new Date();
   const diferencia = fechaObjetivo - ahora;
 
@@ -34,21 +22,28 @@ function actualizarCountdown() {
   const minutos = Math.floor((diferencia / (1000 * 60)) % 60);
   const segundos = Math.floor((diferencia / 1000) % 60);
 
-  document.getElementById("dias").textContent = dias;
-  document.getElementById("horas").textContent = horas;
-  document.getElementById("minutos").textContent = minutos;
-  document.getElementById("segundos").textContent = segundos;
+  document.getElementById("dias").textContent = String(dias).padStart(2, "0");
+  document.getElementById("horas").textContent = String(horas).padStart(2, "0");
+  document.getElementById("minutos").textContent = String(minutos).padStart(2, "0");
+  document.getElementById("segundos").textContent = String(segundos).padStart(2, "0");
 }
 
-setInterval(actualizarCountdown, 1000);
+function cerrarTarjetas() {
+  document.querySelectorAll(".card.is-open").forEach((card) => {
+    card.classList.remove("is-open");
+  });
+}
 
+function abrirTarjeta(card) {
+  const yaAbierta = card.classList.contains("is-open");
+  cerrarTarjetas();
 
-// =============================
-// ACTIVAR PLAN
-// =============================
+  if (!yaAbierta) {
+    card.classList.add("is-open");
+  }
+}
 
 function activarPlan(planId) {
-
   if (localStorage.getItem(planId)) return;
 
   localStorage.setItem(planId, "activado");
@@ -62,66 +57,76 @@ function activarPlan(planId) {
   }
 
   if (mensaje) {
-    mensaje.textContent = "✔ Este plan ya ha sido activado";
+    mensaje.textContent = "Este plan ya ha sido activado.";
   }
 
   actualizarEstados();
 }
-
-
-// =============================
-// ACTUALIZAR ESTADOS
-// =============================
 
 function actualizarEstados() {
-
   let activados = 0;
 
-  planes.forEach(plan => {
-
+  planes.forEach((plan) => {
     const estado = document.getElementById(`estado-${plan}`);
+    const boton = document.getElementById(`boton-${plan}`);
+    const mensaje = document.getElementById(`mensaje-${plan}`);
+    const activo = Boolean(localStorage.getItem(plan));
 
-    if (localStorage.getItem(plan)) {
-
-      activados++;
-
-      if (estado) {
-        estado.textContent = "Activado";
-        estado.style.color = "green";
-      }
-
-    } else {
-
-      if (estado) {
-        estado.textContent = "Pendiente";
-      }
-
+    if (activo) {
+      activados += 1;
     }
 
+    if (estado) {
+      estado.textContent = activo ? "Activado" : "Pendiente";
+      estado.classList.toggle("card__status--active", activo);
+    }
+
+    if (boton) {
+      boton.disabled = activo;
+      boton.textContent = activo ? "Plan activado" : "Activar plan";
+    }
+
+    if (mensaje && activo) {
+      mensaje.textContent = "Este plan ya ha sido activado.";
+    }
   });
 
-  // actualizar contador
   const contador = document.getElementById("contador-planes");
   if (contador) {
-    contador.textContent = `${activados} / 12`;
+    contador.textContent = `${activados} / ${planes.length}`;
   }
 
-  // mensaje final
   const final = document.getElementById("mensaje-final");
-  if (final && activados === 12) {
-    final.hidden = false;
+  if (final) {
+    final.hidden = activados !== planes.length;
   }
-
 }
 
+function prepararTarjetas() {
+  document.querySelectorAll(".card").forEach((card) => {
+    card.addEventListener("click", (event) => {
+      if (event.target.closest("button")) {
+        return;
+      }
 
-// =============================
-// AL CARGAR LA WEB
-// =============================
+      abrirTarjeta(card);
+    });
+  });
 
-window.onload = function() {
+  document.querySelectorAll("[data-close-card]").forEach((button) => {
+    button.addEventListener("click", (event) => {
+      event.stopPropagation();
+      const card = button.closest(".card");
+      if (card) {
+        card.classList.remove("is-open");
+      }
+    });
+  });
+}
 
+window.onload = function () {
   actualizarCountdown();
   actualizarEstados();
-
+  prepararTarjetas();
+  setInterval(actualizarCountdown, 1000);
 };
