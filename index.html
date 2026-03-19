@@ -5,7 +5,20 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>RUTITA GASTRONÓMICA</title>
   <link rel="stylesheet" href="style.css" />
+
+  <script>
+    const password = "12/01/23";
+
+    const userPass = prompt("Introduce la contraseña para acceder a la ruta gastronómica:");
+
+    if (userPass !== password) {
+      document.write("<h1 style='text-align:center;margin-top:40vh;font-family:sans-serif;'>Contraseña incorrecta</h1>");
+      throw new Error("Acceso denegado");
+    }
+  </script>
+
 </head>
+
 <body>
 
   <header class="hero">
