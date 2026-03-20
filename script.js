@@ -4,6 +4,24 @@ const SONGS_KEY = "soundtrackEntries";
 const MOCK_SLOTS = 10;
 let songActualIndex = -1;
 let jukeboxPlaying = false;
+const PORTADA_DESTACADA_ID = "seed:fotofav";
+const TIMELINE_SEED = [
+  { id: "seed:dedo", type: "seed", date: "2023-03-07", title: "Dedo", description: "Uno de vuestros primeros recuerdos guardados en el corcho.", image: "img/dedo.jpeg" },
+  { id: "seed:nohablo", type: "seed", date: "2023-05-03", title: "No hablo", description: "Un recuerdo pequeno que sigue teniendo su sitio.", image: "img/NoHablo.jpeg" },
+  { id: "seed:estudiando", type: "seed", date: "2023-06-20", title: "Estudiando", description: "Una escena vuestra que ya se quedo para siempre.", image: "img/estudiando.jpeg" },
+  { id: "seed:cafe", type: "seed", date: "2023-09-21", title: "Cafe", description: "De esas fotos que huelen a rato compartido.", image: "img/cafe.jpeg" },
+  { id: "seed:bano", type: "seed", date: "2023-09-26", title: "Bano", description: "Otro trocito vuestro clavado en la linea del tiempo.", image: "img/baño.jpeg" },
+  { id: "seed:labo", type: "seed", date: "2023-10-06", title: "Labo", description: "Un momento vuestro convertido en recuerdo fijo.", image: "img/labo.jpeg" },
+  { id: "seed:biblioteca", type: "seed", date: "2023-10-27", title: "Biblioteca", description: "Un recuerdo mas para el corcho.", image: "img/biblioteca.jpeg" },
+  { id: "seed:code1", type: "seed", date: "2023-11-22", title: "Code1", description: "Una de esas fotos que ya forman parte de la historia.", image: "img/code1.jpeg" },
+  { id: "seed:gemes", type: "seed", date: "2023-11-24", title: "Gemes", description: "Otro pedacito vuestro guardado aqui.", image: "img/gemes.jpeg" },
+  { id: "seed:cono", type: "seed", date: "2023-12-23", title: "Cono", description: "Un recuerdo sencillo pero imposible de quitar.", image: "img/cono.jpeg" },
+  { id: "seed:imaginaria", type: "seed", date: "2024-01-28", title: "Imaginaria", description: "Una foto mas para seguir llenando el corcho.", image: "img/imaginaria.jpeg" },
+  { id: "seed:fondo", type: "seed", date: "2024-02-07", title: "Fondo", description: "Un momento vuestro que merecia quedarse.", image: "img/fondo.jpeg" },
+  { id: "seed:rosa", type: "seed", date: "2024-03-10", title: "Rosa", description: "Otra escena guardada con mucho carino.", image: "img/rosa.jpeg" },
+  { id: "seed:nopuc", type: "seed", date: "2024-04-23", title: "Nopuc", description: "Una foto con sitio propio en la historia.", image: "img/nopuc.jpeg" },
+  { id: PORTADA_DESTACADA_ID, type: "seed", date: "2024-04-27", title: "Fotofav", description: "La foto que se queda al frente de la portada.", image: "img/fotofav.jpeg" }
+];
 const LETTERS = [
   {
     id: "letter1",
@@ -21,7 +39,7 @@ const LETTERS = [
   },
   {
     id: "letter3",
-    unlockAt: 10,
+    unlockAt: 9,
     title: "La carta final",
     preview: "Solo aparece cuando la ruta ya esta completa.",
     message: "Terminamos esta ruta, pero no la historia. Lo bonito de llegar aqui es saber que siempre se puede empezar otra, con mas planes, mas fotos, mas canciones y mas nosotros."
@@ -81,8 +99,28 @@ function escribirStorageJson(key, value) {
   localStorage.setItem(key, JSON.stringify(value));
 }
 
+function sincronizarTimelineSemilla() {
+  const existentes = leerStorageJson(TIMELINE_KEY);
+  const ids = new Set(existentes.map((entry) => entry.id));
+  const combinadas = [...existentes];
+  let cambio = false;
+
+  TIMELINE_SEED.forEach((entry) => {
+    if (!ids.has(entry.id)) {
+      combinadas.push({ ...entry });
+      cambio = true;
+    }
+  });
+
+  if (cambio) {
+    escribirStorageJson(TIMELINE_KEY, combinadas);
+  }
+
+  return cambio ? combinadas : existentes;
+}
+
 function obtenerTimeline() {
-  return leerStorageJson(TIMELINE_KEY);
+  return sincronizarTimelineSemilla();
 }
 
 function guardarTimeline(entries) {
@@ -147,6 +185,7 @@ function cerrarTarjetas() {
   document.querySelectorAll(".card.is-open").forEach((card) => {
     card.classList.remove("is-open");
   });
+  document.body.classList.remove("card-overlay-open");
 }
 
 function abrirTarjeta(card) {
@@ -154,6 +193,7 @@ function abrirTarjeta(card) {
   cerrarTarjetas();
 
   if (!yaAbierta) {
+    document.body.classList.add("card-overlay-open");
     card.classList.add("is-open");
   }
 }
@@ -173,6 +213,24 @@ function actualizarPreview(planId, imageSrc) {
     preview.hidden = true;
     previewImg.removeAttribute("src");
   }
+}
+
+function pedirFotoParaPlan() {
+  return new Promise((resolve) => {
+    const input = document.createElement("input");
+    input.type = "file";
+    input.accept = "image/*";
+    input.hidden = true;
+
+    input.addEventListener("change", () => {
+      const file = input.files && input.files[0] ? input.files[0] : null;
+      input.remove();
+      resolve(file);
+    });
+
+    document.body.appendChild(input);
+    input.click();
+  });
 }
 
 function insertarControlesDePlan() {
@@ -202,39 +260,6 @@ function insertarControlesDePlan() {
         activarPlan(planId);
       });
       acciones.insertBefore(botonActivar, botonCompletar);
-    }
-
-    if (!card.querySelector(".memory-upload")) {
-      const bloque = document.createElement("div");
-      bloque.className = "memory-upload";
-      bloque.innerHTML = `
-        <label class="memory-upload__label" for="foto-${planId}">
-          Foto del recuerdo
-        </label>
-        <input
-          class="memory-upload__input"
-          id="foto-${planId}"
-          type="file"
-          accept="image/*"
-        />
-        <div class="memory-upload__preview" id="preview-${planId}" hidden>
-          <img id="preview-img-${planId}" alt="Foto del ${planId}" />
-        </div>
-      `;
-      acciones.parentNode.insertBefore(bloque, acciones);
-
-      const input = bloque.querySelector(".memory-upload__input");
-      input.addEventListener("change", async (event) => {
-        const file = event.target.files && event.target.files[0];
-
-        if (!file || !file.type.startsWith("image/")) {
-          actualizarPreview(planId, "");
-          return;
-        }
-
-        const temporal = await leerArchivoComoDataUrl(file);
-        actualizarPreview(planId, temporal);
-      });
     }
   });
 }
@@ -343,15 +368,22 @@ function renderizarPortada(entradas) {
   }
 
   const posiciones = [
-    { top: "8%", left: "8%", tilt: "-10deg" },
-    { top: "10%", left: "38%", tilt: "8deg" },
-    { top: "14%", left: "67%", tilt: "-6deg" },
-    { top: "44%", left: "12%", tilt: "6deg" },
-    { top: "48%", left: "41%", tilt: "-8deg" },
-    { top: "50%", left: "69%", tilt: "10deg" }
+    { top: "10%", left: "4%", tilt: "-10deg" },
+    { top: "8%", left: "74%", tilt: "8deg" },
+    { top: "52%", left: "6%", tilt: "6deg" },
+    { top: "55%", left: "76%", tilt: "-8deg" }
   ];
 
-  barajar(entradas).slice(0, posiciones.length).forEach((entry, index) => {
+  const destacada = entradas.find((entry) => entry.id === PORTADA_DESTACADA_ID) || entradas[0];
+  const featured = document.createElement("article");
+  featured.className = "cover-memory cover-memory--featured";
+  featured.innerHTML = `
+    <img src="${destacada.image}" alt="${destacada.title}" />
+    <p class="cover-memory__caption">${destacada.title}</p>
+  `;
+  board.appendChild(featured);
+
+  barajar(entradas.filter((entry) => entry.id !== destacada.id)).slice(0, posiciones.length).forEach((entry, index) => {
     const posicion = posiciones[index];
     const foto = document.createElement("article");
     foto.className = "cover-memory";
@@ -534,17 +566,14 @@ async function completarPlan(planId) {
     return;
   }
 
-  const input = document.getElementById(`foto-${planId}`);
   const boton = document.getElementById(`boton-${planId}`);
   const card = document.querySelector(`.card[data-plan="${planId}"]`);
   const titulo = card ? card.dataset.planTitle : planId;
+  const foto = await pedirFotoParaPlan();
 
-  if (!input || !input.files || !input.files[0]) {
-    alert("Para completar el plan necesitas anadir una foto.");
+  if (!foto) {
     return;
   }
-
-  const foto = input.files[0];
 
   if (!foto.type.startsWith("image/")) {
     alert("El archivo debe ser una imagen.");
@@ -586,7 +615,6 @@ function actualizarEstados() {
     const botonActivar = document.getElementById(`activar-${plan}`);
     const botonCompletar = document.getElementById(`boton-${plan}`);
     const mensaje = document.getElementById(`mensaje-${plan}`);
-    const input = document.getElementById(`foto-${plan}`);
     const card = document.querySelector(`.card[data-plan="${plan}"]`);
 
     const estado = localStorage.getItem(claveEstado(plan)) || "pendiente";
@@ -624,15 +652,11 @@ function actualizarEstados() {
       botonCompletar.classList.toggle("is-disabled-look", !estaActivado && !estaCompletado);
     }
 
-    if (input) {
-      input.disabled = estaCompletado;
-    }
-
     if (mensaje) {
       if (estaCompletado) {
         mensaje.textContent = "Este plan ya esta completado y su foto ya forma parte de la linea del tiempo.";
       } else if (estaActivado) {
-        mensaje.textContent = "El plan esta activado. Cuando pase, completalo con una foto y se guardara automaticamente con la fecha de hoy.";
+        mensaje.textContent = "El plan esta activado. Cuando le des a completar, te pedira una foto y se guardara automaticamente con la fecha de hoy.";
       } else {
         mensaje.textContent = "Primero activa el plan. Cuando lo hagais, podras completarlo con una foto.";
       }
@@ -643,12 +667,19 @@ function actualizarEstados() {
       card.classList.toggle("card--completed", estaCompletado);
     }
 
-    actualizarPreview(plan, fotoGuardada || "");
   });
 
   const contador = document.getElementById("contador-planes");
+  const contadorComidas = document.getElementById("contador-planes-comidas");
+  const restantes = document.getElementById("planes-restantes");
   if (contador) {
     contador.textContent = `${activados} / ${planes.length}`;
+  }
+  if (contadorComidas) {
+    contadorComidas.textContent = `${activados} / ${planes.length}`;
+  }
+  if (restantes) {
+    restantes.textContent = String(planes.length - completados);
   }
 
   const final = document.getElementById("mensaje-final");
@@ -834,6 +865,7 @@ function prepararTarjetas() {
   document.querySelectorAll("[data-close-card]").forEach((button) => {
     button.addEventListener("click", (event) => {
       event.stopPropagation();
+      document.body.classList.remove("card-overlay-open");
       const card = button.closest(".card");
       if (card) {
         card.classList.remove("is-open");
