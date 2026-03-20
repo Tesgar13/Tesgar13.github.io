@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="es">
 <head>
   <meta charset="UTF-8" />
@@ -37,13 +37,6 @@
   </div>
 
   <div class="site-shell">
-    <nav class="tab-nav" aria-label="Secciones principales">
-      <button class="tab-nav__button is-active" type="button" data-tab-target="portada">Portada</button>
-      <button class="tab-nav__button" type="button" data-tab-target="comidas">Comidas</button>
-      <button class="tab-nav__button" type="button" data-tab-target="recuerdos">Recuerdos</button>
-      <button class="tab-nav__button" type="button" data-tab-target="musica">Musica</button>
-    </nav>
-
     <main class="main-content main-content--tabs">
       <section class="tab-panel tab-panel--portada is-active" id="tab-portada" data-tab-panel="portada">
         <header class="hero hero--home">
@@ -58,17 +51,12 @@
           </div>
         </header>
         <section class="cover-panel">
-          <div class="cover-panel__copy">
-            <p class="eyebrow eyebrow--soft">un regalo peque�ito</p>
-            <h2>He querido guardarte un trocito de todo lo nuestro aqui</h2>
-            <p>
-              Tienes la ruta de comidas, el corcho de recuerdos y la musica que se ha quedado con nosotros.
-              No es nada enorme, pero si muy tuyo, muy nuestro y muy hecho con carino.
-            </p>
-            <div class="cover-panel__actions">
-              <button class="activate-button" type="button" data-tab-target="comidas">Entrar en la mesa</button>
-              <button class="activate-button activate-button--ghost" type="button" data-tab-target="recuerdos">Ir al corcho</button>
-              <button class="activate-button activate-button--ghost" type="button" data-tab-target="musica">Poner un disco</button>
+          <div class="cover-panel__copy cover-panel__copy--full">
+            <p class="eyebrow eyebrow--soft">Lo que no se ensena al principio</p>
+            <div class="section-line section-line--home" aria-label="Ir a otras secciones">
+              <button class="section-line__link" type="button" data-tab-target="recuerdos">Recuerdos</button>
+              <button class="section-line__link" type="button" data-tab-target="comidas">Comiditas</button>
+              <button class="section-line__link" type="button" data-tab-target="musica">Musiquita</button>
             </div>
             <div class="top-widgets top-widgets--cover">
               <div class="widget">
@@ -112,6 +100,12 @@
       </section>
 
       <section class="tab-panel tab-panel--comidas" id="tab-comidas" data-tab-panel="comidas" hidden>
+        <div class="section-line" aria-label="Ir a otras secciones">
+          <button class="section-line__link" type="button" data-tab-target="portada">Inicio</button>
+          <button class="section-line__link" type="button" data-tab-target="recuerdos">Recuerdos</button>
+          <button class="section-line__link is-active" type="button" data-tab-target="comidas">Comiditas</button>
+          <button class="section-line__link" type="button" data-tab-target="musica">Musiquita</button>
+        </div>
         <section class="intro intro--comidas">
         <p class="eyebrow eyebrow--soft">Comidas</p>
         <h2>Creemos recuerdos juntos comiendo</h2>
@@ -406,6 +400,12 @@
       </section>
 
       <section class="tab-panel tab-panel--recuerdos" id="tab-recuerdos" data-tab-panel="recuerdos" hidden>
+      <div class="section-line" aria-label="Ir a otras secciones">
+        <button class="section-line__link" type="button" data-tab-target="portada">Inicio</button>
+        <button class="section-line__link is-active" type="button" data-tab-target="recuerdos">Recuerdos</button>
+        <button class="section-line__link" type="button" data-tab-target="comidas">Comiditas</button>
+        <button class="section-line__link" type="button" data-tab-target="musica">Musiquita</button>
+      </div>
       <section class="timeline-section">
         <div class="timeline-section__intro">
           <p class="eyebrow eyebrow--soft">Corcho de recuerdos</p>
@@ -465,7 +465,7 @@
       <section class="letters-section">
         <div class="timeline-section__intro">
           <p class="eyebrow eyebrow--soft">Cartas guardadas</p>
-          <h2>Lo que no se enseña al principio</h2>
+          <h2>Palabras que se van abriendo poco a poco</h2>
           <p>
             Algunas cosas necesitaban esperar su momento. Estas cartas se abren cuando la ruta ya tiene peso, fotos y algo de historia encima.
           </p>
@@ -476,6 +476,12 @@
       </section>
 
       <section class="tab-panel tab-panel--musica" id="tab-musica" data-tab-panel="musica" hidden>
+      <div class="section-line" aria-label="Ir a otras secciones">
+        <button class="section-line__link" type="button" data-tab-target="portada">Inicio</button>
+        <button class="section-line__link" type="button" data-tab-target="recuerdos">Recuerdos</button>
+        <button class="section-line__link" type="button" data-tab-target="comidas">Comiditas</button>
+        <button class="section-line__link is-active" type="button" data-tab-target="musica">Musiquita</button>
+      </div>
       <section class="soundtrack-section">
         <div class="timeline-section__intro">
           <p class="eyebrow eyebrow--soft">Banda sonora</p>
@@ -488,71 +494,80 @@
 
         <div class="timeline-layout">
           <section class="timeline-form-card">
-            <div class="panel-action">
-              <p class="panel-action__eyebrow">Nuevo tema</p>
-              <button class="timeline-form__button panel-action__button" type="button" data-toggle-form="song-form-shell">Anadir nueva cancion</button>
-            </div>
-            <div class="form-shell" id="song-form-shell" hidden>
-            <h3>Guardar un nuevo tema</h3>
-            <form id="song-form" class="timeline-form">
-              <label class="field">
-                <span>Titulo</span>
-                <input id="song-title" type="text" maxlength="80" placeholder="Titulo de la cancion" required />
-              </label>
-              <label class="field">
-                <span>Artista</span>
-                <input id="song-artist" type="text" maxlength="80" placeholder="Nombre del artista" required />
-              </label>
-              <label class="field">
-                <span>Spotify</span>
-                <input id="song-link-spotify" type="url" placeholder="https://open.spotify.com/..." />
-              </label>
-              <label class="field">
-                <span>Apple Music</span>
-                <input id="song-link-apple" type="url" placeholder="https://music.apple.com/..." />
-              </label>
-              <label class="field">
-                <span>Nota</span>
-                <textarea id="song-note" rows="4" maxlength="180" placeholder="Por que os recuerda a vosotras"></textarea>
-              </label>
-              <button class="timeline-form__button" type="submit">Guardar cancion</button>
-            </form>
+            <div class="jukebox-library" id="jukebox-library" hidden>
+              <div class="panel-action">
+                <p class="panel-action__eyebrow">Biblioteca</p>
+                <button class="timeline-form__button panel-action__button" type="button" data-toggle-form="song-form-shell">Anadir nueva cancion</button>
+              </div>
+              <div class="songs-list songs-list--drawer" id="songs-list"></div>
+              <div class="form-shell" id="song-form-shell" hidden>
+              <h3>Guardar un nuevo tema</h3>
+              <form id="song-form" class="timeline-form">
+                <label class="field">
+                  <span>Titulo</span>
+                  <input id="song-title" type="text" maxlength="80" placeholder="Titulo de la cancion" required />
+                </label>
+                <label class="field">
+                  <span>Artista</span>
+                  <input id="song-artist" type="text" maxlength="80" placeholder="Nombre del artista" required />
+                </label>
+                <label class="field">
+                  <span>Spotify</span>
+                  <input id="song-link-spotify" type="url" placeholder="https://open.spotify.com/..." />
+                </label>
+                <label class="field">
+                  <span>Apple Music</span>
+                  <input id="song-link-apple" type="url" placeholder="https://music.apple.com/..." />
+                </label>
+                <label class="field">
+                  <span>Nota</span>
+                  <textarea id="song-note" rows="4" maxlength="180" placeholder="Por que os recuerda a vosotras"></textarea>
+                </label>
+                <button class="timeline-form__button" type="submit">Guardar cancion</button>
+              </form>
+              </div>
             </div>
           </section>
 
           <section class="timeline-card">
-            <div class="vinyl-showcase" id="vinyl-showcase">
-              <div class="vinyl-cabinet__lid"></div>
-              <div class="vinyl-player">
-                <div class="vinyl-player__plinth"></div>
-                <div class="vinyl-player__arm"></div>
-                <div class="vinyl-record" id="vinyl-record">
-                  <div class="vinyl-record__grooves"></div>
-                  <div class="vinyl-record__label">
-                    <span id="vinyl-title">Sin cancion</span>
-                    <small id="vinyl-artist">Anade una para empezar vuestra banda sonora</small>
-                  </div>
+            <div class="jukebox-stage">
+              <button class="jukebox" id="jukebox-toggle" type="button" aria-expanded="false" aria-controls="jukebox-library">
+                <div class="jukebox__arch"></div>
+                <div class="jukebox__glass"></div>
+                <div class="jukebox__title">
+                  <p class="jukebox__eyebrow">Musiquita</p>
+                  <h3 id="jukebox-title">Sin cancion</h3>
+                  <p id="jukebox-artist">Toca la jukebox para abrir la biblioteca</p>
                 </div>
-              </div>
-              <div class="vinyl-copy">
-                <p class="vinyl-copy__eyebrow">Ahora girando</p>
-                <h3 id="vinyl-copy-title">Esperando vuestra primera cancion</h3>
-                <p id="vinyl-copy-note">Cuando guardes un tema, se quedara aqui como el disco que encabeza vuestra banda sonora.</p>
-                <div class="song-item__links" id="vinyl-links">
-                  <a class="song-item__link" id="vinyl-link-spotify" href="#" target="_blank" rel="noopener noreferrer" hidden>Spotify</a>
-                  <a class="song-item__link" id="vinyl-link-apple" href="#" target="_blank" rel="noopener noreferrer" hidden>Apple Music</a>
+                <div class="jukebox__window">
+                  <div class="jukebox__selector"></div>
+                  <div class="jukebox__record" id="jukebox-record"></div>
                 </div>
+                <div class="jukebox__lights">
+                  <span></span>
+                  <span></span>
+                  <span></span>
+                </div>
+                <div class="song-item__links jukebox__links">
+                  <a class="song-item__link" id="jukebox-link-spotify" href="#" target="_blank" rel="noopener noreferrer" hidden>Spotify</a>
+                  <a class="song-item__link" id="jukebox-link-apple" href="#" target="_blank" rel="noopener noreferrer" hidden>Apple Music</a>
+                </div>
+              </button>
+              <div class="jukebox-controls">
+                <button class="jukebox-controls__button" type="button" id="jukebox-prev">Anterior</button>
+                <button class="jukebox-controls__button" type="button" id="jukebox-stop">Parar</button>
+                <button class="jukebox-controls__button jukebox-controls__button--primary" type="button" id="jukebox-play">Play</button>
+                <button class="jukebox-controls__button" type="button" id="jukebox-next">Siguiente</button>
               </div>
             </div>
 
             <div class="timeline-card__header">
-              <h3>Discos en sus fundas</h3>
-              <p>Los temas guardados aparecen abajo como si cada uno descansara en su funda, listos para volver a sonar.</p>
+              <h3>La jukebox</h3>
+              <p>Toca arriba para abrir todas las canciones y anadir mas. Desde abajo puedes ir pasando entre temas como si estuvierais delante de una jukebox de verdad.</p>
             </div>
             <div class="timeline-empty" id="songs-empty">
               Todavia no hay canciones guardadas en vuestra banda sonora.
             </div>
-            <div class="songs-list" id="songs-list"></div>
           </section>
         </div>
       </section>
@@ -589,4 +604,5 @@
   </div>
 </body>
 </html>
+
 

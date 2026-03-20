@@ -2,6 +2,8 @@ const fechaObjetivo = new Date("2029-01-11T23:59:00");
 const TIMELINE_KEY = "timelineEntries";
 const SONGS_KEY = "soundtrackEntries";
 const MOCK_SLOTS = 10;
+let songActualIndex = -1;
+let jukeboxPlaying = false;
 const LETTERS = [
   {
     id: "letter1",
@@ -374,7 +376,10 @@ function renderizarCanciones() {
 
   const canciones = obtenerCanciones();
   contenedor.innerHTML = "";
-  actualizarVinilo(canciones);
+  if (songActualIndex >= canciones.length) {
+    songActualIndex = canciones.length ? canciones.length - 1 : -1;
+  }
+  actualizarJukebox(canciones);
 
   if (!canciones.length) {
     empty.hidden = false;
@@ -403,6 +408,12 @@ function renderizarCanciones() {
         </div>
       </div>
     `;
+    item.addEventListener("click", () => {
+      songActualIndex = canciones.indexOf(song);
+      jukeboxPlaying = true;
+      actualizarJukebox(canciones);
+      marcarCancionActiva();
+    });
     contenedor.appendChild(item);
   });
 
@@ -422,27 +433,31 @@ function renderizarCanciones() {
     `;
     contenedor.appendChild(item);
   }
+
+  marcarCancionActiva();
 }
 
-function actualizarVinilo(canciones) {
-  const vinylRecord = document.getElementById("vinyl-record");
-  const vinylTitle = document.getElementById("vinyl-title");
-  const vinylArtist = document.getElementById("vinyl-artist");
-  const copyTitle = document.getElementById("vinyl-copy-title");
-  const copyNote = document.getElementById("vinyl-copy-note");
-  const spotifyLink = document.getElementById("vinyl-link-spotify");
-  const appleLink = document.getElementById("vinyl-link-apple");
+function marcarCancionActiva() {
+  document.querySelectorAll(".songs-list .song-item").forEach((item, index) => {
+    item.classList.toggle("song-item--active", index === songActualIndex);
+  });
+}
 
-  if (!vinylRecord || !vinylTitle || !vinylArtist || !copyTitle || !copyNote || !spotifyLink || !appleLink) {
+function actualizarJukebox(canciones) {
+  const jukeboxRecord = document.getElementById("jukebox-record");
+  const jukeboxTitle = document.getElementById("jukebox-title");
+  const jukeboxArtist = document.getElementById("jukebox-artist");
+  const spotifyLink = document.getElementById("jukebox-link-spotify");
+  const appleLink = document.getElementById("jukebox-link-apple");
+
+  if (!jukeboxRecord || !jukeboxTitle || !jukeboxArtist || !spotifyLink || !appleLink) {
     return;
   }
 
   if (!canciones.length) {
-    vinylRecord.classList.remove("is-spinning");
-    vinylTitle.textContent = "Sin cancion";
-    vinylArtist.textContent = "Anade una para empezar vuestra banda sonora";
-    copyTitle.textContent = "Esperando vuestra primera cancion";
-    copyNote.textContent = "Cuando guardes una cancion, aparecera aqui como el disco principal de vuestra historia.";
+    jukeboxRecord.classList.remove("is-spinning");
+    jukeboxTitle.textContent = "Sin cancion";
+    jukeboxArtist.textContent = "Toca la jukebox para abrir la biblioteca";
     spotifyLink.hidden = true;
     spotifyLink.removeAttribute("href");
     appleLink.hidden = true;
@@ -450,14 +465,16 @@ function actualizarVinilo(canciones) {
     return;
   }
 
-  const song = canciones[canciones.length - 1];
+  if (songActualIndex < 0) {
+    songActualIndex = canciones.length - 1;
+  }
+
+  const song = canciones[songActualIndex];
   const spotifyUrl = song.spotifyLink || song.link || "";
   const appleUrl = song.appleLink || "";
-  vinylRecord.classList.add("is-spinning");
-  vinylTitle.textContent = song.title;
-  vinylArtist.textContent = song.artist;
-  copyTitle.textContent = song.title;
-  copyNote.textContent = song.note || `${song.artist} ya forma parte de vuestra banda sonora.`;
+  jukeboxRecord.classList.toggle("is-spinning", jukeboxPlaying);
+  jukeboxTitle.textContent = song.title;
+  jukeboxArtist.textContent = song.note || song.artist;
 
   if (spotifyUrl) {
     spotifyLink.hidden = false;
@@ -474,6 +491,24 @@ function actualizarVinilo(canciones) {
     appleLink.hidden = true;
     appleLink.removeAttribute("href");
   }
+}
+
+function moverJukebox(direccion) {
+  const canciones = obtenerCanciones();
+
+  if (!canciones.length) {
+    return;
+  }
+
+  if (songActualIndex < 0) {
+    songActualIndex = 0;
+  } else {
+    songActualIndex = (songActualIndex + direccion + canciones.length) % canciones.length;
+  }
+
+  jukeboxPlaying = true;
+  actualizarJukebox(canciones);
+  marcarCancionActiva();
 }
 
 function activarPlan(planId) {
@@ -761,12 +796,14 @@ function activarTab(tabId) {
     panel.classList.toggle("is-active", activa);
   });
 
-  document.querySelectorAll(".tab-nav__button, [data-tab-target]").forEach((button) => {
+  document.querySelectorAll("[data-tab-target]").forEach((button) => {
     if (!button.dataset.tabTarget) {
       return;
     }
 
-    button.classList.toggle("is-active", button.dataset.tabTarget === tabId && button.classList.contains("tab-nav__button"));
+    if (button.classList.contains("section-line__link")) {
+      button.classList.toggle("is-active", button.dataset.tabTarget === tabId);
+    }
   });
 
   aplicarTema(tabId);
@@ -888,6 +925,44 @@ function prepararTogglesDeFormulario() {
   });
 }
 
+function prepararJukebox() {
+  const toggle = document.getElementById("jukebox-toggle");
+  const library = document.getElementById("jukebox-library");
+  const prev = document.getElementById("jukebox-prev");
+  const next = document.getElementById("jukebox-next");
+  const stop = document.getElementById("jukebox-stop");
+  const play = document.getElementById("jukebox-play");
+
+  if (!toggle || !library || !prev || !next || !stop || !play) {
+    return;
+  }
+
+  toggle.addEventListener("click", () => {
+    const abierto = !library.hidden;
+    library.hidden = abierto;
+    toggle.setAttribute("aria-expanded", abierto ? "false" : "true");
+  });
+
+  prev.addEventListener("click", () => moverJukebox(-1));
+  next.addEventListener("click", () => moverJukebox(1));
+  stop.addEventListener("click", () => {
+    jukeboxPlaying = false;
+    actualizarJukebox(obtenerCanciones());
+  });
+  play.addEventListener("click", () => {
+    if (!obtenerCanciones().length) {
+      return;
+    }
+
+    if (songActualIndex < 0) {
+      songActualIndex = obtenerCanciones().length - 1;
+    }
+
+    jukeboxPlaying = true;
+    actualizarJukebox(obtenerCanciones());
+  });
+}
+
 function prepararFormularioCanciones() {
   const form = document.getElementById("song-form");
 
@@ -944,6 +1019,7 @@ window.onload = function () {
   prepararTogglesDeFormulario();
   prepararModalRecuerdo();
   prepararTabs();
+  prepararJukebox();
   renderizarTimeline();
   renderizarCanciones();
   setInterval(actualizarCountdown, 1000);
