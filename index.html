@@ -450,6 +450,52 @@
         </div>
       </section>
 
+      <section class="soundtrack-section">
+        <div class="timeline-section__intro">
+          <p class="eyebrow eyebrow--soft">Banda sonora</p>
+          <h2>Canciones para vuestra historia</h2>
+          <p>
+            Aqui puedes guardar canciones especiales, con su artista, un enlace y una nota para recordar por que son importantes.
+          </p>
+        </div>
+
+        <div class="timeline-layout">
+          <section class="timeline-form-card">
+            <h3>Anadir cancion</h3>
+            <form id="song-form" class="timeline-form">
+              <label class="field">
+                <span>Titulo</span>
+                <input id="song-title" type="text" maxlength="80" placeholder="Titulo de la cancion" required />
+              </label>
+              <label class="field">
+                <span>Artista</span>
+                <input id="song-artist" type="text" maxlength="80" placeholder="Nombre del artista" required />
+              </label>
+              <label class="field">
+                <span>Enlace</span>
+                <input id="song-link" type="url" placeholder="https://open.spotify.com/..." />
+              </label>
+              <label class="field">
+                <span>Nota</span>
+                <textarea id="song-note" rows="4" maxlength="180" placeholder="Por que os recuerda a vosotras"></textarea>
+              </label>
+              <button class="timeline-form__button" type="submit">Guardar cancion</button>
+            </form>
+          </section>
+
+          <section class="timeline-card">
+            <div class="timeline-card__header">
+              <h3>Canciones guardadas</h3>
+              <p>Tu lista emocional para acompanar la ruta y los recuerdos.</p>
+            </div>
+            <div class="timeline-empty" id="songs-empty">
+              Todavia no hay canciones guardadas en vuestra banda sonora.
+            </div>
+            <div class="songs-list" id="songs-list"></div>
+          </section>
+        </div>
+      </section>
+
       <section class="final-message" id="mensaje-final" hidden>
         <h2>Ruta completada</h2>
         <p>

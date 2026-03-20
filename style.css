@@ -54,12 +54,21 @@ body::before {
   visibility: hidden;
 }
 
+.access-granted .site-shell {
+  visibility: visible;
+  opacity: 1;
+}
+
 .access-screen {
   position: fixed;
   inset: 0;
   display: grid;
   place-items: center;
   z-index: 50;
+}
+
+.access-screen[hidden] {
+  display: none !important;
 }
 
 .access-screen__backdrop {
@@ -184,6 +193,12 @@ body::before {
   cursor: pointer;
   box-shadow: 0 18px 28px rgba(74, 114, 191, 0.22);
   transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.activate-button--ghost {
+  background: rgba(223, 232, 251, 0.82);
+  color: var(--primary-strong);
+  box-shadow: none;
 }
 
 .access-form__button:hover,
@@ -443,6 +458,11 @@ body::before {
   color: var(--green-strong);
 }
 
+.card__status--complete {
+  background: rgba(220, 239, 225, 1);
+  color: var(--green-strong);
+}
+
 .card__details {
   display: flex;
   flex: 1;
@@ -514,6 +534,10 @@ body::before {
   font: inherit;
   font-weight: 800;
   cursor: pointer;
+}
+
+.is-disabled-look {
+  opacity: 0.62;
 }
 
 .activate-button:disabled {
@@ -637,6 +661,56 @@ body::before {
 .final-message {
   margin-top: 46px;
   text-align: center;
+}
+
+.soundtrack-section {
+  margin-top: 54px;
+}
+
+.songs-list {
+  display: grid;
+  gap: 18px;
+}
+
+.song-item {
+  border-radius: 24px;
+  border: 1px solid rgba(255, 255, 255, 0.82);
+  background: rgba(255, 255, 255, 0.88);
+  box-shadow: var(--shadow-soft);
+}
+
+.song-item__content {
+  padding: 22px;
+}
+
+.song-item__eyebrow {
+  margin: 0 0 8px;
+  font-size: 0.76rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  font-weight: 800;
+  color: var(--primary-strong);
+}
+
+.song-item h4 {
+  margin: 0 0 6px;
+  font-family: "Cormorant Garamond", serif;
+  font-size: 2rem;
+  font-weight: 600;
+  color: #263555;
+}
+
+.song-item__artist {
+  font-weight: 700;
+  color: #526481;
+}
+
+.song-item__link {
+  display: inline-flex;
+  margin-top: 8px;
+  color: var(--primary-strong);
+  font-weight: 800;
+  text-decoration: none;
 }
 
 @media (max-width: 980px) {

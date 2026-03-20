@@ -7,11 +7,19 @@ function concederAcceso() {
   sessionStorage.setItem(CLAVE_ACCESO, "true");
   document.documentElement.classList.remove("access-locked");
   document.body.classList.remove("access-pending");
+  document.body.classList.add("access-granted");
 
   const pantalla = document.getElementById("access-screen");
   if (pantalla) {
     pantalla.hidden = true;
     pantalla.setAttribute("aria-hidden", "true");
+    pantalla.style.display = "none";
+  }
+
+  const contenido = document.querySelector(".site-shell");
+  if (contenido) {
+    contenido.style.visibility = "visible";
+    contenido.style.opacity = "1";
   }
 }
 

@@ -1,10 +1,15 @@
 const fechaObjetivo = new Date("2029-01-11T23:59:00");
 const TIMELINE_KEY = "timelineEntries";
+const SONGS_KEY = "soundtrackEntries";
 
 const planes = [
   "plan1", "plan2", "plan3", "plan4", "plan5",
   "plan6", "plan7", "plan8", "plan9", "plan10"
 ];
+
+function claveEstado(planId) {
+  return `${planId}_estado`;
+}
 
 function claveFoto(planId) {
   return `${planId}_foto`;
@@ -14,24 +19,8 @@ function claveFecha(planId) {
   return `${planId}_fecha`;
 }
 
-function obtenerTimeline() {
-  try {
-    return JSON.parse(localStorage.getItem(TIMELINE_KEY)) || [];
-  } catch (error) {
-    return [];
-  }
-}
-
-function guardarTimeline(entries) {
-  localStorage.setItem(TIMELINE_KEY, JSON.stringify(entries));
-}
-
-function normalizarFecha(valor) {
-  if (!valor) {
-    return "";
-  }
-
-  return valor.slice(0, 10);
+function hoyIso() {
+  return new Date().toISOString().slice(0, 10);
 }
 
 function formatearFecha(valor) {
@@ -44,6 +33,34 @@ function formatearFecha(valor) {
     month: "long",
     year: "numeric"
   });
+}
+
+function leerStorageJson(key) {
+  try {
+    return JSON.parse(localStorage.getItem(key)) || [];
+  } catch (error) {
+    return [];
+  }
+}
+
+function escribirStorageJson(key, value) {
+  localStorage.setItem(key, JSON.stringify(value));
+}
+
+function obtenerTimeline() {
+  return leerStorageJson(TIMELINE_KEY);
+}
+
+function guardarTimeline(entries) {
+  escribirStorageJson(TIMELINE_KEY, entries);
+}
+
+function obtenerCanciones() {
+  return leerStorageJson(SONGS_KEY);
+}
+
+function guardarCanciones(entries) {
+  escribirStorageJson(SONGS_KEY, entries);
 }
 
 function leerArchivoComoDataUrl(file) {
@@ -65,8 +82,7 @@ function actualizarCountdown() {
     return;
   }
 
-  const ahora = new Date();
-  const diferencia = fechaObjetivo - ahora;
+  const diferencia = fechaObjetivo - new Date();
 
   if (diferencia <= 0) {
     diasEl.textContent = "00";
@@ -76,15 +92,10 @@ function actualizarCountdown() {
     return;
   }
 
-  const dias = Math.floor(diferencia / (1000 * 60 * 60 * 24));
-  const horas = Math.floor((diferencia / (1000 * 60 * 60)) % 24);
-  const minutos = Math.floor((diferencia / (1000 * 60)) % 60);
-  const segundos = Math.floor((diferencia / 1000) % 60);
-
-  diasEl.textContent = String(dias).padStart(2, "0");
-  horasEl.textContent = String(horas).padStart(2, "0");
-  minutosEl.textContent = String(minutos).padStart(2, "0");
-  segundosEl.textContent = String(segundos).padStart(2, "0");
+  diasEl.textContent = String(Math.floor(diferencia / (1000 * 60 * 60 * 24))).padStart(2, "0");
+  horasEl.textContent = String(Math.floor((diferencia / (1000 * 60 * 60)) % 24)).padStart(2, "0");
+  minutosEl.textContent = String(Math.floor((diferencia / (1000 * 60)) % 60)).padStart(2, "0");
+  segundosEl.textContent = String(Math.floor((diferencia / 1000) % 60)).padStart(2, "0");
 }
 
 function cerrarTarjetas() {
@@ -119,81 +130,87 @@ function actualizarPreview(planId, imageSrc) {
   }
 }
 
-function insertarBloquesDeFoto() {
+function insertarControlesDePlan() {
   document.querySelectorAll(".card[data-plan]").forEach((card) => {
     const planId = card.dataset.plan;
     const acciones = card.querySelector(".card__actions");
+    const botonCompletar = document.getElementById(`boton-${planId}`);
 
-    if (!planId || !acciones || card.querySelector(".memory-upload")) {
+    if (!planId || !acciones || !botonCompletar) {
       return;
     }
 
-    const bloque = document.createElement("div");
-    bloque.className = "memory-upload";
-    bloque.innerHTML = `
-      <label class="memory-upload__label" for="foto-${planId}">
-        Sube una foto para completar este recuerdo
-      </label>
-      <input
-        class="memory-upload__input"
-        id="foto-${planId}"
-        type="file"
-        accept="image/*"
-      />
-      <label class="memory-upload__label" for="fecha-${planId}">
-        Fecha del plan
-      </label>
-      <input
-        class="memory-upload__date"
-        id="fecha-${planId}"
-        type="date"
-      />
-      <div class="memory-upload__preview" id="preview-${planId}" hidden>
-        <img id="preview-img-${planId}" alt="Foto del ${planId}" />
-      </div>
-    `;
-
-    acciones.parentNode.insertBefore(bloque, acciones);
-
-    const input = bloque.querySelector(".memory-upload__input");
-    input.addEventListener("change", async (event) => {
-      const file = event.target.files && event.target.files[0];
-
-      if (!file || !file.type.startsWith("image/")) {
-        actualizarPreview(planId, "");
-        return;
-      }
-
-      const temporal = await leerArchivoComoDataUrl(file);
-      actualizarPreview(planId, temporal);
+    botonCompletar.removeAttribute("onclick");
+    botonCompletar.addEventListener("click", (event) => {
+      event.stopPropagation();
+      completarPlan(planId);
     });
+
+    if (!document.getElementById(`activar-${planId}`)) {
+      const botonActivar = document.createElement("button");
+      botonActivar.id = `activar-${planId}`;
+      botonActivar.type = "button";
+      botonActivar.className = "activate-button activate-button--ghost";
+      botonActivar.textContent = "Activar plan";
+      botonActivar.addEventListener("click", (event) => {
+        event.stopPropagation();
+        activarPlan(planId);
+      });
+      acciones.insertBefore(botonActivar, botonCompletar);
+    }
+
+    if (!card.querySelector(".memory-upload")) {
+      const bloque = document.createElement("div");
+      bloque.className = "memory-upload";
+      bloque.innerHTML = `
+        <label class="memory-upload__label" for="foto-${planId}">
+          Foto del recuerdo
+        </label>
+        <input
+          class="memory-upload__input"
+          id="foto-${planId}"
+          type="file"
+          accept="image/*"
+        />
+        <div class="memory-upload__preview" id="preview-${planId}" hidden>
+          <img id="preview-img-${planId}" alt="Foto del ${planId}" />
+        </div>
+      `;
+      acciones.parentNode.insertBefore(bloque, acciones);
+
+      const input = bloque.querySelector(".memory-upload__input");
+      input.addEventListener("change", async (event) => {
+        const file = event.target.files && event.target.files[0];
+
+        if (!file || !file.type.startsWith("image/")) {
+          actualizarPreview(planId, "");
+          return;
+        }
+
+        const temporal = await leerArchivoComoDataUrl(file);
+        actualizarPreview(planId, temporal);
+      });
+    }
   });
 }
 
 function crearEntradaPlan(planId, titulo, fecha, imagen) {
   const entradas = obtenerTimeline();
-  const existente = entradas.find((entry) => entry.id === `plan:${planId}`);
-
   const nuevaEntrada = {
     id: `plan:${planId}`,
     type: "plan",
     planId,
     date: fecha,
     title: titulo,
-    description: `Plan completado y guardado dentro de la ruta.`,
+    description: "Plan completado y guardado dentro de la ruta.",
     image: imagen
   };
 
-  if (existente) {
-    const actualizadas = entradas.map((entry) => (
-      entry.id === nuevaEntrada.id ? nuevaEntrada : entry
-    ));
-    guardarTimeline(actualizadas);
-    return;
-  }
+  const actualizadas = entradas.some((entry) => entry.id === nuevaEntrada.id)
+    ? entradas.map((entry) => (entry.id === nuevaEntrada.id ? nuevaEntrada : entry))
+    : [...entradas, nuevaEntrada];
 
-  entradas.push(nuevaEntrada);
-  guardarTimeline(entradas);
+  guardarTimeline(actualizadas);
 }
 
 function renderizarTimeline() {
@@ -204,9 +221,7 @@ function renderizarTimeline() {
     return;
   }
 
-  const entradas = obtenerTimeline()
-    .sort((a, b) => new Date(a.date) - new Date(b.date));
-
+  const entradas = obtenerTimeline().sort((a, b) => new Date(a.date) - new Date(b.date));
   contenedor.innerHTML = "";
 
   if (!entradas.length) {
@@ -235,25 +250,70 @@ function renderizarTimeline() {
   });
 }
 
-async function activarPlan(planId) {
-  if (localStorage.getItem(planId)) {
+function renderizarCanciones() {
+  const contenedor = document.getElementById("songs-list");
+  const empty = document.getElementById("songs-empty");
+
+  if (!contenedor || !empty) {
+    return;
+  }
+
+  const canciones = obtenerCanciones();
+  contenedor.innerHTML = "";
+
+  if (!canciones.length) {
+    empty.hidden = false;
+    return;
+  }
+
+  empty.hidden = true;
+
+  canciones.forEach((song) => {
+    const item = document.createElement("article");
+    item.className = "song-item";
+    item.innerHTML = `
+      <div class="song-item__content">
+        <p class="song-item__eyebrow">Banda sonora</p>
+        <h4>${song.title}</h4>
+        <p class="song-item__artist">${song.artist}</p>
+        <p>${song.note || ""}</p>
+        ${song.link ? `<a class="song-item__link" href="${song.link}" target="_blank" rel="noopener noreferrer">Escuchar cancion</a>` : ""}
+      </div>
+    `;
+    contenedor.appendChild(item);
+  });
+}
+
+function activarPlan(planId) {
+  const estado = localStorage.getItem(claveEstado(planId)) || "pendiente";
+
+  if (estado === "activado" || estado === "completado") {
+    return;
+  }
+
+  localStorage.setItem(claveEstado(planId), "activado");
+  actualizarEstados();
+}
+
+async function completarPlan(planId) {
+  const estado = localStorage.getItem(claveEstado(planId)) || "pendiente";
+
+  if (estado === "pendiente") {
+    alert("Primero activa el plan y luego completalo.");
+    return;
+  }
+
+  if (estado === "completado") {
     return;
   }
 
   const input = document.getElementById(`foto-${planId}`);
-  const inputFecha = document.getElementById(`fecha-${planId}`);
   const boton = document.getElementById(`boton-${planId}`);
   const card = document.querySelector(`.card[data-plan="${planId}"]`);
   const titulo = card ? card.dataset.planTitle : planId;
-  const fecha = normalizarFecha(inputFecha ? inputFecha.value : "");
 
   if (!input || !input.files || !input.files[0]) {
-    alert("Antes de completar el plan, anade una foto del recuerdo.");
-    return;
-  }
-
-  if (!fecha) {
-    alert("Antes de completar el plan, anade tambien la fecha.");
+    alert("Para completar el plan necesitas anadir una foto.");
     return;
   }
 
@@ -271,7 +331,9 @@ async function activarPlan(planId) {
     }
 
     const imagenBase64 = await leerArchivoComoDataUrl(foto);
-    localStorage.setItem(planId, "activado");
+    const fecha = hoyIso();
+
+    localStorage.setItem(claveEstado(planId), "completado");
     localStorage.setItem(claveFoto(planId), imagenBase64);
     localStorage.setItem(claveFecha(planId), fecha);
 
@@ -281,7 +343,7 @@ async function activarPlan(planId) {
   } catch (error) {
     if (boton) {
       boton.disabled = false;
-      boton.textContent = "Completar con foto";
+      boton.textContent = "Completar plan";
     }
 
     alert("No se pudo guardar la foto. Intentalo otra vez.");
@@ -290,55 +352,68 @@ async function activarPlan(planId) {
 
 function actualizarEstados() {
   let activados = 0;
+  let completados = 0;
 
   planes.forEach((plan) => {
-    const estado = document.getElementById(`estado-${plan}`);
-    const boton = document.getElementById(`boton-${plan}`);
+    const estadoEl = document.getElementById(`estado-${plan}`);
+    const botonActivar = document.getElementById(`activar-${plan}`);
+    const botonCompletar = document.getElementById(`boton-${plan}`);
     const mensaje = document.getElementById(`mensaje-${plan}`);
     const input = document.getElementById(`foto-${plan}`);
-    const inputFecha = document.getElementById(`fecha-${plan}`);
     const card = document.querySelector(`.card[data-plan="${plan}"]`);
+
+    const estado = localStorage.getItem(claveEstado(plan)) || "pendiente";
     const fotoGuardada = localStorage.getItem(claveFoto(plan));
     const fechaGuardada = localStorage.getItem(claveFecha(plan));
-    const activo = Boolean(localStorage.getItem(plan) && fotoGuardada && fechaGuardada);
 
-    if (inputFecha && fechaGuardada) {
-      inputFecha.value = fechaGuardada;
+    const estaActivado = estado === "activado" || estado === "completado";
+    const estaCompletado = estado === "completado" && fotoGuardada && fechaGuardada;
+
+    if (estaActivado) {
+      activados += 1;
     }
 
-    if (activo) {
-      activados += 1;
+    if (estaCompletado) {
+      completados += 1;
       if (card) {
         crearEntradaPlan(plan, card.dataset.planTitle || plan, fechaGuardada, fotoGuardada);
       }
     }
 
-    if (estado) {
-      estado.textContent = activo ? "Completado" : "Pendiente";
-      estado.classList.toggle("card__status--active", activo);
+    if (estadoEl) {
+      estadoEl.textContent = estaCompletado ? "Completado" : (estaActivado ? "Activado" : "Pendiente");
+      estadoEl.classList.toggle("card__status--active", estaActivado && !estaCompletado);
+      estadoEl.classList.toggle("card__status--complete", estaCompletado);
     }
 
-    if (boton) {
-      boton.disabled = activo;
-      boton.textContent = activo ? "Recuerdo guardado" : "Completar con foto";
+    if (botonActivar) {
+      botonActivar.disabled = estaActivado;
+      botonActivar.textContent = estaActivado ? "Plan activado" : "Activar plan";
+    }
+
+    if (botonCompletar) {
+      botonCompletar.disabled = estaCompletado;
+      botonCompletar.textContent = estaCompletado ? "Recuerdo guardado" : "Completar plan";
+      botonCompletar.classList.toggle("is-disabled-look", !estaActivado && !estaCompletado);
     }
 
     if (input) {
-      input.disabled = activo;
-    }
-
-    if (inputFecha) {
-      inputFecha.disabled = activo;
+      input.disabled = estaCompletado;
     }
 
     if (mensaje) {
-      mensaje.textContent = activo
-        ? "Este plan ya esta completado y su foto ya forma parte de la linea del tiempo."
-        : "Para completarlo, sube una foto, anade la fecha y guarda el recuerdo.";
+      if (estaCompletado) {
+        mensaje.textContent = "Este plan ya esta completado y su foto ya forma parte de la linea del tiempo.";
+      } else if (estaActivado) {
+        mensaje.textContent = "El plan esta activado. Cuando pase, completalo con una foto y se guardara automaticamente con la fecha de hoy.";
+      } else {
+        mensaje.textContent = "Primero activa el plan. Cuando lo hagais, podras completarlo con una foto.";
+      }
     }
 
     if (card) {
-      card.classList.toggle("card--completed", activo);
+      card.classList.toggle("card--active", estaActivado && !estaCompletado);
+      card.classList.toggle("card--completed", estaCompletado);
     }
 
     actualizarPreview(plan, fotoGuardada || "");
@@ -351,7 +426,7 @@ function actualizarEstados() {
 
   const final = document.getElementById("mensaje-final");
   if (final) {
-    final.hidden = activados !== planes.length;
+    final.hidden = completados !== planes.length;
   }
 }
 
@@ -396,9 +471,8 @@ function prepararFormularioTimeline() {
       return;
     }
 
-    const temporal = await leerArchivoComoDataUrl(file);
     preview.hidden = false;
-    previewImg.src = temporal;
+    previewImg.src = await leerArchivoComoDataUrl(file);
   });
 
   form.addEventListener("submit", async (event) => {
@@ -420,7 +494,7 @@ function prepararFormularioTimeline() {
     entradas.push({
       id: `manual:${Date.now()}`,
       type: "manual",
-      date: normalizarFecha(dateInput.value),
+      date: dateInput.value,
       title: titleInput.value.trim(),
       description: descriptionInput.value.trim(),
       image: imagen
@@ -434,12 +508,49 @@ function prepararFormularioTimeline() {
   });
 }
 
+function prepararFormularioCanciones() {
+  const form = document.getElementById("song-form");
+
+  if (!form) {
+    return;
+  }
+
+  form.addEventListener("submit", (event) => {
+    event.preventDefault();
+
+    const titleInput = document.getElementById("song-title");
+    const artistInput = document.getElementById("song-artist");
+    const linkInput = document.getElementById("song-link");
+    const noteInput = document.getElementById("song-note");
+
+    if (!titleInput.value.trim() || !artistInput.value.trim()) {
+      alert("La cancion necesita al menos titulo y artista.");
+      return;
+    }
+
+    const canciones = obtenerCanciones();
+    canciones.push({
+      id: `song:${Date.now()}`,
+      title: titleInput.value.trim(),
+      artist: artistInput.value.trim(),
+      link: linkInput.value.trim(),
+      note: noteInput.value.trim()
+    });
+
+    guardarCanciones(canciones);
+    renderizarCanciones();
+    form.reset();
+  });
+}
+
 window.onload = function () {
-  insertarBloquesDeFoto();
+  insertarControlesDePlan();
   actualizarCountdown();
   actualizarEstados();
   prepararTarjetas();
   prepararFormularioTimeline();
+  prepararFormularioCanciones();
   renderizarTimeline();
+  renderizarCanciones();
   setInterval(actualizarCountdown, 1000);
 };
