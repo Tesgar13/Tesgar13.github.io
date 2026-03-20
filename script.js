@@ -3,24 +3,27 @@ const TIMELINE_KEY = "timelineEntries";
 const SONGS_KEY = "soundtrackEntries";
 const MOCK_SLOTS = 10;
 let songActualIndex = -1;
-let jukeboxPlaying = false;
+let turntablePlaying = false;
 const PORTADA_DESTACADA_ID = "seed:fotofav";
+const DEFAULT_MEMORY_NOTE = "Escribe aqui una frase vuestra.";
+const DEFAULT_MEMORY_DESCRIPTION = "Pon aqui una descripcion pequena que luego cambiaras.";
+const DEBUG_PLAN_RESET_KEY = "debugPlanResetDone";
 const TIMELINE_SEED = [
-  { id: "seed:dedo", type: "seed", date: "2023-03-07", title: "Dedo", description: "Uno de vuestros primeros recuerdos guardados en el corcho.", image: "img/dedo.jpeg" },
-  { id: "seed:nohablo", type: "seed", date: "2023-05-03", title: "No hablo", description: "Un recuerdo pequeno que sigue teniendo su sitio.", image: "img/NoHablo.jpeg" },
-  { id: "seed:estudiando", type: "seed", date: "2023-06-20", title: "Estudiando", description: "Una escena vuestra que ya se quedo para siempre.", image: "img/estudiando.jpeg" },
-  { id: "seed:cafe", type: "seed", date: "2023-09-21", title: "Cafe", description: "De esas fotos que huelen a rato compartido.", image: "img/cafe.jpeg" },
-  { id: "seed:bano", type: "seed", date: "2023-09-26", title: "Bano", description: "Otro trocito vuestro clavado en la linea del tiempo.", image: "img/baño.jpeg" },
-  { id: "seed:labo", type: "seed", date: "2023-10-06", title: "Labo", description: "Un momento vuestro convertido en recuerdo fijo.", image: "img/labo.jpeg" },
-  { id: "seed:biblioteca", type: "seed", date: "2023-10-27", title: "Biblioteca", description: "Un recuerdo mas para el corcho.", image: "img/biblioteca.jpeg" },
-  { id: "seed:code1", type: "seed", date: "2023-11-22", title: "Code1", description: "Una de esas fotos que ya forman parte de la historia.", image: "img/code1.jpeg" },
-  { id: "seed:gemes", type: "seed", date: "2023-11-24", title: "Gemes", description: "Otro pedacito vuestro guardado aqui.", image: "img/gemes.jpeg" },
-  { id: "seed:cono", type: "seed", date: "2023-12-23", title: "Cono", description: "Un recuerdo sencillo pero imposible de quitar.", image: "img/cono.jpeg" },
-  { id: "seed:imaginaria", type: "seed", date: "2024-01-28", title: "Imaginaria", description: "Una foto mas para seguir llenando el corcho.", image: "img/imaginaria.jpeg" },
-  { id: "seed:fondo", type: "seed", date: "2024-02-07", title: "Fondo", description: "Un momento vuestro que merecia quedarse.", image: "img/fondo.jpeg" },
-  { id: "seed:rosa", type: "seed", date: "2024-03-10", title: "Rosa", description: "Otra escena guardada con mucho carino.", image: "img/rosa.jpeg" },
-  { id: "seed:nopuc", type: "seed", date: "2024-04-23", title: "Nopuc", description: "Una foto con sitio propio en la historia.", image: "img/nopuc.jpeg" },
-  { id: PORTADA_DESTACADA_ID, type: "seed", date: "2024-04-27", title: "Fotofav", description: "La foto que se queda al frente de la portada.", image: "img/fotofav.jpeg" }
+  { id: "seed:dedo", type: "seed", date: "2023-03-07", title: "", note: "", description: "", image: "img/dedo.jpeg" },
+  { id: "seed:nohablo", type: "seed", date: "2023-05-03", title: "", note: "", description: "", image: "img/NoHablo.jpeg" },
+  { id: "seed:estudiando", type: "seed", date: "2023-06-20", title: "", note: "", description: "", image: "img/estudiando.jpeg" },
+  { id: "seed:cafe", type: "seed", date: "2023-09-21", title: "", note: "", description: "", image: "img/cafe.jpeg" },
+  { id: "seed:bano", type: "seed", date: "2023-09-26", title: "", note: "", description: "", image: "img/baño.jpeg" },
+  { id: "seed:labo", type: "seed", date: "2023-10-06", title: "", note: "", description: "", image: "img/labo.jpeg" },
+  { id: "seed:biblioteca", type: "seed", date: "2023-10-27", title: "", note: "", description: "", image: "img/biblioteca.jpeg" },
+  { id: "seed:code1", type: "seed", date: "2023-11-22", title: "", note: "", description: "", image: "img/code1.jpeg" },
+  { id: "seed:gemes", type: "seed", date: "2023-11-24", title: "", note: "", description: "", image: "img/gemes.jpeg" },
+  { id: "seed:cono", type: "seed", date: "2023-12-23", title: "", note: "", description: "", image: "img/cono.jpeg" },
+  { id: "seed:imaginaria", type: "seed", date: "2024-01-28", title: "", note: "", description: "", image: "img/imaginaria.jpeg" },
+  { id: "seed:fondo", type: "seed", date: "2024-02-07", title: "", note: "", description: "", image: "img/fondo.jpeg" },
+  { id: "seed:rosa", type: "seed", date: "2024-03-10", title: "", note: "", description: "", image: "img/rosa.jpeg" },
+  { id: "seed:nopuc", type: "seed", date: "2024-04-23", title: "", note: "", description: "", image: "img/nopuc.jpeg" },
+  { id: PORTADA_DESTACADA_ID, type: "seed", date: "2024-04-27", title: "", note: "", description: "", image: "img/fotofav.jpeg" }
 ];
 const LETTERS = [
   {
@@ -79,12 +82,45 @@ function formatearFecha(valor) {
   });
 }
 
-function mensajeDetrasDeRecuerdo(entry) {
-  if (entry.type === "plan") {
-    return `Esta parada ya forma parte de vuestra ruta. ${entry.description || "Un recuerdo guardado para volver a el cuando querais."}`;
+function obtenerTextoRecuerdo(entry) {
+  if (entry.note && entry.note.trim()) {
+    return entry.note.trim();
   }
 
-  return entry.description || "Un recuerdo pequeno, pero clavado para quedarse en vuestra historia.";
+  if (entry.type === "manual" && entry.title && entry.title.trim()) {
+    return entry.title.trim();
+  }
+
+  return DEFAULT_MEMORY_NOTE;
+}
+
+function obtenerDescripcionRecuerdo(entry) {
+  if (entry.type !== "manual" && !(entry.note && entry.note.trim())) {
+    return DEFAULT_MEMORY_DESCRIPTION;
+  }
+
+  if (entry.description && entry.description.trim()) {
+    return entry.description.trim();
+  }
+
+  return DEFAULT_MEMORY_DESCRIPTION;
+}
+
+function obtenerAltRecuerdo(entry) {
+  const texto = obtenerTextoRecuerdo(entry);
+  return texto === DEFAULT_MEMORY_NOTE ? `Recuerdo del ${formatearFecha(entry.date)}` : texto;
+}
+
+function mensajeDetrasDeRecuerdo(entry) {
+  const descripcion = obtenerDescripcionRecuerdo(entry);
+
+  if (entry.type === "plan") {
+    return descripcion === DEFAULT_MEMORY_DESCRIPTION
+      ? "Esta parada ya forma parte de vuestra ruta. Aqui puedes escribir lo que os guardo esta foto."
+      : descripcion;
+  }
+
+  return descripcion;
 }
 
 function leerStorageJson(key) {
@@ -112,6 +148,13 @@ function sincronizarTimelineSemilla() {
     }
   });
 
+  combinadas.forEach((entry) => {
+    if (entry.id === "seed:bano" && entry.image !== "img/baño.jpeg") {
+      entry.image = "img/baño.jpeg";
+      cambio = true;
+    }
+  });
+
   if (cambio) {
     escribirStorageJson(TIMELINE_KEY, combinadas);
   }
@@ -133,6 +176,20 @@ function obtenerCanciones() {
 
 function guardarCanciones(entries) {
   escribirStorageJson(SONGS_KEY, entries);
+}
+
+function limpiarPlanesActivadosDePrueba() {
+  if (localStorage.getItem(DEBUG_PLAN_RESET_KEY) === "true") {
+    return;
+  }
+
+  planes.forEach((planId) => {
+    if (localStorage.getItem(claveEstado(planId)) === "activado") {
+      localStorage.removeItem(claveEstado(planId));
+    }
+  });
+
+  localStorage.setItem(DEBUG_PLAN_RESET_KEY, "true");
 }
 
 function barajar(array) {
@@ -272,7 +329,8 @@ function crearEntradaPlan(planId, titulo, fecha, imagen) {
     planId,
     date: fecha,
     title: titulo,
-    description: "Plan completado y guardado dentro de la ruta.",
+    note: "",
+    description: "",
     image: imagen
   };
 
@@ -304,19 +362,24 @@ function renderizarTimeline() {
   }
 
   entradas.forEach((entry) => {
+    const texto = obtenerTextoRecuerdo(entry);
+    const descripcion = obtenerDescripcionRecuerdo(entry);
+    const etiqueta = entry.type === "plan"
+      ? "Plan completado"
+      : (entry.type === "manual" ? "Recuerdo manual" : "Recuerdo clavado");
     const item = document.createElement("article");
     item.className = "timeline-item";
     item.dataset.entryId = entry.id;
     item.innerHTML = `
       <div class="timeline-item__dot">${formatearFecha(entry.date)}</div>
-      <div class="timeline-item__content" role="button" tabindex="0" aria-label="Abrir recuerdo ${entry.title}">
+      <div class="timeline-item__content" role="button" tabindex="0" aria-label="Abrir recuerdo del ${formatearFecha(entry.date)}">
         <p class="timeline-item__date">${formatearFecha(entry.date)}</p>
         <div class="timeline-item__media">
-          <img src="${entry.image}" alt="${entry.title}" />
+          <img src="${entry.image}" alt="${obtenerAltRecuerdo(entry)}" />
         </div>
-        <h4>${entry.title}</h4>
-        <p class="timeline-item__caption">${entry.description || "Pulsa para ampliar este recuerdo."}</p>
-        <span class="timeline-item__tag">${entry.type === "plan" ? "Plan completado" : "Recuerdo manual"}</span>
+        <p class="timeline-item__note">${texto}</p>
+        <p class="timeline-item__caption">${descripcion}</p>
+        <span class="timeline-item__tag">${etiqueta}</span>
       </div>
     `;
 
@@ -340,8 +403,8 @@ function renderizarTimeline() {
       <div class="timeline-item__content" aria-hidden="true">
         <p class="timeline-item__date">Fecha pendiente</p>
         <div class="timeline-item__media timeline-item__media--placeholder"></div>
-        <h4>Recuerdo ${i + 1}</h4>
-        <p class="timeline-item__caption">Aqui ira una foto clavada en el corcho con su fecha y su mensaje.</p>
+        <p class="timeline-item__note">${DEFAULT_MEMORY_NOTE}</p>
+        <p class="timeline-item__caption">${DEFAULT_MEMORY_DESCRIPTION}</p>
         <span class="timeline-item__tag">Hueco reservado</span>
       </div>
     `;
@@ -378,9 +441,18 @@ function renderizarPortada(entradas) {
   const featured = document.createElement("article");
   featured.className = "cover-memory cover-memory--featured";
   featured.innerHTML = `
-    <img src="${destacada.image}" alt="${destacada.title}" />
-    <p class="cover-memory__caption">${destacada.title}</p>
+    <img src="${destacada.image}" alt="${obtenerAltRecuerdo(destacada)}" />
   `;
+  featured.tabIndex = 0;
+  featured.setAttribute("role", "button");
+  featured.setAttribute("aria-label", `Abrir recuerdo del ${formatearFecha(destacada.date)}`);
+  featured.addEventListener("click", () => abrirModalRecuerdo(destacada.id));
+  featured.addEventListener("keydown", (event) => {
+    if (event.key === "Enter" || event.key === " ") {
+      event.preventDefault();
+      abrirModalRecuerdo(destacada.id);
+    }
+  });
   board.appendChild(featured);
 
   barajar(entradas.filter((entry) => entry.id !== destacada.id)).slice(0, posiciones.length).forEach((entry, index) => {
@@ -391,9 +463,18 @@ function renderizarPortada(entradas) {
     foto.style.left = posicion.left;
     foto.style.setProperty("--tilt", posicion.tilt);
     foto.innerHTML = `
-      <img src="${entry.image}" alt="${entry.title}" />
-      <p class="cover-memory__caption">${entry.title}</p>
+      <img src="${entry.image}" alt="${obtenerAltRecuerdo(entry)}" />
     `;
+    foto.tabIndex = 0;
+    foto.setAttribute("role", "button");
+    foto.setAttribute("aria-label", `Abrir recuerdo del ${formatearFecha(entry.date)}`);
+    foto.addEventListener("click", () => abrirModalRecuerdo(entry.id));
+    foto.addEventListener("keydown", (event) => {
+      if (event.key === "Enter" || event.key === " ") {
+        event.preventDefault();
+        abrirModalRecuerdo(entry.id);
+      }
+    });
     board.appendChild(foto);
   });
 }
@@ -411,7 +492,7 @@ function renderizarCanciones() {
   if (songActualIndex >= canciones.length) {
     songActualIndex = canciones.length ? canciones.length - 1 : -1;
   }
-  actualizarJukebox(canciones);
+  actualizarTocadiscos(canciones);
 
   if (!canciones.length) {
     empty.hidden = false;
@@ -420,7 +501,7 @@ function renderizarCanciones() {
     empty.hidden = true;
   }
 
-  canciones.forEach((song) => {
+  canciones.forEach((song, index) => {
     const spotifyLink = song.spotifyLink || song.link || "";
     const appleLink = song.appleLink || "";
     const item = document.createElement("article");
@@ -441,9 +522,9 @@ function renderizarCanciones() {
       </div>
     `;
     item.addEventListener("click", () => {
-      songActualIndex = canciones.indexOf(song);
-      jukeboxPlaying = true;
-      actualizarJukebox(canciones);
+      songActualIndex = index;
+      turntablePlaying = true;
+      actualizarTocadiscos(canciones);
       marcarCancionActiva();
     });
     contenedor.appendChild(item);
@@ -467,29 +548,35 @@ function renderizarCanciones() {
   }
 
   marcarCancionActiva();
+  prepararCarruselCanciones();
 }
 
 function marcarCancionActiva() {
   document.querySelectorAll(".songs-list .song-item").forEach((item, index) => {
     item.classList.toggle("song-item--active", index === songActualIndex);
   });
+
+  const activa = document.querySelector(".songs-list .song-item--active");
+  if (activa) {
+    activa.scrollIntoView({ behavior: "smooth", inline: "center", block: "nearest" });
+  }
 }
 
-function actualizarJukebox(canciones) {
-  const jukeboxRecord = document.getElementById("jukebox-record");
-  const jukeboxTitle = document.getElementById("jukebox-title");
-  const jukeboxArtist = document.getElementById("jukebox-artist");
-  const spotifyLink = document.getElementById("jukebox-link-spotify");
-  const appleLink = document.getElementById("jukebox-link-apple");
+function actualizarTocadiscos(canciones) {
+  const record = document.getElementById("turntable-record");
+  const title = document.getElementById("turntable-title");
+  const artist = document.getElementById("turntable-artist");
+  const spotifyLink = document.getElementById("turntable-link-spotify");
+  const appleLink = document.getElementById("turntable-link-apple");
 
-  if (!jukeboxRecord || !jukeboxTitle || !jukeboxArtist || !spotifyLink || !appleLink) {
+  if (!record || !title || !artist || !spotifyLink || !appleLink) {
     return;
   }
 
   if (!canciones.length) {
-    jukeboxRecord.classList.remove("is-spinning");
-    jukeboxTitle.textContent = "Sin cancion";
-    jukeboxArtist.textContent = "Toca la jukebox para abrir la biblioteca";
+    record.classList.remove("is-spinning");
+    title.textContent = "Sin cancion";
+    artist.textContent = "Toca el tocadiscos para ver la coleccion";
     spotifyLink.hidden = true;
     spotifyLink.removeAttribute("href");
     appleLink.hidden = true;
@@ -504,9 +591,9 @@ function actualizarJukebox(canciones) {
   const song = canciones[songActualIndex];
   const spotifyUrl = song.spotifyLink || song.link || "";
   const appleUrl = song.appleLink || "";
-  jukeboxRecord.classList.toggle("is-spinning", jukeboxPlaying);
-  jukeboxTitle.textContent = song.title;
-  jukeboxArtist.textContent = song.note || song.artist;
+  record.classList.toggle("is-spinning", turntablePlaying);
+  title.textContent = song.title;
+  artist.textContent = song.note || song.artist;
 
   if (spotifyUrl) {
     spotifyLink.hidden = false;
@@ -525,7 +612,7 @@ function actualizarJukebox(canciones) {
   }
 }
 
-function moverJukebox(direccion) {
+function moverTocadiscos(direccion) {
   const canciones = obtenerCanciones();
 
   if (!canciones.length) {
@@ -538,9 +625,37 @@ function moverJukebox(direccion) {
     songActualIndex = (songActualIndex + direccion + canciones.length) % canciones.length;
   }
 
-  jukeboxPlaying = true;
-  actualizarJukebox(canciones);
+  turntablePlaying = true;
+  actualizarTocadiscos(canciones);
   marcarCancionActiva();
+}
+
+function prepararCarruselCanciones() {
+  const contenedor = document.getElementById("songs-list");
+  const prev = document.getElementById("songs-carousel-prev");
+  const next = document.getElementById("songs-carousel-next");
+
+  if (!contenedor || !prev || !next || contenedor.dataset.carouselReady === "true") {
+    return;
+  }
+
+  const mover = (direccion) => {
+    const distancia = Math.max(contenedor.clientWidth * 0.72, 280);
+    contenedor.scrollBy({ left: distancia * direccion, behavior: "smooth" });
+  };
+
+  prev.addEventListener("click", () => mover(-1));
+  next.addEventListener("click", () => mover(1));
+  contenedor.addEventListener("wheel", (event) => {
+    if (Math.abs(event.deltaY) <= Math.abs(event.deltaX)) {
+      return;
+    }
+
+    event.preventDefault();
+    contenedor.scrollBy({ left: event.deltaY, behavior: "auto" });
+  }, { passive: false });
+
+  contenedor.dataset.carouselReady = "true";
 }
 
 function activarPlan(planId) {
@@ -691,54 +806,56 @@ function actualizarEstados() {
 }
 
 function renderizarCartas(completados) {
-  const contenedor = document.getElementById("letters-grid");
+  const contenedores = document.querySelectorAll("#letters-grid, #letters-grid-cover");
 
-  if (!contenedor) {
+  if (!contenedores.length) {
     return;
   }
 
-  contenedor.innerHTML = "";
+  contenedores.forEach((contenedor) => {
+    contenedor.innerHTML = "";
 
-  LETTERS.forEach((letter) => {
-    const unlocked = completados >= letter.unlockAt;
-    const item = document.createElement("article");
-    item.className = `letter-card${unlocked ? "" : " letter-card--locked"}`;
-    item.innerHTML = `
-      <div class="letter-card__inner">
-        <section class="letter-card__face letter-card__face--front">
-          <div class="letter-card__seal">${unlocked ? "Ab" : "?"}</div>
-          <div>
-            <span class="${unlocked ? "letter-card__unlock" : "letter-card__status"}">
-              ${unlocked ? "Desbloqueada" : `Se abre con ${letter.unlockAt} planes`}
-            </span>
-            <h3 class="letter-card__title">${letter.title}</h3>
-            <p class="letter-card__text">${unlocked ? letter.preview : "Todavia esta cerrada. Seguid completando planes para abrirla."}</p>
-          </div>
-          <button class="activate-button letter-card__action" type="button" ${unlocked ? "" : "disabled"}>
-            ${unlocked ? "Abrir carta" : "Bloqueada"}
-          </button>
-        </section>
-        <section class="letter-card__face letter-card__face--back">
-          <div>
-            <span class="letter-card__unlock">Carta abierta</span>
-            <h3 class="letter-card__title">${letter.title}</h3>
-            <p class="letter-card__text">${letter.message}</p>
-          </div>
-          <button class="activate-button activate-button--ghost letter-card__action" type="button">Cerrar carta</button>
-        </section>
-      </div>
-    `;
+    LETTERS.forEach((letter) => {
+      const unlocked = completados >= letter.unlockAt;
+      const item = document.createElement("article");
+      item.className = `letter-card${unlocked ? "" : " letter-card--locked"}`;
+      item.innerHTML = `
+        <div class="letter-card__inner">
+          <section class="letter-card__face letter-card__face--front">
+            <div class="letter-card__seal">${unlocked ? "Ab" : "?"}</div>
+            <div>
+              <span class="${unlocked ? "letter-card__unlock" : "letter-card__status"}">
+                ${unlocked ? "Desbloqueada" : `Se abre con ${letter.unlockAt} planes`}
+              </span>
+              <h3 class="letter-card__title">${letter.title}</h3>
+              <p class="letter-card__text">${unlocked ? letter.preview : "Todavia esta cerrada. Seguid completando planes para abrirla."}</p>
+            </div>
+            <button class="activate-button letter-card__action" type="button" ${unlocked ? "" : "disabled"}>
+              ${unlocked ? "Abrir carta" : "Bloqueada"}
+            </button>
+          </section>
+          <section class="letter-card__face letter-card__face--back">
+            <div>
+              <span class="letter-card__unlock">Carta abierta</span>
+              <h3 class="letter-card__title">${letter.title}</h3>
+              <p class="letter-card__text">${letter.message}</p>
+            </div>
+            <button class="activate-button activate-button--ghost letter-card__action" type="button">Cerrar carta</button>
+          </section>
+        </div>
+      `;
 
-    if (unlocked) {
-      const buttons = item.querySelectorAll("button");
-      buttons.forEach((button) => {
-        button.addEventListener("click", () => {
-          item.classList.toggle("is-open");
+      if (unlocked) {
+        const buttons = item.querySelectorAll("button");
+        buttons.forEach((button) => {
+          button.addEventListener("click", () => {
+            item.classList.toggle("is-open");
+          });
         });
-      });
-    }
+      }
 
-    contenedor.appendChild(item);
+      contenedor.appendChild(item);
+    });
   });
 }
 
@@ -747,24 +864,27 @@ function abrirModalRecuerdo(entryId) {
   const flip = document.getElementById("memory-flip");
   const image = document.getElementById("memory-modal-image");
   const date = document.getElementById("memory-modal-date");
-  const title = document.getElementById("memory-modal-title");
-  const description = document.getElementById("memory-modal-description");
+  const noteInput = document.getElementById("memory-modal-note-input");
+  const descriptionInput = document.getElementById("memory-modal-description-input");
+  const saved = document.getElementById("memory-modal-saved");
   const backTitle = document.getElementById("memory-modal-back-title");
   const message = document.getElementById("memory-modal-message");
   const entry = obtenerTimeline().find((item) => item.id === entryId);
 
-  if (!modal || !flip || !image || !date || !title || !description || !backTitle || !message || !entry) {
+  if (!modal || !flip || !image || !date || !noteInput || !descriptionInput || !saved || !backTitle || !message || !entry) {
     return;
   }
 
   flip.classList.remove("is-flipped");
   image.src = entry.image;
-  image.alt = entry.title;
+  image.alt = obtenerAltRecuerdo(entry);
   date.textContent = formatearFecha(entry.date);
-  title.textContent = entry.title;
-  description.textContent = entry.description || "Un recuerdo guardado para volver a este momento cuando querais.";
-  backTitle.textContent = entry.title;
+  noteInput.value = obtenerTextoRecuerdo(entry);
+  descriptionInput.value = obtenerDescripcionRecuerdo(entry);
+  saved.hidden = true;
+  backTitle.textContent = obtenerTextoRecuerdo(entry);
   message.textContent = mensajeDetrasDeRecuerdo(entry);
+  modal.dataset.entryId = entryId;
   modal.hidden = false;
   document.body.style.overflow = "hidden";
 }
@@ -778,8 +898,56 @@ function cerrarModalRecuerdo() {
   }
 
   flip.classList.remove("is-flipped");
+  delete modal.dataset.entryId;
   modal.hidden = true;
   document.body.style.overflow = "";
+}
+
+function guardarTextoRecuerdoActual() {
+  const modal = document.getElementById("memory-modal");
+  const noteInput = document.getElementById("memory-modal-note-input");
+  const descriptionInput = document.getElementById("memory-modal-description-input");
+  const saved = document.getElementById("memory-modal-saved");
+  const backTitle = document.getElementById("memory-modal-back-title");
+  const message = document.getElementById("memory-modal-message");
+
+  if (!modal || !noteInput || !descriptionInput || !saved || !backTitle || !message || !modal.dataset.entryId) {
+    return;
+  }
+
+  const texto = noteInput.value.trim();
+  const descripcion = descriptionInput.value.trim();
+
+  if (!texto) {
+    alert("Pon al menos una frase corta para esa foto.");
+    noteInput.focus();
+    return;
+  }
+
+  const actualizadas = obtenerTimeline().map((entry) => {
+    if (entry.id !== modal.dataset.entryId) {
+      return entry;
+    }
+
+    return {
+      ...entry,
+      title: entry.type === "manual" ? texto : entry.title,
+      note: texto,
+      description: descripcion
+    };
+  });
+
+  guardarTimeline(actualizadas);
+  renderizarTimeline();
+
+  const actualizada = actualizadas.find((entry) => entry.id === modal.dataset.entryId);
+  if (!actualizada) {
+    return;
+  }
+
+  backTitle.textContent = obtenerTextoRecuerdo(actualizada);
+  message.textContent = mensajeDetrasDeRecuerdo(actualizada);
+  saved.hidden = false;
 }
 
 function prepararModalRecuerdo() {
@@ -787,8 +955,12 @@ function prepararModalRecuerdo() {
   const flip = document.getElementById("memory-flip");
   const turn = document.getElementById("memory-modal-turn");
   const back = document.getElementById("memory-modal-return");
+  const save = document.getElementById("memory-modal-save");
+  const noteInput = document.getElementById("memory-modal-note-input");
+  const descriptionInput = document.getElementById("memory-modal-description-input");
+  const saved = document.getElementById("memory-modal-saved");
 
-  if (!modal || !flip || !turn || !back) {
+  if (!modal || !flip || !turn || !back || !save || !noteInput || !descriptionInput || !saved) {
     return;
   }
 
@@ -802,6 +974,14 @@ function prepararModalRecuerdo() {
 
   back.addEventListener("click", () => {
     flip.classList.remove("is-flipped");
+  });
+
+  save.addEventListener("click", guardarTextoRecuerdoActual);
+  noteInput.addEventListener("input", () => {
+    saved.hidden = true;
+  });
+  descriptionInput.addEventListener("input", () => {
+    saved.hidden = true;
   });
 
   document.addEventListener("keydown", (event) => {
@@ -906,7 +1086,7 @@ function prepararFormularioTimeline() {
     const file = imageInput.files && imageInput.files[0];
 
     if (!dateInput.value || !titleInput.value.trim() || !file) {
-      alert("Para anadir un recuerdo manual necesitas fecha, titulo y foto.");
+      alert("Para anadir un recuerdo manual necesitas fecha, texto y foto.");
       return;
     }
 
@@ -918,6 +1098,7 @@ function prepararFormularioTimeline() {
       type: "manual",
       date: dateInput.value,
       title: titleInput.value.trim(),
+      note: titleInput.value.trim(),
       description: descriptionInput.value.trim(),
       image: imagen
     });
@@ -957,29 +1138,45 @@ function prepararTogglesDeFormulario() {
   });
 }
 
-function prepararJukebox() {
-  const toggle = document.getElementById("jukebox-toggle");
-  const library = document.getElementById("jukebox-library");
-  const prev = document.getElementById("jukebox-prev");
-  const next = document.getElementById("jukebox-next");
-  const stop = document.getElementById("jukebox-stop");
-  const play = document.getElementById("jukebox-play");
+function prepararTocadiscos() {
+  const toggle = document.getElementById("turntable-toggle");
+  const library = document.getElementById("song-library");
+  const prev = document.getElementById("turntable-prev");
+  const next = document.getElementById("turntable-next");
+  const stop = document.getElementById("turntable-stop");
+  const play = document.getElementById("turntable-play");
 
   if (!toggle || !library || !prev || !next || !stop || !play) {
     return;
   }
 
-  toggle.addEventListener("click", () => {
+  const alternarBiblioteca = () => {
     const abierto = !library.hidden;
     library.hidden = abierto;
     toggle.setAttribute("aria-expanded", abierto ? "false" : "true");
+  };
+
+  toggle.addEventListener("click", (event) => {
+    if (event.target.closest("a")) {
+      return;
+    }
+
+    alternarBiblioteca();
+  });
+  toggle.addEventListener("keydown", (event) => {
+    if (event.key !== "Enter" && event.key !== " ") {
+      return;
+    }
+
+    event.preventDefault();
+    alternarBiblioteca();
   });
 
-  prev.addEventListener("click", () => moverJukebox(-1));
-  next.addEventListener("click", () => moverJukebox(1));
+  prev.addEventListener("click", () => moverTocadiscos(-1));
+  next.addEventListener("click", () => moverTocadiscos(1));
   stop.addEventListener("click", () => {
-    jukeboxPlaying = false;
-    actualizarJukebox(obtenerCanciones());
+    turntablePlaying = false;
+    actualizarTocadiscos(obtenerCanciones());
   });
   play.addEventListener("click", () => {
     if (!obtenerCanciones().length) {
@@ -990,8 +1187,8 @@ function prepararJukebox() {
       songActualIndex = obtenerCanciones().length - 1;
     }
 
-    jukeboxPlaying = true;
-    actualizarJukebox(obtenerCanciones());
+    turntablePlaying = true;
+    actualizarTocadiscos(obtenerCanciones());
   });
 }
 
@@ -1043,6 +1240,7 @@ function prepararFormularioCanciones() {
 
 window.onload = function () {
   insertarControlesDePlan();
+  limpiarPlanesActivadosDePrueba();
   actualizarCountdown();
   actualizarEstados();
   prepararTarjetas();
@@ -1051,7 +1249,7 @@ window.onload = function () {
   prepararTogglesDeFormulario();
   prepararModalRecuerdo();
   prepararTabs();
-  prepararJukebox();
+  prepararTocadiscos();
   renderizarTimeline();
   renderizarCanciones();
   setInterval(actualizarCountdown, 1000);
