@@ -37,66 +37,92 @@
   </div>
 
   <div class="site-shell">
-    <header class="hero">
-      <div class="hero__overlay"></div>
-      <div class="hero__content">
-        <p class="eyebrow">Que mejor plan que comer juntos</p>
-        <h1>Creemos recuerdos comiendo</h1>
-        <p class="hero__text">
-          Durante estos 3 anos hemos creado innumerables recuerdos juntos.
-          Que te parece si en los proximos 3 recreamos algunos de ellos y seguimos sumando muchos mas?
-        </p>
+    <nav class="tab-nav" aria-label="Secciones principales">
+      <button class="tab-nav__button is-active" type="button" data-tab-target="portada">Portada</button>
+      <button class="tab-nav__button" type="button" data-tab-target="comidas">Comidas</button>
+      <button class="tab-nav__button" type="button" data-tab-target="recuerdos">Recuerdos</button>
+      <button class="tab-nav__button" type="button" data-tab-target="musica">Musica</button>
+    </nav>
 
-        <div class="top-widgets">
-          <div class="widget">
-            <span class="widget__label">Planes activados</span>
-            <span class="widget__value" id="contador-planes">0 / 10</span>
-          </div>
+    <main class="main-content main-content--tabs">
+      <section class="tab-panel tab-panel--portada is-active" id="tab-portada" data-tab-panel="portada">
+        <header class="hero hero--home">
+          <div class="hero__overlay"></div>
+          <div class="hero__content">
+            <p class="eyebrow">Que mejor plan que comer juntos</p>
+            <h1>Creemos recuerdos comiendo</h1>
+            <p class="hero__text">
+              Durante estos 3 anos hemos creado innumerables recuerdos juntos.
+              Que te parece si en los proximos 3 recreamos algunos de ellos y seguimos sumando muchos mas?
+            </p>
 
-          <div class="widget">
-            <span class="widget__label">Quedan</span>
-
-            <div class="countdown" id="countdown">
-              <div class="countdown__item">
-                <span id="dias">00</span>
-                <small>dias</small>
+            <div class="top-widgets">
+              <div class="widget">
+                <span class="widget__label">Planes activados</span>
+                <span class="widget__value" id="contador-planes">0 / 10</span>
               </div>
 
-              <div class="countdown__item">
-                <span id="horas">00</span>
-                <small>horas</small>
-              </div>
+              <div class="widget">
+                <span class="widget__label">Quedan</span>
 
-              <div class="countdown__item">
-                <span id="minutos">00</span>
-                <small>min</small>
-              </div>
+                <div class="countdown" id="countdown">
+                  <div class="countdown__item">
+                    <span id="dias">00</span>
+                    <small>dias</small>
+                  </div>
 
-              <div class="countdown__item">
-                <span id="segundos">00</span>
-                <small>seg</small>
+                  <div class="countdown__item">
+                    <span id="horas">00</span>
+                    <small>horas</small>
+                  </div>
+
+                  <div class="countdown__item">
+                    <span id="minutos">00</span>
+                    <small>min</small>
+                  </div>
+
+                  <div class="countdown__item">
+                    <span id="segundos">00</span>
+                    <small>seg</small>
+                  </div>
+                </div>
+
+                <p class="countdown__date" id="fecha-objetivo-texto">
+                  para completar todos los planes
+                </p>
               </div>
             </div>
-
-            <p class="countdown__date" id="fecha-objetivo-texto">
-              para completar todos los planes
-            </p>
           </div>
-        </div>
-      </div>
-    </header>
+        </header>
 
-    <main class="main-content">
-      <section class="intro">
-        <h2>Recuerdos creados, recuerdos por crear</h2>
-        <p>
-          Cada tarjeta representa un momento especial vivido juntos.
-          Ahora cada una se abre aqui mismo y, cuando la completeis, necesitara
-          una foto para guardar el recuerdo como parte de vuestra ruta.
-        </p>
+        <section class="cover-panel">
+          <div class="cover-panel__copy">
+            <p class="eyebrow eyebrow--soft">Portada viva</p>
+            <h2>Una portada que cambia con vosotros</h2>
+            <p>
+              Desde aqui entras en la mesa, en el corcho y en la banda sonora.
+              Las fotos de vuestra linea del tiempo se recolocan cada vez que vuelves, como una portada que nunca se queda quieta.
+            </p>
+            <div class="cover-panel__actions">
+              <button class="activate-button" type="button" data-tab-target="comidas">Entrar en la mesa</button>
+              <button class="activate-button activate-button--ghost" type="button" data-tab-target="recuerdos">Ir al corcho</button>
+              <button class="activate-button activate-button--ghost" type="button" data-tab-target="musica">Poner un disco</button>
+            </div>
+          </div>
+          <div class="cover-board" id="cover-board"></div>
+        </section>
       </section>
 
-      <section class="cards-grid">
+      <section class="tab-panel tab-panel--comidas" id="tab-comidas" data-tab-panel="comidas" hidden>
+        <section class="intro intro--comidas">
+        <h2>La mesa donde vuelven nuestros planes</h2>
+        <p>
+          Aqui estan las paradas de vuestra ruta: antojos, sitios repetidos, clasicos y alguna sorpresa.
+          Cada tarjeta pide volver, vivirla otra vez y dejar una foto para que ese momento no se quede solo en memoria.
+        </p>
+        </section>
+
+        <section class="cards-grid">
         <article class="card" data-plan="plan1" data-plan-title="Donde todo empezo">
           <div class="card__inner">
             <div class="card__face card__face--front">
@@ -398,21 +424,31 @@
             </div>
           </div>
         </article>
+        </section>
+
+        <section class="final-message" id="mensaje-final" hidden>
+          <h2>Ruta completada</h2>
+          <p>
+            Habeis completado toda la ruta y cada parada ha quedado guardada con su foto.
+            Ya no es solo una lista: es vuestro album de recuerdos.
+          </p>
+        </section>
       </section>
 
+      <section class="tab-panel tab-panel--recuerdos" id="tab-recuerdos" data-tab-panel="recuerdos" hidden>
       <section class="timeline-section">
         <div class="timeline-section__intro">
-          <p class="eyebrow eyebrow--soft">Linea del tiempo</p>
-          <h2>Vuestro album cronologico</h2>
+          <p class="eyebrow eyebrow--soft">Corcho de recuerdos</p>
+          <h2>Un corcho lleno de fechas, fotos y huellas</h2>
           <p>
-            Aqui puedes ir anadiendo fechas importantes con una foto, un titulo y una descripcion.
-            Los planes completados tambien se guardaran automaticamente en esta linea del tiempo.
+            Aqui podeis ir clavando fechas importantes con foto, titulo y unas palabras.
+            Los planes completados tambien caen aqui automaticamente, unidos por un hilo rojo como si todo llevara tiempo esperando este sitio.
           </p>
         </div>
 
         <div class="timeline-layout">
           <section class="timeline-form-card">
-            <h3>Anadir recuerdo manualmente</h3>
+            <h3>Clavar un recuerdo nuevo</h3>
             <form id="timeline-form" class="timeline-form">
               <label class="field">
                 <span>Fecha</span>
@@ -439,8 +475,8 @@
 
           <section class="timeline-card">
             <div class="timeline-card__header">
-              <h3>Recuerdos guardados</h3>
-              <p>Se ordenan por fecha y se quedan guardados en esta pagina.</p>
+              <h3>Polaroids clavadas</h3>
+              <p>Toca cualquier foto para acercarla, girarla y leer lo que guarda en la parte de atras.</p>
             </div>
             <div class="timeline-empty" id="timeline-empty">
               Todavia no hay recuerdos en la linea del tiempo.
@@ -450,18 +486,33 @@
         </div>
       </section>
 
+      <section class="letters-section">
+        <div class="timeline-section__intro">
+          <p class="eyebrow eyebrow--soft">Cartas guardadas</p>
+          <h2>Lo que no se enseña al principio</h2>
+          <p>
+            Algunas cosas necesitaban esperar su momento. Estas cartas se abren cuando la ruta ya tiene peso, fotos y algo de historia encima.
+          </p>
+        </div>
+
+        <div class="letters-grid" id="letters-grid"></div>
+      </section>
+      </section>
+
+      <section class="tab-panel tab-panel--musica" id="tab-musica" data-tab-panel="musica" hidden>
       <section class="soundtrack-section">
         <div class="timeline-section__intro">
           <p class="eyebrow eyebrow--soft">Banda sonora</p>
-          <h2>Canciones para vuestra historia</h2>
+          <h2>Los discos que se quedaron con vosotros</h2>
           <p>
-            Aqui puedes guardar canciones especiales, con su artista, un enlace y una nota para recordar por que son importantes.
+            Aqui van las canciones que se os han quedado pegadas a momentos concretos.
+            Guarda el tema, el artista y esa pequena razon por la que, al sonar, ya no vuelve a sonar igual.
           </p>
         </div>
 
         <div class="timeline-layout">
           <section class="timeline-form-card">
-            <h3>Anadir cancion</h3>
+            <h3>Guardar un nuevo tema</h3>
             <form id="song-form" class="timeline-form">
               <label class="field">
                 <span>Titulo</span>
@@ -484,9 +535,28 @@
           </section>
 
           <section class="timeline-card">
+            <div class="vinyl-showcase" id="vinyl-showcase">
+              <div class="vinyl-player">
+                <div class="vinyl-player__arm"></div>
+                <div class="vinyl-record" id="vinyl-record">
+                  <div class="vinyl-record__grooves"></div>
+                  <div class="vinyl-record__label">
+                    <span id="vinyl-title">Sin cancion</span>
+                    <small id="vinyl-artist">Anade una para empezar vuestra banda sonora</small>
+                  </div>
+                </div>
+              </div>
+              <div class="vinyl-copy">
+                <p class="vinyl-copy__eyebrow">Ahora girando</p>
+                <h3 id="vinyl-copy-title">Esperando vuestra primera cancion</h3>
+                <p id="vinyl-copy-note">Cuando guardes un tema, se quedara aqui como el disco que encabeza vuestra banda sonora.</p>
+                <a class="song-item__link" id="vinyl-link" href="#" target="_blank" rel="noopener noreferrer" hidden>Escuchar tema</a>
+              </div>
+            </div>
+
             <div class="timeline-card__header">
-              <h3>Canciones guardadas</h3>
-              <p>Tu lista emocional para acompanar la ruta y los recuerdos.</p>
+              <h3>Temas guardados</h3>
+              <p>Una coleccion pequena de canciones que ya no suenan separadas de vuestra historia.</p>
             </div>
             <div class="timeline-empty" id="songs-empty">
               Todavia no hay canciones guardadas en vuestra banda sonora.
@@ -495,17 +565,36 @@
           </section>
         </div>
       </section>
-
-      <section class="final-message" id="mensaje-final" hidden>
-        <h2>Ruta completada</h2>
-        <p>
-          Habeis completado toda la ruta y cada parada ha quedado guardada con su foto.
-          Ya no es solo una lista: es vuestro album de recuerdos.
-        </p>
       </section>
     </main>
   </div>
 
   <script src="script.js"></script>
+
+  <div class="memory-modal" id="memory-modal" hidden>
+    <div class="memory-modal__backdrop" data-close-memory-modal></div>
+    <div class="memory-modal__dialog">
+      <button class="memory-modal__close" type="button" data-close-memory-modal>Cerrar</button>
+      <article class="memory-flip" id="memory-flip">
+        <div class="memory-flip__inner">
+          <section class="memory-flip__face memory-flip__face--front">
+            <p class="memory-flip__date" id="memory-modal-date"></p>
+            <div class="memory-flip__media">
+              <img id="memory-modal-image" alt="Recuerdo ampliado" />
+            </div>
+            <h3 id="memory-modal-title"></h3>
+            <p id="memory-modal-description"></p>
+            <button class="activate-button" type="button" id="memory-modal-turn">Dar la vuelta</button>
+          </section>
+          <section class="memory-flip__face memory-flip__face--back">
+            <p class="memory-flip__eyebrow">Detras de la polaroid</p>
+            <h3 id="memory-modal-back-title"></h3>
+            <p id="memory-modal-message"></p>
+            <button class="activate-button activate-button--ghost" type="button" id="memory-modal-return">Volver a la foto</button>
+          </section>
+        </div>
+      </article>
+    </div>
+  </div>
 </body>
 </html>

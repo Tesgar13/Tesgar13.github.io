@@ -1,6 +1,29 @@
 const fechaObjetivo = new Date("2029-01-11T23:59:00");
 const TIMELINE_KEY = "timelineEntries";
 const SONGS_KEY = "soundtrackEntries";
+const LETTERS = [
+  {
+    id: "letter1",
+    unlockAt: 3,
+    title: "La primera carta",
+    preview: "Se abre cuando la ruta ya empieza a sentirse vuestra.",
+    message: "Si has llegado hasta aqui, esta ruta ya no es una idea bonita: ya es una coleccion de momentos reales contigo. Cada parada suma, pero lo mejor sigue siendo que todas son a tu lado."
+  },
+  {
+    id: "letter2",
+    unlockAt: 6,
+    title: "La carta del medio",
+    preview: "A mitad del camino ya hay demasiadas cosas bonitas como para no dejarlo por escrito.",
+    message: "Ya llevamos suficientes recuerdos como para saber que repetir contigo nunca se siente repetido. Da igual el sitio si al final lo importante es seguir construyendo algo tan nuestro."
+  },
+  {
+    id: "letter3",
+    unlockAt: 10,
+    title: "La carta final",
+    preview: "Solo aparece cuando la ruta ya esta completa.",
+    message: "Terminamos esta ruta, pero no la historia. Lo bonito de llegar aqui es saber que siempre se puede empezar otra, con mas planes, mas fotos, mas canciones y mas nosotros."
+  }
+];
 
 const planes = [
   "plan1", "plan2", "plan3", "plan4", "plan5",
@@ -35,6 +58,14 @@ function formatearFecha(valor) {
   });
 }
 
+function mensajeDetrasDeRecuerdo(entry) {
+  if (entry.type === "plan") {
+    return `Esta parada ya forma parte de vuestra ruta. ${entry.description || "Un recuerdo guardado para volver a el cuando querais."}`;
+  }
+
+  return entry.description || "Un recuerdo pequeno, pero clavado para quedarse en vuestra historia.";
+}
+
 function leerStorageJson(key) {
   try {
     return JSON.parse(localStorage.getItem(key)) || [];
@@ -61,6 +92,17 @@ function obtenerCanciones() {
 
 function guardarCanciones(entries) {
   escribirStorageJson(SONGS_KEY, entries);
+}
+
+function barajar(array) {
+  const copia = [...array];
+
+  for (let i = copia.length - 1; i > 0; i -= 1) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [copia[i], copia[j]] = [copia[j], copia[i]];
+  }
+
+  return copia;
 }
 
 function leerArchivoComoDataUrl(file) {
@@ -226,27 +268,82 @@ function renderizarTimeline() {
 
   if (!entradas.length) {
     empty.hidden = false;
+    renderizarPortada([]);
     return;
   }
 
   empty.hidden = true;
+  renderizarPortada(entradas);
 
   entradas.forEach((entry) => {
     const item = document.createElement("article");
     item.className = "timeline-item";
+    item.dataset.entryId = entry.id;
     item.innerHTML = `
-      <div class="timeline-item__dot"></div>
-      <div class="timeline-item__content">
+      <div class="timeline-item__dot">${formatearFecha(entry.date)}</div>
+      <div class="timeline-item__content" role="button" tabindex="0" aria-label="Abrir recuerdo ${entry.title}">
         <p class="timeline-item__date">${formatearFecha(entry.date)}</p>
-        <h4>${entry.title}</h4>
-        <p>${entry.description || ""}</p>
         <div class="timeline-item__media">
           <img src="${entry.image}" alt="${entry.title}" />
         </div>
+        <h4>${entry.title}</h4>
+        <p class="timeline-item__caption">${entry.description || "Pulsa para ampliar este recuerdo."}</p>
         <span class="timeline-item__tag">${entry.type === "plan" ? "Plan completado" : "Recuerdo manual"}</span>
       </div>
     `;
+
+    const content = item.querySelector(".timeline-item__content");
+    content.addEventListener("click", () => abrirModalRecuerdo(entry.id));
+    content.addEventListener("keydown", (event) => {
+      if (event.key === "Enter" || event.key === " ") {
+        event.preventDefault();
+        abrirModalRecuerdo(entry.id);
+      }
+    });
+
     contenedor.appendChild(item);
+  });
+}
+
+function renderizarPortada(entradas) {
+  const board = document.getElementById("cover-board");
+
+  if (!board) {
+    return;
+  }
+
+  board.innerHTML = "";
+
+  if (!entradas.length) {
+    board.innerHTML = `
+      <div class="cover-board__empty">
+        <p>Todavia no hay fotos clavadas en vuestra historia. En cuanto guardes recuerdos, iran apareciendo aqui.</p>
+      </div>
+    `;
+    return;
+  }
+
+  const posiciones = [
+    { top: "8%", left: "8%", tilt: "-10deg" },
+    { top: "10%", left: "38%", tilt: "8deg" },
+    { top: "14%", left: "67%", tilt: "-6deg" },
+    { top: "44%", left: "12%", tilt: "6deg" },
+    { top: "48%", left: "41%", tilt: "-8deg" },
+    { top: "50%", left: "69%", tilt: "10deg" }
+  ];
+
+  barajar(entradas).slice(0, posiciones.length).forEach((entry, index) => {
+    const posicion = posiciones[index];
+    const foto = document.createElement("article");
+    foto.className = "cover-memory";
+    foto.style.top = posicion.top;
+    foto.style.left = posicion.left;
+    foto.style.setProperty("--tilt", posicion.tilt);
+    foto.innerHTML = `
+      <img src="${entry.image}" alt="${entry.title}" />
+      <p class="cover-memory__caption">${entry.title}</p>
+    `;
+    board.appendChild(foto);
   });
 }
 
@@ -260,6 +357,7 @@ function renderizarCanciones() {
 
   const canciones = obtenerCanciones();
   contenedor.innerHTML = "";
+  actualizarVinilo(canciones);
 
   if (!canciones.length) {
     empty.hidden = false;
@@ -272,6 +370,7 @@ function renderizarCanciones() {
     const item = document.createElement("article");
     item.className = "song-item";
     item.innerHTML = `
+      <div class="song-item__record" aria-hidden="true"></div>
       <div class="song-item__content">
         <p class="song-item__eyebrow">Banda sonora</p>
         <h4>${song.title}</h4>
@@ -282,6 +381,45 @@ function renderizarCanciones() {
     `;
     contenedor.appendChild(item);
   });
+}
+
+function actualizarVinilo(canciones) {
+  const vinylRecord = document.getElementById("vinyl-record");
+  const vinylTitle = document.getElementById("vinyl-title");
+  const vinylArtist = document.getElementById("vinyl-artist");
+  const copyTitle = document.getElementById("vinyl-copy-title");
+  const copyNote = document.getElementById("vinyl-copy-note");
+  const link = document.getElementById("vinyl-link");
+
+  if (!vinylRecord || !vinylTitle || !vinylArtist || !copyTitle || !copyNote || !link) {
+    return;
+  }
+
+  if (!canciones.length) {
+    vinylRecord.classList.remove("is-spinning");
+    vinylTitle.textContent = "Sin cancion";
+    vinylArtist.textContent = "Anade una para empezar vuestra banda sonora";
+    copyTitle.textContent = "Esperando vuestra primera cancion";
+    copyNote.textContent = "Cuando guardes una cancion, aparecera aqui como el disco principal de vuestra historia.";
+    link.hidden = true;
+    link.removeAttribute("href");
+    return;
+  }
+
+  const song = canciones[canciones.length - 1];
+  vinylRecord.classList.add("is-spinning");
+  vinylTitle.textContent = song.title;
+  vinylArtist.textContent = song.artist;
+  copyTitle.textContent = song.title;
+  copyNote.textContent = song.note || `${song.artist} ya forma parte de vuestra banda sonora.`;
+
+  if (song.link) {
+    link.hidden = false;
+    link.href = song.link;
+  } else {
+    link.hidden = true;
+    link.removeAttribute("href");
+  }
 }
 
 function activarPlan(planId) {
@@ -428,6 +566,167 @@ function actualizarEstados() {
   if (final) {
     final.hidden = completados !== planes.length;
   }
+
+  renderizarCartas(completados);
+}
+
+function renderizarCartas(completados) {
+  const contenedor = document.getElementById("letters-grid");
+
+  if (!contenedor) {
+    return;
+  }
+
+  contenedor.innerHTML = "";
+
+  LETTERS.forEach((letter) => {
+    const unlocked = completados >= letter.unlockAt;
+    const item = document.createElement("article");
+    item.className = `letter-card${unlocked ? "" : " letter-card--locked"}`;
+    item.innerHTML = `
+      <div class="letter-card__inner">
+        <section class="letter-card__face letter-card__face--front">
+          <div class="letter-card__seal">${unlocked ? "Ab" : "?"}</div>
+          <div>
+            <span class="${unlocked ? "letter-card__unlock" : "letter-card__status"}">
+              ${unlocked ? "Desbloqueada" : `Se abre con ${letter.unlockAt} planes`}
+            </span>
+            <h3 class="letter-card__title">${letter.title}</h3>
+            <p class="letter-card__text">${unlocked ? letter.preview : "Todavia esta cerrada. Seguid completando planes para abrirla."}</p>
+          </div>
+          <button class="activate-button letter-card__action" type="button" ${unlocked ? "" : "disabled"}>
+            ${unlocked ? "Abrir carta" : "Bloqueada"}
+          </button>
+        </section>
+        <section class="letter-card__face letter-card__face--back">
+          <div>
+            <span class="letter-card__unlock">Carta abierta</span>
+            <h3 class="letter-card__title">${letter.title}</h3>
+            <p class="letter-card__text">${letter.message}</p>
+          </div>
+          <button class="activate-button activate-button--ghost letter-card__action" type="button">Cerrar carta</button>
+        </section>
+      </div>
+    `;
+
+    if (unlocked) {
+      const buttons = item.querySelectorAll("button");
+      buttons.forEach((button) => {
+        button.addEventListener("click", () => {
+          item.classList.toggle("is-open");
+        });
+      });
+    }
+
+    contenedor.appendChild(item);
+  });
+}
+
+function abrirModalRecuerdo(entryId) {
+  const modal = document.getElementById("memory-modal");
+  const flip = document.getElementById("memory-flip");
+  const image = document.getElementById("memory-modal-image");
+  const date = document.getElementById("memory-modal-date");
+  const title = document.getElementById("memory-modal-title");
+  const description = document.getElementById("memory-modal-description");
+  const backTitle = document.getElementById("memory-modal-back-title");
+  const message = document.getElementById("memory-modal-message");
+  const entry = obtenerTimeline().find((item) => item.id === entryId);
+
+  if (!modal || !flip || !image || !date || !title || !description || !backTitle || !message || !entry) {
+    return;
+  }
+
+  flip.classList.remove("is-flipped");
+  image.src = entry.image;
+  image.alt = entry.title;
+  date.textContent = formatearFecha(entry.date);
+  title.textContent = entry.title;
+  description.textContent = entry.description || "Un recuerdo guardado para volver a este momento cuando querais.";
+  backTitle.textContent = entry.title;
+  message.textContent = mensajeDetrasDeRecuerdo(entry);
+  modal.hidden = false;
+  document.body.style.overflow = "hidden";
+}
+
+function cerrarModalRecuerdo() {
+  const modal = document.getElementById("memory-modal");
+  const flip = document.getElementById("memory-flip");
+
+  if (!modal || !flip) {
+    return;
+  }
+
+  flip.classList.remove("is-flipped");
+  modal.hidden = true;
+  document.body.style.overflow = "";
+}
+
+function prepararModalRecuerdo() {
+  const modal = document.getElementById("memory-modal");
+  const flip = document.getElementById("memory-flip");
+  const turn = document.getElementById("memory-modal-turn");
+  const back = document.getElementById("memory-modal-return");
+
+  if (!modal || !flip || !turn || !back) {
+    return;
+  }
+
+  document.querySelectorAll("[data-close-memory-modal]").forEach((element) => {
+    element.addEventListener("click", cerrarModalRecuerdo);
+  });
+
+  turn.addEventListener("click", () => {
+    flip.classList.add("is-flipped");
+  });
+
+  back.addEventListener("click", () => {
+    flip.classList.remove("is-flipped");
+  });
+
+  document.addEventListener("keydown", (event) => {
+    if (modal.hidden) {
+      return;
+    }
+
+    if (event.key === "Escape") {
+      cerrarModalRecuerdo();
+    }
+  });
+}
+
+function aplicarTema(tabId) {
+  document.body.classList.remove("theme-portada", "theme-comidas", "theme-recuerdos", "theme-musica");
+  document.body.classList.add(`theme-${tabId}`);
+}
+
+function activarTab(tabId) {
+  document.querySelectorAll("[data-tab-panel]").forEach((panel) => {
+    const activa = panel.dataset.tabPanel === tabId;
+    panel.hidden = !activa;
+    panel.classList.toggle("is-active", activa);
+  });
+
+  document.querySelectorAll(".tab-nav__button, [data-tab-target]").forEach((button) => {
+    if (!button.dataset.tabTarget) {
+      return;
+    }
+
+    button.classList.toggle("is-active", button.dataset.tabTarget === tabId && button.classList.contains("tab-nav__button"));
+  });
+
+  aplicarTema(tabId);
+  window.scrollTo({ top: 0, behavior: "smooth" });
+}
+
+function prepararTabs() {
+  document.querySelectorAll("[data-tab-target]").forEach((button) => {
+    button.addEventListener("click", () => {
+      activarTab(button.dataset.tabTarget);
+    });
+  });
+
+  activarTab("portada");
 }
 
 function prepararTarjetas() {
@@ -550,6 +849,8 @@ window.onload = function () {
   prepararTarjetas();
   prepararFormularioTimeline();
   prepararFormularioCanciones();
+  prepararModalRecuerdo();
+  prepararTabs();
   renderizarTimeline();
   renderizarCanciones();
   setInterval(actualizarCountdown, 1000);
