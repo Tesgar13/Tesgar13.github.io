@@ -1,6 +1,7 @@
 const fechaObjetivo = new Date("2029-01-11T23:59:00");
 const TIMELINE_KEY = "timelineEntries";
 const SONGS_KEY = "soundtrackEntries";
+const MOCK_SLOTS = 10;
 const LETTERS = [
   {
     id: "letter1",
@@ -263,17 +264,17 @@ function renderizarTimeline() {
     return;
   }
 
-  const entradas = obtenerTimeline().sort((a, b) => new Date(a.date) - new Date(b.date));
+  const entradas = obtenerTimeline().sort((a, b) => new Date(b.date) - new Date(a.date));
   contenedor.innerHTML = "";
 
   if (!entradas.length) {
     empty.hidden = false;
+    empty.textContent = "Aqui abajo ves la plantilla del corcho con 10 huecos para que te hagas una idea de como quedara.";
     renderizarPortada([]);
-    return;
+  } else {
+    empty.hidden = true;
+    renderizarPortada(entradas);
   }
-
-  empty.hidden = true;
-  renderizarPortada(entradas);
 
   entradas.forEach((entry) => {
     const item = document.createElement("article");
@@ -303,6 +304,22 @@ function renderizarTimeline() {
 
     contenedor.appendChild(item);
   });
+
+  for (let i = entradas.length; i < MOCK_SLOTS; i += 1) {
+    const placeholder = document.createElement("article");
+    placeholder.className = "timeline-item timeline-item--placeholder";
+    placeholder.innerHTML = `
+      <div class="timeline-item__dot">Espacio</div>
+      <div class="timeline-item__content" aria-hidden="true">
+        <p class="timeline-item__date">Fecha pendiente</p>
+        <div class="timeline-item__media timeline-item__media--placeholder"></div>
+        <h4>Recuerdo ${i + 1}</h4>
+        <p class="timeline-item__caption">Aqui ira una foto clavada en el corcho con su fecha y su mensaje.</p>
+        <span class="timeline-item__tag">Hueco reservado</span>
+      </div>
+    `;
+    contenedor.appendChild(placeholder);
+  }
 }
 
 function renderizarPortada(entradas) {
@@ -361,26 +378,50 @@ function renderizarCanciones() {
 
   if (!canciones.length) {
     empty.hidden = false;
-    return;
+    empty.textContent = "Aqui abajo ves la plantilla de 10 canciones para que puedas imaginar la coleccion terminada.";
+  } else {
+    empty.hidden = true;
   }
 
-  empty.hidden = true;
-
   canciones.forEach((song) => {
+    const spotifyLink = song.spotifyLink || song.link || "";
+    const appleLink = song.appleLink || "";
     const item = document.createElement("article");
     item.className = "song-item";
     item.innerHTML = `
-      <div class="song-item__record" aria-hidden="true"></div>
+      <div class="song-item__sleeve">
+        <div class="song-item__record" aria-hidden="true"></div>
+      </div>
       <div class="song-item__content">
-        <p class="song-item__eyebrow">Banda sonora</p>
+        <p class="song-item__eyebrow">En funda</p>
         <h4>${song.title}</h4>
         <p class="song-item__artist">${song.artist}</p>
         <p>${song.note || ""}</p>
-        ${song.link ? `<a class="song-item__link" href="${song.link}" target="_blank" rel="noopener noreferrer">Escuchar cancion</a>` : ""}
+        <div class="song-item__links">
+          ${spotifyLink ? `<a class="song-item__link" href="${spotifyLink}" target="_blank" rel="noopener noreferrer">Spotify</a>` : ""}
+          ${appleLink ? `<a class="song-item__link" href="${appleLink}" target="_blank" rel="noopener noreferrer">Apple Music</a>` : ""}
+        </div>
       </div>
     `;
     contenedor.appendChild(item);
   });
+
+  for (let i = canciones.length; i < MOCK_SLOTS; i += 1) {
+    const item = document.createElement("article");
+    item.className = "song-item song-item--placeholder";
+    item.innerHTML = `
+      <div class="song-item__sleeve">
+        <div class="song-item__record" aria-hidden="true"></div>
+      </div>
+      <div class="song-item__content">
+        <p class="song-item__eyebrow">Hueco ${i + 1}</p>
+        <h4>Titulo pendiente</h4>
+        <p class="song-item__artist">Artista pendiente</p>
+        <p>Aqui ira la nota que acompane a la cancion y explique por que se ha quedado con vosotros.</p>
+      </div>
+    `;
+    contenedor.appendChild(item);
+  }
 }
 
 function actualizarVinilo(canciones) {
@@ -389,9 +430,10 @@ function actualizarVinilo(canciones) {
   const vinylArtist = document.getElementById("vinyl-artist");
   const copyTitle = document.getElementById("vinyl-copy-title");
   const copyNote = document.getElementById("vinyl-copy-note");
-  const link = document.getElementById("vinyl-link");
+  const spotifyLink = document.getElementById("vinyl-link-spotify");
+  const appleLink = document.getElementById("vinyl-link-apple");
 
-  if (!vinylRecord || !vinylTitle || !vinylArtist || !copyTitle || !copyNote || !link) {
+  if (!vinylRecord || !vinylTitle || !vinylArtist || !copyTitle || !copyNote || !spotifyLink || !appleLink) {
     return;
   }
 
@@ -401,24 +443,36 @@ function actualizarVinilo(canciones) {
     vinylArtist.textContent = "Anade una para empezar vuestra banda sonora";
     copyTitle.textContent = "Esperando vuestra primera cancion";
     copyNote.textContent = "Cuando guardes una cancion, aparecera aqui como el disco principal de vuestra historia.";
-    link.hidden = true;
-    link.removeAttribute("href");
+    spotifyLink.hidden = true;
+    spotifyLink.removeAttribute("href");
+    appleLink.hidden = true;
+    appleLink.removeAttribute("href");
     return;
   }
 
   const song = canciones[canciones.length - 1];
+  const spotifyUrl = song.spotifyLink || song.link || "";
+  const appleUrl = song.appleLink || "";
   vinylRecord.classList.add("is-spinning");
   vinylTitle.textContent = song.title;
   vinylArtist.textContent = song.artist;
   copyTitle.textContent = song.title;
   copyNote.textContent = song.note || `${song.artist} ya forma parte de vuestra banda sonora.`;
 
-  if (song.link) {
-    link.hidden = false;
-    link.href = song.link;
+  if (spotifyUrl) {
+    spotifyLink.hidden = false;
+    spotifyLink.href = spotifyUrl;
   } else {
-    link.hidden = true;
-    link.removeAttribute("href");
+    spotifyLink.hidden = true;
+    spotifyLink.removeAttribute("href");
+  }
+
+  if (appleUrl) {
+    appleLink.hidden = false;
+    appleLink.href = appleUrl;
+  } else {
+    appleLink.hidden = true;
+    appleLink.removeAttribute("href");
   }
 }
 
@@ -804,6 +858,33 @@ function prepararFormularioTimeline() {
     form.reset();
     preview.hidden = true;
     previewImg.removeAttribute("src");
+
+    const shell = document.getElementById("timeline-form-shell");
+    const button = document.querySelector('[data-toggle-form="timeline-form-shell"]');
+    if (shell) {
+      shell.hidden = true;
+    }
+    if (button) {
+      button.textContent = "Anadir recuerdo";
+    }
+  });
+}
+
+function prepararTogglesDeFormulario() {
+  document.querySelectorAll("[data-toggle-form]").forEach((button) => {
+    button.addEventListener("click", () => {
+      const shell = document.getElementById(button.dataset.toggleForm);
+
+      if (!shell) {
+        return;
+      }
+
+      const abierto = !shell.hidden;
+      shell.hidden = abierto;
+      button.textContent = abierto
+        ? (button.dataset.toggleForm === "song-form-shell" ? "Anadir nueva cancion" : "Anadir recuerdo")
+        : "Cerrar";
+    });
   });
 }
 
@@ -819,7 +900,8 @@ function prepararFormularioCanciones() {
 
     const titleInput = document.getElementById("song-title");
     const artistInput = document.getElementById("song-artist");
-    const linkInput = document.getElementById("song-link");
+    const spotifyInput = document.getElementById("song-link-spotify");
+    const appleInput = document.getElementById("song-link-apple");
     const noteInput = document.getElementById("song-note");
 
     if (!titleInput.value.trim() || !artistInput.value.trim()) {
@@ -832,13 +914,23 @@ function prepararFormularioCanciones() {
       id: `song:${Date.now()}`,
       title: titleInput.value.trim(),
       artist: artistInput.value.trim(),
-      link: linkInput.value.trim(),
+      spotifyLink: spotifyInput.value.trim(),
+      appleLink: appleInput.value.trim(),
       note: noteInput.value.trim()
     });
 
     guardarCanciones(canciones);
     renderizarCanciones();
     form.reset();
+
+    const shell = document.getElementById("song-form-shell");
+    const button = document.querySelector('[data-toggle-form="song-form-shell"]');
+    if (shell) {
+      shell.hidden = true;
+    }
+    if (button) {
+      button.textContent = "Anadir nueva cancion";
+    }
   });
 }
 
@@ -849,6 +941,7 @@ window.onload = function () {
   prepararTarjetas();
   prepararFormularioTimeline();
   prepararFormularioCanciones();
+  prepararTogglesDeFormulario();
   prepararModalRecuerdo();
   prepararTabs();
   renderizarTimeline();

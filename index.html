@@ -448,6 +448,11 @@
 
         <div class="timeline-layout">
           <section class="timeline-form-card">
+            <div class="panel-action">
+              <p class="panel-action__eyebrow">Nuevo recuerdo</p>
+              <button class="timeline-form__button panel-action__button" type="button" data-toggle-form="timeline-form-shell">Anadir recuerdo</button>
+            </div>
+            <div class="form-shell" id="timeline-form-shell" hidden>
             <h3>Clavar un recuerdo nuevo</h3>
             <form id="timeline-form" class="timeline-form">
               <label class="field">
@@ -471,6 +476,7 @@
               </div>
               <button class="timeline-form__button" type="submit">Guardar en la linea del tiempo</button>
             </form>
+            </div>
           </section>
 
           <section class="timeline-card">
@@ -512,6 +518,11 @@
 
         <div class="timeline-layout">
           <section class="timeline-form-card">
+            <div class="panel-action">
+              <p class="panel-action__eyebrow">Nuevo tema</p>
+              <button class="timeline-form__button panel-action__button" type="button" data-toggle-form="song-form-shell">Anadir nueva cancion</button>
+            </div>
+            <div class="form-shell" id="song-form-shell" hidden>
             <h3>Guardar un nuevo tema</h3>
             <form id="song-form" class="timeline-form">
               <label class="field">
@@ -523,8 +534,12 @@
                 <input id="song-artist" type="text" maxlength="80" placeholder="Nombre del artista" required />
               </label>
               <label class="field">
-                <span>Enlace</span>
-                <input id="song-link" type="url" placeholder="https://open.spotify.com/..." />
+                <span>Spotify</span>
+                <input id="song-link-spotify" type="url" placeholder="https://open.spotify.com/..." />
+              </label>
+              <label class="field">
+                <span>Apple Music</span>
+                <input id="song-link-apple" type="url" placeholder="https://music.apple.com/..." />
               </label>
               <label class="field">
                 <span>Nota</span>
@@ -532,11 +547,14 @@
               </label>
               <button class="timeline-form__button" type="submit">Guardar cancion</button>
             </form>
+            </div>
           </section>
 
           <section class="timeline-card">
             <div class="vinyl-showcase" id="vinyl-showcase">
+              <div class="vinyl-cabinet__lid"></div>
               <div class="vinyl-player">
+                <div class="vinyl-player__plinth"></div>
                 <div class="vinyl-player__arm"></div>
                 <div class="vinyl-record" id="vinyl-record">
                   <div class="vinyl-record__grooves"></div>
@@ -550,13 +568,16 @@
                 <p class="vinyl-copy__eyebrow">Ahora girando</p>
                 <h3 id="vinyl-copy-title">Esperando vuestra primera cancion</h3>
                 <p id="vinyl-copy-note">Cuando guardes un tema, se quedara aqui como el disco que encabeza vuestra banda sonora.</p>
-                <a class="song-item__link" id="vinyl-link" href="#" target="_blank" rel="noopener noreferrer" hidden>Escuchar tema</a>
+                <div class="song-item__links" id="vinyl-links">
+                  <a class="song-item__link" id="vinyl-link-spotify" href="#" target="_blank" rel="noopener noreferrer" hidden>Spotify</a>
+                  <a class="song-item__link" id="vinyl-link-apple" href="#" target="_blank" rel="noopener noreferrer" hidden>Apple Music</a>
+                </div>
               </div>
             </div>
 
             <div class="timeline-card__header">
-              <h3>Temas guardados</h3>
-              <p>Una coleccion pequena de canciones que ya no suenan separadas de vuestra historia.</p>
+              <h3>Discos en sus fundas</h3>
+              <p>Los temas guardados aparecen abajo como si cada uno descansara en su funda, listos para volver a sonar.</p>
             </div>
             <div class="timeline-empty" id="songs-empty">
               Todavia no hay canciones guardadas en vuestra banda sonora.
