@@ -49,17 +49,31 @@
         <header class="hero hero--home">
           <div class="hero__overlay"></div>
           <div class="hero__content">
-            <p class="eyebrow">Que mejor plan que comer juntos</p>
-            <h1>Creemos recuerdos comiendo</h1>
+            <p class="eyebrow">esto es para ti</p>
+            <h1>Feliz cumpleanos, Naroa</h1>
             <p class="hero__text">
-              Durante estos 3 anos hemos creado innumerables recuerdos juntos.
-              Que te parece si en los proximos 3 recreamos algunos de ellos y seguimos sumando muchos mas?
+              por mil anos mas riendome contigo, cuidandote,
+              picandote un poco y teniendo la suerte de seguir siendo tu mejor amigo
             </p>
-
-            <div class="top-widgets">
+          </div>
+        </header>
+        <section class="cover-panel">
+          <div class="cover-panel__copy">
+            <p class="eyebrow eyebrow--soft">un regalo pequeñito</p>
+            <h2>He querido guardarte un trocito de todo lo nuestro aqui</h2>
+            <p>
+              Tienes la ruta de comidas, el corcho de recuerdos y la musica que se ha quedado con nosotros.
+              No es nada enorme, pero si muy tuyo, muy nuestro y muy hecho con carino.
+            </p>
+            <div class="cover-panel__actions">
+              <button class="activate-button" type="button" data-tab-target="comidas">Entrar en la mesa</button>
+              <button class="activate-button activate-button--ghost" type="button" data-tab-target="recuerdos">Ir al corcho</button>
+              <button class="activate-button activate-button--ghost" type="button" data-tab-target="musica">Poner un disco</button>
+            </div>
+            <div class="top-widgets top-widgets--cover">
               <div class="widget">
                 <span class="widget__label">Planes activados</span>
-                <span class="widget__value" id="contador-planes">0 / 10</span>
+                <span class="widget__value" id="contador-planes">0 / 9</span>
               </div>
 
               <div class="widget">
@@ -93,29 +107,14 @@
               </div>
             </div>
           </div>
-        </header>
-
-        <section class="cover-panel">
-          <div class="cover-panel__copy">
-            <p class="eyebrow eyebrow--soft">Portada viva</p>
-            <h2>Una portada que cambia con vosotros</h2>
-            <p>
-              Desde aqui entras en la mesa, en el corcho y en la banda sonora.
-              Las fotos de vuestra linea del tiempo se recolocan cada vez que vuelves, como una portada que nunca se queda quieta.
-            </p>
-            <div class="cover-panel__actions">
-              <button class="activate-button" type="button" data-tab-target="comidas">Entrar en la mesa</button>
-              <button class="activate-button activate-button--ghost" type="button" data-tab-target="recuerdos">Ir al corcho</button>
-              <button class="activate-button activate-button--ghost" type="button" data-tab-target="musica">Poner un disco</button>
-            </div>
-          </div>
           <div class="cover-board" id="cover-board"></div>
         </section>
       </section>
 
       <section class="tab-panel tab-panel--comidas" id="tab-comidas" data-tab-panel="comidas" hidden>
         <section class="intro intro--comidas">
-        <h2>La mesa donde vuelven nuestros planes</h2>
+        <p class="eyebrow eyebrow--soft">Comidas</p>
+        <h2>Creemos recuerdos juntos comiendo</h2>
         <p>
           Aqui estan las paradas de vuestra ruta: antojos, sitios repetidos, clasicos y alguna sorpresa.
           Cada tarjeta pide volver, vivirla otra vez y dejar una foto para que ese momento no se quede solo en memoria.
@@ -395,35 +394,6 @@
           </div>
         </article>
 
-        <article class="card" data-plan="plan10" data-plan-title="Cierre perfecto">
-          <div class="card__inner">
-            <div class="card__face card__face--front">
-              <img src="img/Marias.jpg" alt="Plan 10" class="card__image" />
-              <div class="card__content">
-                <p class="card__number">Plan 10</p>
-                <h3>Cierre perfecto</h3>
-                <p>La ultima tarjeta para rematar la ruta como se merece.</p>
-                <span class="card__status" id="estado-plan10">Pendiente</span>
-              </div>
-            </div>
-
-            <div class="card__face card__face--back">
-              <div class="card__details">
-                <p class="card__number">Plan 10</p>
-                <h3>Cierre perfecto</h3>
-                <p class="card__detail-text">
-                  La ultima parada tiene que sentirse especial: una cita para cerrar esta ruta y abrir la siguiente.
-                </p>
-                <p class="card__detail-meta"><strong>Plan:</strong> Elegir un sitio que merezca el broche final.</p>
-                <p id="mensaje-plan10" class="plan-message">Para completarlo, sube una foto y guarda el recuerdo.</p>
-                <div class="card__actions">
-                  <button id="boton-plan10" class="activate-button" type="button" onclick="activarPlan('plan10')">Completar con foto</button>
-                  <button class="card__close" type="button" data-close-card>Cerrar</button>
-                </div>
-              </div>
-            </div>
-          </div>
-        </article>
         </section>
 
         <section class="final-message" id="mensaje-final" hidden>
@@ -619,3 +589,4 @@
   </div>
 </body>
 </html>
+

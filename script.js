@@ -28,7 +28,7 @@ const LETTERS = [
 
 const planes = [
   "plan1", "plan2", "plan3", "plan4", "plan5",
-  "plan6", "plan7", "plan8", "plan9", "plan10"
+  "plan6", "plan7", "plan8", "plan9"
 ];
 
 function claveEstado(planId) {

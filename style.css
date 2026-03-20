@@ -436,6 +436,30 @@ body::before {
 
 .tab-panel--portada .hero {
   padding-top: 82px;
+  min-height: 72vh;
+  display: flex;
+  align-items: center;
+}
+
+.hero--home .hero__content {
+  max-width: 980px;
+  text-align: center;
+}
+
+.hero--home h1 {
+  max-width: none;
+  font-size: clamp(4rem, 8.5vw, 7rem);
+  line-height: 0.98;
+  letter-spacing: -0.05em;
+}
+
+.hero--home .hero__text {
+  max-width: 820px;
+  margin: 10px auto 0;
+  font-size: clamp(1.08rem, 2vw, 1.42rem);
+  line-height: 1.9;
+  letter-spacing: 0.01em;
+  color: rgba(247, 251, 255, 0.92);
 }
 
 .cover-panel {
@@ -451,6 +475,28 @@ body::before {
   isolation: isolate;
 }
 
+.top-widgets--cover {
+  grid-template-columns: 1fr;
+  margin-top: 26px;
+}
+
+.top-widgets--cover .widget {
+  color: var(--ink);
+  background: rgba(255, 255, 255, 0.82);
+  border-color: rgba(111, 144, 214, 0.12);
+}
+
+.top-widgets--cover .widget__label,
+.top-widgets--cover .countdown__item small,
+.top-widgets--cover .countdown__date {
+  color: var(--muted);
+}
+
+.top-widgets--cover .countdown__item {
+  background: rgba(223, 232, 251, 0.42);
+  border-color: rgba(111, 144, 214, 0.12);
+}
+
 .cover-panel::before {
   content: "";
   position: absolute;
@@ -464,8 +510,8 @@ body::before {
 .cover-panel__copy h2 {
   margin: 0 0 12px;
   font-family: "Cormorant Garamond", serif;
-  font-size: clamp(2.7rem, 4vw, 4.2rem);
-  line-height: 0.94;
+  font-size: clamp(2.9rem, 4.2vw, 4.4rem);
+  line-height: 0.98;
   letter-spacing: -0.04em;
 }
 
@@ -473,6 +519,12 @@ body::before {
   line-height: 1.85;
   color: var(--muted);
   max-width: 34rem;
+}
+
+.hero--home .eyebrow,
+.cover-panel__copy .eyebrow {
+  text-transform: none;
+  letter-spacing: 0.06em;
 }
 
 .cover-panel__actions {
@@ -1705,12 +1757,357 @@ body::before {
   }
 }
 
+/* Humanized full-screen redesign for Recuerdos and Musica */
+.tab-panel--recuerdos,
+.tab-panel--musica {
+  width: min(1440px, calc(100vw - 32px));
+  margin-left: calc(50% - min(1440px, calc(100vw - 32px)) / 2);
+  margin-right: auto;
+  padding: 18px 0 40px;
+}
+
+.tab-panel--recuerdos .timeline-section,
+.tab-panel--musica .soundtrack-section {
+  min-height: calc(100vh - 120px);
+  padding: 28px;
+  border-radius: 56px 42px 60px 34px / 40px 58px 42px 52px;
+  position: relative;
+  overflow: hidden;
+}
+
+.tab-panel--recuerdos .timeline-section {
+  background:
+    radial-gradient(circle at 8% 14%, rgba(255, 238, 209, 0.32), transparent 16%),
+    radial-gradient(circle at 90% 20%, rgba(130, 80, 46, 0.1), transparent 18%),
+    linear-gradient(135deg, rgba(173, 120, 77, 0.14), transparent 24%),
+    linear-gradient(180deg, #b68457 0%, #a9774f 38%, #926744 100%);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 241, 220, 0.26),
+    0 34px 70px rgba(83, 50, 27, 0.22);
+}
+
+.tab-panel--recuerdos .timeline-section::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(circle, rgba(255, 232, 204, 0.08) 0 1px, transparent 1px),
+    radial-gradient(circle at 30% 20%, rgba(120, 76, 41, 0.12), transparent 22%),
+    radial-gradient(circle at 70% 80%, rgba(255, 230, 198, 0.08), transparent 18%);
+  background-size: 14px 14px, auto, auto;
+  mix-blend-mode: multiply;
+  pointer-events: none;
+}
+
+.tab-panel--recuerdos .timeline-layout {
+  grid-template-columns: minmax(300px, 350px) 1fr;
+  gap: 30px;
+  align-items: start;
+}
+
+.tab-panel--recuerdos .timeline-form-card,
+.tab-panel--recuerdos .timeline-card {
+  background: transparent;
+  border: 0;
+  box-shadow: none;
+  padding: 0;
+}
+
+.tab-panel--recuerdos .timeline-form-card::before,
+.tab-panel--recuerdos .timeline-card::before {
+  display: none;
+}
+
+.tab-panel--recuerdos .panel-action,
+.tab-panel--recuerdos .form-shell {
+  position: relative;
+  background: linear-gradient(180deg, rgba(255, 251, 245, 0.96), rgba(247, 238, 226, 0.98));
+  border-radius: 34px 30px 38px 26px / 28px 36px 30px 34px;
+  padding: 24px;
+  box-shadow:
+    0 18px 34px rgba(92, 57, 29, 0.2),
+    inset 0 1px 0 rgba(255, 255, 255, 0.44);
+}
+
+.tab-panel--recuerdos .panel-action::before,
+.tab-panel--recuerdos .form-shell::before {
+  content: "";
+  position: absolute;
+  top: -10px;
+  left: 28px;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 30% 30%, #f4c0c5, #c7454f 72%);
+  box-shadow: 0 8px 16px rgba(199, 69, 79, 0.26);
+}
+
+.tab-panel--recuerdos .form-shell {
+  margin-top: 18px;
+  transform: rotate(-1deg);
+  border-top: 0;
+}
+
+.tab-panel--recuerdos .timeline-card__header {
+  max-width: 540px;
+  margin: 0 0 18px 24px;
+  padding: 22px 26px;
+  background: rgba(255, 248, 238, 0.9);
+  border-radius: 30px 38px 28px 36px / 28px 32px 40px 30px;
+  box-shadow: 0 18px 32px rgba(86, 52, 29, 0.18);
+}
+
+.tab-panel--recuerdos .timeline-empty {
+  background: rgba(255, 246, 233, 0.82);
+  color: #6e4d35;
+  margin: 0 24px 18px;
+}
+
+.tab-panel--recuerdos .timeline {
+  padding: 26px 18px 34px;
+}
+
+.tab-panel--recuerdos .timeline::before {
+  left: 118px;
+  width: 6px;
+  background: linear-gradient(180deg, rgba(167, 34, 49, 0.7), rgba(131, 28, 40, 0.95));
+  box-shadow: none;
+}
+
+.tab-panel--recuerdos .timeline-item__dot {
+  background: rgba(255, 247, 236, 0.96);
+  border-radius: 24px 18px 22px 20px / 18px 22px 20px 24px;
+}
+
+.tab-panel--recuerdos .timeline-item__content {
+  width: min(100%, 410px);
+  border-radius: 10px 10px 18px 12px / 10px 10px 26px 14px;
+  box-shadow: 0 26px 42px rgba(84, 52, 31, 0.18);
+}
+
+.tab-panel--recuerdos .timeline-item:nth-child(odd) .timeline-item__content {
+  transform: rotate(-4deg);
+}
+
+.tab-panel--recuerdos .timeline-item:nth-child(even) .timeline-item__content {
+  transform: rotate(3.5deg);
+}
+
+.tab-panel--recuerdos .timeline-item:hover .timeline-item__content {
+  transform: translateY(-6px) rotate(0deg) scale(1.03);
+}
+
+.tab-panel--recuerdos .letters-section {
+  margin-top: 28px;
+  padding: 0 12px;
+}
+
+.tab-panel--recuerdos .letters-grid {
+  grid-template-columns: repeat(auto-fit, minmax(290px, 1fr));
+}
+
+.tab-panel--musica .soundtrack-section {
+  background:
+    radial-gradient(circle at 14% 16%, rgba(255, 221, 188, 0.12), transparent 18%),
+    radial-gradient(circle at 90% 10%, rgba(255, 243, 228, 0.08), transparent 16%),
+    linear-gradient(180deg, #24160f 0%, #2f1d14 38%, #1f1410 100%);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 237, 218, 0.08),
+    0 34px 72px rgba(16, 7, 4, 0.34);
+}
+
+.tab-panel--musica .soundtrack-section::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(circle, rgba(255, 243, 227, 0.04) 0 1px, transparent 1px),
+    linear-gradient(135deg, rgba(255, 209, 167, 0.06), transparent 34%);
+  background-size: 18px 18px, auto;
+  pointer-events: none;
+}
+
+.tab-panel--musica .timeline-layout {
+  grid-template-columns: minmax(300px, 360px) 1fr;
+  gap: 34px;
+}
+
+.tab-panel--musica .timeline-form-card,
+.tab-panel--musica .timeline-card {
+  background: transparent;
+  border: 0;
+  box-shadow: none;
+  padding: 0;
+}
+
+.tab-panel--musica .timeline-form-card::before,
+.tab-panel--musica .timeline-card::before {
+  display: none;
+}
+
+.tab-panel--musica .panel-action,
+.tab-panel--musica .form-shell {
+  background:
+    linear-gradient(180deg, rgba(248, 228, 207, 0.96), rgba(237, 211, 187, 0.98));
+  color: #4a2d1d;
+  border-radius: 40px 28px 42px 26px / 30px 42px 30px 40px;
+  padding: 24px;
+  box-shadow: 0 18px 34px rgba(19, 8, 4, 0.24);
+}
+
+.tab-panel--musica .form-shell {
+  margin-top: 16px;
+  border-top: 0;
+}
+
+.tab-panel--musica .field span {
+  color: #6d452f;
+}
+
+.tab-panel--musica .field input,
+.tab-panel--musica .field textarea {
+  background: rgba(255, 252, 248, 0.94);
+  border-color: rgba(126, 82, 51, 0.18);
+}
+
+.tab-panel--musica .timeline-form__button,
+.tab-panel--musica .activate-button {
+  background: linear-gradient(135deg, #8e5735, #6f4328);
+  box-shadow: 0 16px 28px rgba(41, 19, 10, 0.24);
+}
+
+.tab-panel--musica .vinyl-showcase {
+  min-height: 68vh;
+  grid-template-columns: minmax(320px, 480px) 1fr;
+  padding: 34px;
+  border-radius: 64px 38px 58px 34px / 44px 60px 36px 54px;
+  background:
+    radial-gradient(circle at top left, rgba(255, 223, 188, 0.12), transparent 26%),
+    linear-gradient(180deg, #7a4d31 0%, #603c28 52%, #4a2f21 100%);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 234, 213, 0.14),
+    inset 0 -22px 42px rgba(51, 28, 17, 0.26),
+    0 28px 56px rgba(0, 0, 0, 0.24);
+}
+
+.tab-panel--musica .vinyl-cabinet__lid {
+  inset: 20px 20px auto;
+  height: 30px;
+  border-radius: 20px 20px 10px 10px;
+  background: linear-gradient(180deg, rgba(255, 233, 210, 0.14), rgba(72, 41, 24, 0.2));
+}
+
+.tab-panel--musica .vinyl-player {
+  min-height: 420px;
+  border-radius: 54px 38px 42px 32px / 40px 48px 34px 42px;
+  background:
+    radial-gradient(circle at top left, rgba(255, 238, 220, 0.08), transparent 24%),
+    linear-gradient(135deg, #8a5b3b, #6e472f 54%, #553628);
+}
+
+.tab-panel--musica .vinyl-player__plinth {
+  inset: 22px;
+  border-radius: 36px 30px 34px 28px / 30px 36px 26px 34px;
+  background:
+    radial-gradient(circle at top left, rgba(255, 243, 230, 0.14), transparent 24%),
+    linear-gradient(135deg, #6a4129, #845437);
+}
+
+.tab-panel--musica .vinyl-player__arm {
+  top: 64px;
+  right: 52px;
+  width: 152px;
+  height: 12px;
+  background: linear-gradient(90deg, #cbb7a0, #e7d7c4);
+  transform: rotate(28deg);
+}
+
+.tab-panel--musica .vinyl-record {
+  width: min(100%, 300px);
+  box-shadow:
+    0 30px 46px rgba(14, 7, 4, 0.36),
+    inset 0 0 0 1px rgba(255, 255, 255, 0.04);
+}
+
+.tab-panel--musica .vinyl-record__label {
+  width: 114px;
+  height: 114px;
+  background: radial-gradient(circle at top, #e7c9aa, #c98754);
+  box-shadow: inset 0 0 0 10px rgba(255, 243, 228, 0.34);
+}
+
+.tab-panel--musica .vinyl-copy {
+  align-self: stretch;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: 24px 12px 8px;
+}
+
+.tab-panel--musica .vinyl-copy h3 {
+  font-size: clamp(2.8rem, 5vw, 4.5rem);
+}
+
+.tab-panel--musica .songs-list {
+  grid-template-columns: repeat(auto-fit, minmax(270px, 1fr));
+  gap: 22px;
+}
+
+.tab-panel--musica .song-item {
+  grid-template-columns: 1fr;
+  gap: 18px;
+  padding: 24px;
+  border-radius: 28px 24px 34px 20px / 24px 30px 22px 34px;
+  background: linear-gradient(180deg, rgba(249, 236, 221, 0.98), rgba(236, 214, 190, 0.98));
+  box-shadow: 0 18px 34px rgba(15, 7, 4, 0.2);
+}
+
+.tab-panel--musica .song-item__sleeve {
+  width: 160px;
+  height: 160px;
+  justify-self: center;
+  border-radius: 18px 14px 22px 12px / 14px 20px 14px 22px;
+  background: linear-gradient(135deg, #70462e, #4c2f21);
+}
+
+.tab-panel--musica .song-item__record {
+  width: 124px;
+  height: 124px;
+  margin-top: 6px;
+}
+
+.tab-panel--musica .song-item__content h4 {
+  font-size: 2rem;
+}
+
+.tab-panel--musica .timeline-card__header,
+.tab-panel--musica .timeline-empty {
+  max-width: 780px;
+  margin-left: 12px;
+}
+
 @media (max-width: 980px) {
   .top-widgets,
   .cover-panel,
   .timeline-layout,
   .vinyl-showcase {
     grid-template-columns: 1fr;
+  }
+
+  .tab-panel--recuerdos,
+  .tab-panel--musica {
+    width: calc(100vw - 20px);
+    margin-left: 10px;
+  }
+
+  .tab-panel--recuerdos .timeline-section,
+  .tab-panel--musica .soundtrack-section {
+    padding: 22px;
+    border-radius: 34px;
+  }
+
+  .tab-panel--musica .vinyl-showcase {
+    min-height: auto;
   }
 }
 
@@ -1771,6 +2168,17 @@ body::before {
     left: 18px;
   }
 
+  .tab-panel--recuerdos .timeline-layout,
+  .tab-panel--musica .timeline-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .tab-panel--recuerdos .timeline-card__header,
+  .tab-panel--musica .timeline-card__header,
+  .tab-panel--musica .timeline-empty {
+    margin-left: 0;
+  }
+
   .timeline-item {
     grid-template-columns: 1fr;
     gap: 12px;
@@ -1803,6 +2211,14 @@ body::before {
 
   .vinyl-showcase {
     padding: 18px;
+  }
+
+  .tab-panel--musica .vinyl-player {
+    min-height: 320px;
+  }
+
+  .tab-panel--musica .song-item {
+    grid-template-columns: 1fr;
   }
 
   .memory-flip__inner {
