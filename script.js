@@ -355,6 +355,126 @@ function guardarCanciones(entries) {
   escribirStorageJson(SONGS_KEY, entries);
 }
 
+async function guardarCancionEnFirestore(song) {
+  if (!window.firebaseDb || !window.firebaseFns) {
+    return;
+  }
+
+  const db = window.firebaseDb;
+  const { collection, addDoc } = window.firebaseFns;
+
+  await addDoc(collection(db, "songs"), {
+    songId: song.id,
+    title: song.title || "",
+    artist: song.artist || "",
+    spotifyLink: song.spotifyLink || song.link || "",
+    appleLink: song.appleLink || "",
+    note: song.note || "",
+    createdAt: Date.now()
+  });
+}
+
+async function cargarCancionesFirestore() {
+  if (!window.firebaseDb || !window.firebaseFns) {
+    return;
+  }
+
+  const db = window.firebaseDb;
+  const { collection, getDocs, query, orderBy } = window.firebaseFns;
+
+  try {
+    const snapshot = await getDocs(query(collection(db, "songs"), orderBy("createdAt", "desc")));
+    const locales = obtenerCanciones();
+    const porId = new Map(locales.map((song) => [song.id, song]));
+
+    snapshot.forEach((doc) => {
+      const data = doc.data();
+      const songId = data.songId || `song:${doc.id}`;
+      const existente = porId.get(songId) || {};
+      const existenteCreatedAt = Number(existente.createdAt || 0);
+      const actualCreatedAt = Number(data.createdAt || 0);
+
+      if (existente.id && existenteCreatedAt > actualCreatedAt) {
+        return;
+      }
+
+      porId.set(songId, {
+        id: songId,
+        title: data.title || "",
+        artist: data.artist || "",
+        spotifyLink: data.spotifyLink || "",
+        appleLink: data.appleLink || "",
+        note: data.note || "",
+        createdAt: actualCreatedAt
+      });
+    });
+
+    guardarCanciones(Array.from(porId.values()));
+  } catch (error) {
+    console.error("Error cargando canciones:", error);
+  }
+}
+
+async function guardarEstadoPlanEnFirestore(planId, status, extra = {}) {
+  if (!window.firebaseDb || !window.firebaseFns) {
+    return;
+  }
+
+  const db = window.firebaseDb;
+  const { collection, addDoc } = window.firebaseFns;
+
+  await addDoc(collection(db, "planStates"), {
+    planId,
+    status,
+    photoUrl: extra.photoUrl || "",
+    date: extra.date || "",
+    createdAt: Date.now()
+  });
+}
+
+async function cargarEstadosPlanesFirestore() {
+  if (!window.firebaseDb || !window.firebaseFns) {
+    return;
+  }
+
+  const db = window.firebaseDb;
+  const { collection, getDocs, query, orderBy } = window.firebaseFns;
+
+  try {
+    const snapshot = await getDocs(query(collection(db, "planStates"), orderBy("createdAt", "desc")));
+    const latestByPlan = new Map();
+
+    snapshot.forEach((doc) => {
+      const data = doc.data();
+
+      if (!data.planId || latestByPlan.has(data.planId)) {
+        return;
+      }
+
+      latestByPlan.set(data.planId, data);
+    });
+
+    latestByPlan.forEach((data, planId) => {
+      if (data.status === "completado") {
+        localStorage.setItem(claveEstado(planId), "completado");
+        if (data.photoUrl) {
+          localStorage.setItem(claveFoto(planId), data.photoUrl);
+        }
+        if (data.date) {
+          localStorage.setItem(claveFecha(planId), data.date);
+        }
+        return;
+      }
+
+      if (data.status === "activado" && localStorage.getItem(claveEstado(planId)) !== "completado") {
+        localStorage.setItem(claveEstado(planId), "activado");
+      }
+    });
+  } catch (error) {
+    console.error("Error cargando estados de planes:", error);
+  }
+}
+
 function limpiarPlanesActivadosDePrueba() {
   if (localStorage.getItem(DEBUG_PLAN_RESET_KEY) === "true") {
     return;
@@ -876,6 +996,9 @@ function activarPlan(planId) {
   }
 
   localStorage.setItem(claveEstado(planId), "activado");
+  guardarEstadoPlanEnFirestore(planId, "activado").catch((error) => {
+    console.error("No se pudo sincronizar la activacion del plan:", error);
+  });
   actualizarEstados();
 }
 
@@ -931,6 +1054,7 @@ async function completarPlan(planId) {
 
     crearEntradaPlan(planId, titulo, fecha, imageUrl);
     await guardarRecuerdoEnFirestore(entry, foto.name);
+    await guardarEstadoPlanEnFirestore(planId, "completado", { photoUrl: imageUrl, date: fecha });
     actualizarEstados();
     renderizarTimeline();
   } catch (error) {
@@ -1443,7 +1567,7 @@ function prepararFormularioCanciones() {
     return;
   }
 
-  form.addEventListener("submit", (event) => {
+  form.addEventListener("submit", async (event) => {
     event.preventDefault();
 
     const titleInput = document.getElementById("song-title");
@@ -1458,16 +1582,18 @@ function prepararFormularioCanciones() {
     }
 
     const canciones = obtenerCanciones();
-    canciones.push({
+    const nuevaCancion = {
       id: `song:${Date.now()}`,
       title: titleInput.value.trim(),
       artist: artistInput.value.trim(),
       spotifyLink: spotifyInput.value.trim(),
       appleLink: appleInput.value.trim(),
       note: noteInput.value.trim()
-    });
+    };
+    canciones.push(nuevaCancion);
 
     guardarCanciones(canciones);
+    await guardarCancionEnFirestore(nuevaCancion);
     renderizarCanciones();
     form.reset();
 
@@ -1496,7 +1622,9 @@ window.onload = async function () {
   prepararTocadiscos();
   await esperarAuthFirebase();
   await cargarAssetsDesdeStorage();
+  await cargarEstadosPlanesFirestore();
   await cargarRecuerdosFirestore();
+  await cargarCancionesFirestore();
   actualizarEstados();
   renderizarTimeline();
   renderizarCanciones();
