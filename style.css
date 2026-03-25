@@ -1375,9 +1375,9 @@ body.card-overlay-open {
 .timeline-item__content {
   position: relative;
   width: min(100%, 370px);
-  padding: 18px 18px 22px;
+  padding: 18px 18px 26px;
   background: #fff;
-  border-radius: 6px;
+  border-radius: 10px;
   border: 1px solid rgba(28, 36, 58, 0.08);
   box-shadow: 0 26px 34px rgba(48, 63, 99, 0.14);
   cursor: pointer;
@@ -1439,11 +1439,12 @@ body.card-overlay-open {
 }
 
 .timeline-item__note {
-  margin: 12px 4px 8px;
+  margin: 16px 4px 6px;
   font-family: "Caveat", "Cormorant Garamond", serif;
-  font-size: clamp(1.8rem, 3vw, 2.2rem);
-  line-height: 1;
-  color: #2f436b;
+  font-size: clamp(2rem, 3vw, 2.5rem);
+  line-height: 1.02;
+  color: #4a3a2d;
+  text-align: center;
 }
 
 .timeline-item p {
@@ -1451,23 +1452,34 @@ body.card-overlay-open {
 }
 
 .timeline-item__media {
-  margin-bottom: 16px;
+  margin-bottom: 0;
   border-radius: 2px;
-  background: #faf6f0;
+  background: #f7f1e8;
+  padding: 10px;
+  min-height: 280px;
+  display: grid;
+  place-items: center;
+  border: 1px solid rgba(74, 53, 39, 0.08);
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.7);
 }
 
 .timeline-item__media img {
   display: block;
-  width: 100%;
-  height: 248px;
-  object-fit: cover;
+  width: auto;
+  height: auto;
+  max-width: 100%;
+  max-height: 360px;
+  object-fit: contain;
+  border-radius: 2px;
 }
 
 .timeline-item__caption {
   padding: 0 4px;
-  font-size: 1rem;
-  line-height: 1.75;
-  color: #4a597b;
+  margin-top: 8px;
+  font-size: 0.98rem;
+  line-height: 1.65;
+  color: #6e5a48;
+  text-align: center;
 }
 
 .timeline-item__tag {
@@ -1915,7 +1927,7 @@ body.card-overlay-open {
 .memory-modal__dialog {
   position: relative;
   z-index: 1;
-  width: min(96vw, 1040px);
+  width: min(96vw, 860px);
 }
 
 .memory-modal__close {
@@ -1943,7 +1955,7 @@ body.card-overlay-open {
 
 .memory-flip__inner {
   position: relative;
-  min-height: min(82vh, 860px);
+  min-height: min(84vh, 920px);
   transform-style: preserve-3d;
   transition: transform 0.9s cubic-bezier(0.22, 1, 0.36, 1);
 }
@@ -1965,14 +1977,16 @@ body.card-overlay-open {
 }
 
 .memory-flip__face--front {
-  background: linear-gradient(180deg, #fff, #f8fbff);
+  align-items: center;
+  justify-content: center;
+  background:
+    radial-gradient(circle at top, rgba(255, 255, 255, 0.94), rgba(243, 235, 223, 0.98)),
+    linear-gradient(180deg, #fffdf9, #f3eadf);
 }
 
 .memory-flip__face--back {
   transform: rotateY(180deg);
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
+  justify-content: space-between;
   background: linear-gradient(180deg, rgba(255, 250, 243, 0.98), rgba(248, 241, 231, 0.98));
 }
 
@@ -1986,31 +2000,53 @@ body.card-overlay-open {
   color: #9c5f69;
 }
 
+.memory-polaroid {
+  width: min(100%, 560px);
+  background: #fff;
+  padding: 18px 18px 28px;
+  border-radius: 10px;
+  box-shadow:
+    0 24px 42px rgba(58, 34, 24, 0.2),
+    0 2px 0 rgba(255, 255, 255, 0.8) inset;
+  transform: rotate(-1.2deg);
+}
+
 .memory-flip__media {
-  flex: 1;
-  min-height: 0;
+  width: 100%;
   overflow: hidden;
-  border-radius: 24px;
+  border-radius: 2px;
   display: grid;
   place-items: center;
-  padding: 20px;
-  background:
-    linear-gradient(180deg, rgba(246, 241, 233, 0.98), rgba(238, 229, 216, 0.98));
+  padding: 10px;
+  min-height: min(62vh, 620px);
+  background: #f4efe8;
+  border: 1px solid rgba(69, 43, 29, 0.08);
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.6);
 }
 
 .memory-flip__media img {
   display: block;
-  width: 100%;
-  max-height: 100%;
-  min-height: 0;
+  width: auto;
+  height: auto;
+  max-width: 100%;
+  max-height: min(58vh, 580px);
   object-fit: contain;
+  border-radius: 2px;
+  box-shadow: 0 8px 20px rgba(45, 27, 16, 0.1);
 }
 
-.memory-flip h3 {
+.memory-polaroid__caption {
+  padding: 18px 10px 0;
+  text-align: center;
+  min-height: 88px;
+}
+
+.memory-polaroid__caption h3 {
   margin: 0;
-  font-family: "Cormorant Garamond", serif;
-  font-size: 2.6rem;
-  color: #22314d;
+  font-family: "Caveat", "Cormorant Garamond", serif;
+  font-size: clamp(2.2rem, 4vw, 3.1rem);
+  line-height: 1.04;
+  color: #42362b;
 }
 
 .memory-flip p {
@@ -2018,9 +2054,18 @@ body.card-overlay-open {
   line-height: 1.8;
 }
 
-.memory-flip__copy {
+.memory-note {
   display: grid;
-  gap: 14px;
+  gap: 18px;
+  padding: 6px 6px 0;
+}
+
+.memory-note__date {
+  margin: 0;
+  font-family: "Caveat", "Cormorant Garamond", serif;
+  font-size: clamp(2rem, 3.6vw, 2.8rem);
+  line-height: 1;
+  color: #7d4e59;
 }
 
 .memory-flip__field {
@@ -2048,10 +2093,28 @@ body.card-overlay-open {
   resize: vertical;
 }
 
+.memory-flip__field--plain input,
+.memory-flip__field--plain textarea {
+  border: 0;
+  border-radius: 0;
+  padding: 0;
+  background: transparent;
+  box-shadow: none;
+  font-family: "Caveat", "Cormorant Garamond", serif;
+  color: #4a3426;
+  resize: none;
+}
+
 .memory-flip__field input {
   font-family: "Caveat", "Cormorant Garamond", serif;
-  font-size: 1.9rem;
-  line-height: 1;
+  font-size: 2.4rem;
+  line-height: 1.04;
+}
+
+.memory-flip__field--plain textarea {
+  font-size: 2rem;
+  line-height: 1.22;
+  min-height: 210px;
 }
 
 .memory-flip__saved {
@@ -2062,9 +2125,13 @@ body.card-overlay-open {
 
 .memory-flip__actions {
   display: flex;
-  justify-content: flex-end;
+  justify-content: center;
   gap: 12px;
   flex-wrap: wrap;
+}
+
+.memory-flip__actions--back {
+  justify-content: space-between;
 }
 
 @keyframes spin {
@@ -2843,6 +2910,14 @@ body.card-overlay-open {
     width: 28px;
   }
 
+  .timeline-item__media {
+    min-height: 220px;
+  }
+
+  .timeline-item__media img {
+    max-height: 300px;
+  }
+
   .vinyl-showcase {
     padding: 18px;
   }
@@ -2926,8 +3001,14 @@ body.card-overlay-open {
     min-height: 560px;
   }
 
+  .memory-polaroid {
+    width: 100%;
+    padding: 14px 14px 22px;
+  }
+
   .memory-flip__media {
-    padding: 14px;
+    min-height: min(48vh, 420px);
+    padding: 8px;
   }
 
   .memory-modal__close {
@@ -2939,7 +3020,14 @@ body.card-overlay-open {
     padding: 20px;
   }
 
-  .memory-flip h3 {
-    font-size: 2rem;
+  .memory-polaroid__caption h3,
+  .memory-note__date,
+  .memory-flip__field input,
+  .memory-flip__field--plain textarea {
+    font-size: 1.9rem;
+  }
+
+  .memory-flip__actions--back {
+    justify-content: center;
   }
 }

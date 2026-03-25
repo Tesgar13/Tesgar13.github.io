@@ -580,31 +580,36 @@
       <article class="memory-flip" id="memory-flip">
         <div class="memory-flip__inner">
           <section class="memory-flip__face memory-flip__face--front">
-            <p class="memory-flip__date" id="memory-modal-date"></p>
-            <div class="memory-flip__media">
-              <img id="memory-modal-image" alt="Recuerdo ampliado" />
-            </div>
-            <div class="memory-flip__copy">
-              <label class="memory-flip__field">
-                <span>Tu texto</span>
-                <input id="memory-modal-note-input" type="text" maxlength="90" placeholder="Escribe aqui una frase vuestra" />
-              </label>
-              <label class="memory-flip__field">
-                <span>Descripcion pequena</span>
-                <textarea id="memory-modal-description-input" rows="3" maxlength="220" placeholder="Pon aqui una descripcion pequena"></textarea>
-              </label>
-              <p class="memory-flip__saved" id="memory-modal-saved" hidden>Texto guardado.</p>
+            <div class="memory-polaroid">
+              <div class="memory-flip__media">
+                <img id="memory-modal-image" alt="Recuerdo ampliado" />
+              </div>
+              <div class="memory-polaroid__caption">
+                <h3 id="memory-modal-title">Recuerdo</h3>
+              </div>
             </div>
             <div class="memory-flip__actions">
-              <button class="activate-button activate-button--ghost" type="button" id="memory-modal-save">Guardar texto</button>
               <button class="activate-button" type="button" id="memory-modal-turn">Dar la vuelta</button>
             </div>
           </section>
           <section class="memory-flip__face memory-flip__face--back">
-            <p class="memory-flip__eyebrow">Detras de la polaroid</p>
-            <h3 id="memory-modal-back-title">Lo que guarda</h3>
-            <p id="memory-modal-message"></p>
-            <button class="activate-button activate-button--ghost" type="button" id="memory-modal-return">Volver a la foto</button>
+            <div class="memory-note">
+              <p class="memory-flip__eyebrow">Detras de la polaroid</p>
+              <p class="memory-note__date" id="memory-modal-date"></p>
+              <label class="memory-flip__field memory-flip__field--plain">
+                <span>Titulo</span>
+                <input id="memory-modal-note-input" type="text" maxlength="90" placeholder="Escribe aqui una frase vuestra" />
+              </label>
+              <label class="memory-flip__field memory-flip__field--plain">
+                <span>Descripcion</span>
+                <textarea id="memory-modal-description-input" rows="6" maxlength="220" placeholder="Pon aqui una descripcion pequena"></textarea>
+              </label>
+              <p class="memory-flip__saved" id="memory-modal-saved" hidden>Texto guardado.</p>
+            </div>
+            <div class="memory-flip__actions memory-flip__actions--back">
+              <button class="activate-button activate-button--ghost" type="button" id="memory-modal-save">Guardar texto</button>
+              <button class="activate-button" type="button" id="memory-modal-return">Volver a la foto</button>
+            </div>
           </section>
         </div>
       </article>

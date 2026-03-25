@@ -1210,14 +1210,13 @@ function abrirModalRecuerdo(entryId) {
   const flip = document.getElementById("memory-flip");
   const image = document.getElementById("memory-modal-image");
   const date = document.getElementById("memory-modal-date");
+  const title = document.getElementById("memory-modal-title");
   const noteInput = document.getElementById("memory-modal-note-input");
   const descriptionInput = document.getElementById("memory-modal-description-input");
   const saved = document.getElementById("memory-modal-saved");
-  const backTitle = document.getElementById("memory-modal-back-title");
-  const message = document.getElementById("memory-modal-message");
   const entry = obtenerTimeline().find((item) => item.id === entryId);
 
-  if (!modal || !flip || !image || !date || !noteInput || !descriptionInput || !saved || !backTitle || !message || !entry) {
+  if (!modal || !flip || !image || !date || !title || !noteInput || !descriptionInput || !saved || !entry) {
     return;
   }
 
@@ -1225,11 +1224,10 @@ function abrirModalRecuerdo(entryId) {
   image.src = resolveImageUrl(entry.image);
   image.alt = obtenerAltRecuerdo(entry);
   date.textContent = formatearFecha(entry.date);
+  title.textContent = obtenerTextoRecuerdo(entry);
   noteInput.value = obtenerTextoRecuerdo(entry);
   descriptionInput.value = obtenerDescripcionRecuerdo(entry);
   saved.hidden = true;
-  backTitle.textContent = obtenerTextoRecuerdo(entry);
-  message.textContent = mensajeDetrasDeRecuerdo(entry);
   modal.dataset.entryId = entryId;
   modal.hidden = false;
   document.body.style.overflow = "hidden";
@@ -1254,10 +1252,9 @@ function guardarTextoRecuerdoActual() {
   const noteInput = document.getElementById("memory-modal-note-input");
   const descriptionInput = document.getElementById("memory-modal-description-input");
   const saved = document.getElementById("memory-modal-saved");
-  const backTitle = document.getElementById("memory-modal-back-title");
-  const message = document.getElementById("memory-modal-message");
+  const title = document.getElementById("memory-modal-title");
 
-  if (!modal || !noteInput || !descriptionInput || !saved || !backTitle || !message || !modal.dataset.entryId) {
+  if (!modal || !noteInput || !descriptionInput || !saved || !title || !modal.dataset.entryId) {
     return;
   }
 
@@ -1291,8 +1288,7 @@ function guardarTextoRecuerdoActual() {
     return;
   }
 
-  backTitle.textContent = obtenerTextoRecuerdo(actualizada);
-  message.textContent = mensajeDetrasDeRecuerdo(actualizada);
+  title.textContent = obtenerTextoRecuerdo(actualizada);
   saved.hidden = false;
 
   guardarRecuerdoEnFirestore(actualizada).catch((error) => {
