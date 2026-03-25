@@ -15,8 +15,8 @@
   --shadow-soft: 0 18px 42px rgba(55, 83, 136, 0.12);
   --accent-red: #c7454f;
   --paper: #fffaf3;
-  --entrada-image: url("img/Entrada.png");
-  --hero-featured-image: url("img/fotofav.jpeg");
+  --entrada-image: none;
+  --hero-featured-image: none;
 }
 
 * {

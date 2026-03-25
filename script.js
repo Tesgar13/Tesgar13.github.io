@@ -168,7 +168,7 @@ function resolveImageUrl(path) {
     return path;
   }
 
-  return assetUrlMap[path] || path;
+  return assetUrlMap[path] || "";
 }
 
 function aplicarAssetsRemotosAlDom() {
@@ -184,7 +184,11 @@ function aplicarAssetsRemotosAlDom() {
     }
 
     image.dataset.assetPath = originalPath;
-    image.src = resolveImageUrl(originalPath);
+    const remoteUrl = resolveImageUrl(originalPath);
+
+    if (remoteUrl) {
+      image.src = remoteUrl;
+    }
   });
 }
 
@@ -246,79 +250,31 @@ async function guardarRecuerdoEnFirestore(entry, fileName = "") {
   });
 }
 
-async function cargarAssetMapFirestore() {
-  if (!window.firebaseDb || !window.firebaseFns) {
-    aplicarAssetsRemotosAlDom();
-    return;
-  }
-
-  const db = window.firebaseDb;
-  const { collection, getDocs } = window.firebaseFns;
-
-  try {
-    const snapshot = await getDocs(collection(db, "assets"));
-    const map = { ...assetUrlMap };
-
-    snapshot.forEach((doc) => {
-      const data = doc.data();
-
-      if (data.path && data.url) {
-        map[data.path] = data.url;
-      }
-    });
-
-    guardarAssetMap(map);
-  } catch (error) {
-    console.error("Error cargando assets:", error);
-  }
-
-  aplicarAssetsRemotosAlDom();
+function storagePathDesdeAssetLocal(assetPath) {
+  const fileName = assetPath.split("/").pop();
+  return fileName ? `assets/${fileName}` : "";
 }
 
-async function migrarAssetsLocalesAFirebase() {
-  if (!window.firebaseDb || !window.firebaseFns) {
+async function cargarAssetsDesdeStorage() {
+  if (!window.firebaseStorage || !window.firebaseFns) {
     aplicarAssetsRemotosAlDom();
     return;
   }
 
-  await cargarAssetMapFirestore();
-
-  const db = window.firebaseDb;
-  const { collection, addDoc } = window.firebaseFns;
+  const { ref, getDownloadURL } = window.firebaseFns;
+  const storage = window.firebaseStorage;
   const nextMap = { ...assetUrlMap };
 
-  for (const assetPath of MIGRATABLE_ASSET_PATHS) {
-    if (nextMap[assetPath]) {
-      continue;
-    }
-
+  await Promise.all(MIGRATABLE_ASSET_PATHS.map(async (assetPath) => {
     try {
-      const response = await fetch(assetPath);
-
-      if (!response.ok) {
-        console.warn(`No se pudo leer el asset local ${assetPath}.`);
-        continue;
-      }
-
-      const blob = await response.blob();
-      const fileName = assetPath.split("/").pop() || `asset-${Date.now()}`;
-      const file = new File([blob], fileName, { type: blob.type || "application/octet-stream" });
-      const url = await subirImagenAFirebase(file, "assets");
-
-      nextMap[assetPath] = url;
-      guardarAssetMap(nextMap);
-
-      await addDoc(collection(db, "assets"), {
-        path: assetPath,
-        url,
-        name: fileName,
-        createdAt: Date.now()
-      });
+      const remoteUrl = await getDownloadURL(ref(storage, storagePathDesdeAssetLocal(assetPath)));
+      nextMap[assetPath] = remoteUrl;
     } catch (error) {
-      console.error(`Error migrando ${assetPath}:`, error);
+      console.error(`No se pudo cargar ${assetPath} desde Firebase Storage.`, error);
     }
-  }
+  }));
 
+  guardarAssetMap(nextMap);
   aplicarAssetsRemotosAlDom();
 }
 
@@ -423,6 +379,20 @@ async function subirImagenAFirebase(file, folder = "recuerdos") {
 
   await uploadBytes(fileRef, file);
   return getDownloadURL(fileRef);
+}
+
+function esperarAuthFirebase() {
+  return new Promise((resolve) => {
+    if (!window.firebaseAuth || !window.firebaseFns?.onAuthStateChanged) {
+      resolve(null);
+      return;
+    }
+
+    const unsubscribe = window.firebaseFns.onAuthStateChanged(window.firebaseAuth, (user) => {
+      unsubscribe();
+      resolve(user || null);
+    });
+  });
 }
 
 function actualizarCountdown() {
@@ -1493,7 +1463,8 @@ window.onload = async function () {
   prepararModalRecuerdo();
   prepararTabs();
   prepararTocadiscos();
-  await migrarAssetsLocalesAFirebase();
+  await esperarAuthFirebase();
+  await cargarAssetsDesdeStorage();
   await cargarRecuerdosFirestore();
   actualizarEstados();
   renderizarTimeline();
