@@ -2,81 +2,28 @@ const fechaObjetivo = new Date("2029-01-11T23:59:00");
 const TIMELINE_KEY = "timelineEntries";
 const SONGS_KEY = "soundtrackEntries";
 const MOCK_SLOTS = 10;
-const PRIVATE_MEDIA_PREFIX = "/private-media/";
-const PRIVATE_UPLOAD_ENDPOINT = "/api/private-media";
 let songActualIndex = -1;
 let turntablePlaying = false;
 const PORTADA_DESTACADA_ID = "seed:fotofav";
 const DEFAULT_MEMORY_NOTE = "Escribe aqui una frase vuestra.";
 const DEFAULT_MEMORY_DESCRIPTION = "Pon aqui una descripcion pequena que luego cambiaras.";
 const DEBUG_PLAN_RESET_KEY = "debugPlanResetDone";
-
-function privateMediaUrl(key) {
-  return `${PRIVATE_MEDIA_PREFIX}${encodeURI(String(key || "").replace(/^\/+/, ""))}`;
-}
-
-function normalizarRutaPrivada(image) {
-  if (!image || typeof image !== "string") {
-    return image;
-  }
-
-  if (
-    image.startsWith(PRIVATE_MEDIA_PREFIX) ||
-    image.startsWith("data:") ||
-    image.startsWith("blob:") ||
-    /^https?:\/\//.test(image)
-  ) {
-    return image;
-  }
-
-  return privateMediaUrl(image);
-}
-
-function rutaActual() {
-  return `${window.location.pathname}${window.location.search}`;
-}
-
-async function subirImagenPrivada(file, folder) {
-  const formData = new FormData();
-  formData.append("file", file);
-  formData.append("folder", folder);
-
-  const response = await fetch(PRIVATE_UPLOAD_ENDPOINT, {
-    method: "POST",
-    body: formData,
-    credentials: "same-origin"
-  });
-
-  if (response.status === 401) {
-    window.location.href = `/login?next=${encodeURIComponent(rutaActual())}`;
-    throw new Error("La sesion ha caducado.");
-  }
-
-  const payload = await response.json().catch(() => ({}));
-
-  if (!response.ok) {
-    throw new Error(payload.error || "No se pudo subir la imagen.");
-  }
-
-  return payload;
-}
-
 const TIMELINE_SEED = [
-  { id: "seed:dedo", type: "seed", date: "2023-03-07", title: "", note: "", description: "", image: privateMediaUrl("img/dedo.jpeg") },
-  { id: "seed:nohablo", type: "seed", date: "2023-05-03", title: "", note: "", description: "", image: privateMediaUrl("img/NoHablo.jpeg") },
-  { id: "seed:estudiando", type: "seed", date: "2023-06-20", title: "", note: "", description: "", image: privateMediaUrl("img/estudiando.jpeg") },
-  { id: "seed:cafe", type: "seed", date: "2023-09-21", title: "", note: "", description: "", image: privateMediaUrl("img/cafe.jpeg") },
-  { id: "seed:bano", type: "seed", date: "2023-09-26", title: "", note: "", description: "", image: privateMediaUrl("img/bano.jpeg") },
-  { id: "seed:labo", type: "seed", date: "2023-10-06", title: "", note: "", description: "", image: privateMediaUrl("img/labo.jpeg") },
-  { id: "seed:biblioteca", type: "seed", date: "2023-10-27", title: "", note: "", description: "", image: privateMediaUrl("img/biblioteca.jpeg") },
-  { id: "seed:code1", type: "seed", date: "2023-11-22", title: "", note: "", description: "", image: privateMediaUrl("img/code1.jpeg") },
-  { id: "seed:gemes", type: "seed", date: "2023-11-24", title: "", note: "", description: "", image: privateMediaUrl("img/gemes.jpeg") },
-  { id: "seed:cono", type: "seed", date: "2023-12-23", title: "", note: "", description: "", image: privateMediaUrl("img/cono.jpeg") },
-  { id: "seed:imaginaria", type: "seed", date: "2024-01-28", title: "", note: "", description: "", image: privateMediaUrl("img/imaginaria.jpeg") },
-  { id: "seed:fondo", type: "seed", date: "2024-02-07", title: "", note: "", description: "", image: privateMediaUrl("img/fondo.jpeg") },
-  { id: "seed:rosa", type: "seed", date: "2024-03-10", title: "", note: "", description: "", image: privateMediaUrl("img/rosa.jpeg") },
-  { id: "seed:nopuc", type: "seed", date: "2024-04-23", title: "", note: "", description: "", image: privateMediaUrl("img/nopuc.jpeg") },
-  { id: PORTADA_DESTACADA_ID, type: "seed", date: "2024-04-27", title: "", note: "", description: "", image: privateMediaUrl("img/fotofav.jpeg") }
+  { id: "seed:dedo", type: "seed", date: "2023-03-07", title: "", note: "", description: "", image: "img/dedo.jpeg" },
+  { id: "seed:nohablo", type: "seed", date: "2023-05-03", title: "", note: "", description: "", image: "img/NoHablo.jpeg" },
+  { id: "seed:estudiando", type: "seed", date: "2023-06-20", title: "", note: "", description: "", image: "img/estudiando.jpeg" },
+  { id: "seed:cafe", type: "seed", date: "2023-09-21", title: "", note: "", description: "", image: "img/cafe.jpeg" },
+  { id: "seed:bano", type: "seed", date: "2023-09-26", title: "", note: "", description: "", image: "img/baño.jpeg" },
+  { id: "seed:labo", type: "seed", date: "2023-10-06", title: "", note: "", description: "", image: "img/labo.jpeg" },
+  { id: "seed:biblioteca", type: "seed", date: "2023-10-27", title: "", note: "", description: "", image: "img/biblioteca.jpeg" },
+  { id: "seed:code1", type: "seed", date: "2023-11-22", title: "", note: "", description: "", image: "img/code1.jpeg" },
+  { id: "seed:gemes", type: "seed", date: "2023-11-24", title: "", note: "", description: "", image: "img/gemes.jpeg" },
+  { id: "seed:cono", type: "seed", date: "2023-12-23", title: "", note: "", description: "", image: "img/cono.jpeg" },
+  { id: "seed:imaginaria", type: "seed", date: "2024-01-28", title: "", note: "", description: "", image: "img/imaginaria.jpeg" },
+  { id: "seed:fondo", type: "seed", date: "2024-02-07", title: "", note: "", description: "", image: "img/fondo.jpeg" },
+  { id: "seed:rosa", type: "seed", date: "2024-03-10", title: "", note: "", description: "", image: "img/rosa.jpeg" },
+  { id: "seed:nopuc", type: "seed", date: "2024-04-23", title: "", note: "", description: "", image: "img/nopuc.jpeg" },
+  { id: PORTADA_DESTACADA_ID, type: "seed", date: "2024-04-27", title: "", note: "", description: "", image: "img/fotofav.jpeg" }
 ];
 const LETTERS = [
   {
@@ -202,15 +149,8 @@ function sincronizarTimelineSemilla() {
   });
 
   combinadas.forEach((entry) => {
-    const imagenNormalizada = normalizarRutaPrivada(entry.image);
-
-    if (imagenNormalizada !== entry.image) {
-      entry.image = imagenNormalizada;
-      cambio = true;
-    }
-
-    if (entry.id === "seed:bano" && entry.image !== privateMediaUrl("img/bano.jpeg")) {
-      entry.image = privateMediaUrl("img/bano.jpeg");
+    if (entry.id === "seed:bano" && entry.image !== "img/baño.jpeg") {
+      entry.image = "img/baño.jpeg";
       cambio = true;
     }
   });
@@ -391,7 +331,7 @@ function crearEntradaPlan(planId, titulo, fecha, imagen) {
     title: titulo,
     note: "",
     description: "",
-    image: normalizarRutaPrivada(imagen)
+    image: imagen
   };
 
   const actualizadas = entradas.some((entry) => entry.id === nuevaEntrada.id)
@@ -761,14 +701,14 @@ async function completarPlan(planId) {
       boton.textContent = "Guardando recuerdo...";
     }
 
-    const subida = await subirImagenPrivada(foto, `plans/${planId}`);
+    const imagenBase64 = await leerArchivoComoDataUrl(foto);
     const fecha = hoyIso();
 
     localStorage.setItem(claveEstado(planId), "completado");
-    localStorage.setItem(claveFoto(planId), subida.url);
+    localStorage.setItem(claveFoto(planId), imagenBase64);
     localStorage.setItem(claveFecha(planId), fecha);
 
-    crearEntradaPlan(planId, titulo, fecha, subida.url);
+    crearEntradaPlan(planId, titulo, fecha, imagenBase64);
     actualizarEstados();
     renderizarTimeline();
   } catch (error) {
@@ -777,7 +717,7 @@ async function completarPlan(planId) {
       boton.textContent = "Completar plan";
     }
 
-    alert(error instanceof Error ? error.message : "No se pudo guardar la foto. Intentalo otra vez.");
+    alert("No se pudo guardar la foto. Intentalo otra vez.");
   }
 }
 
@@ -793,13 +733,8 @@ function actualizarEstados() {
     const card = document.querySelector(`.card[data-plan="${plan}"]`);
 
     const estado = localStorage.getItem(claveEstado(plan)) || "pendiente";
-    const fotoGuardadaOriginal = localStorage.getItem(claveFoto(plan));
-    const fotoGuardada = normalizarRutaPrivada(fotoGuardadaOriginal);
+    const fotoGuardada = localStorage.getItem(claveFoto(plan));
     const fechaGuardada = localStorage.getItem(claveFecha(plan));
-
-    if (fotoGuardada && fotoGuardada !== fotoGuardadaOriginal) {
-      localStorage.setItem(claveFoto(plan), fotoGuardada);
-    }
 
     const estaActivado = estado === "activado" || estado === "completado";
     const estaCompletado = estado === "completado" && fotoGuardada && fechaGuardada;
@@ -1087,14 +1022,7 @@ function activarTab(tabId) {
 }
 
 function prepararTabs() {
-  const botones = document.querySelectorAll("[data-tab-target]");
-  const paneles = document.querySelectorAll("[data-tab-panel]");
-
-  if (!botones.length || !paneles.length) {
-    return;
-  }
-
-  botones.forEach((button) => {
+  document.querySelectorAll("[data-tab-target]").forEach((button) => {
     button.addEventListener("click", () => {
       activarTab(button.dataset.tabTarget);
     });
@@ -1156,53 +1084,38 @@ function prepararFormularioTimeline() {
     const titleInput = document.getElementById("timeline-title");
     const descriptionInput = document.getElementById("timeline-description");
     const file = imageInput.files && imageInput.files[0];
-    const submitButton = form.querySelector('button[type="submit"]');
 
     if (!dateInput.value || !titleInput.value.trim() || !file) {
       alert("Para anadir un recuerdo manual necesitas fecha, texto y foto.");
       return;
     }
 
-    try {
-      if (submitButton) {
-        submitButton.disabled = true;
-        submitButton.textContent = "Guardando recuerdo...";
-      }
+    const imagen = await leerArchivoComoDataUrl(file);
+    const entradas = obtenerTimeline();
 
-      const subida = await subirImagenPrivada(file, "timeline/manual");
-      const entradas = obtenerTimeline();
+    entradas.push({
+      id: `manual:${Date.now()}`,
+      type: "manual",
+      date: dateInput.value,
+      title: titleInput.value.trim(),
+      note: titleInput.value.trim(),
+      description: descriptionInput.value.trim(),
+      image: imagen
+    });
 
-      entradas.push({
-        id: `manual:${Date.now()}`,
-        type: "manual",
-        date: dateInput.value,
-        title: titleInput.value.trim(),
-        note: titleInput.value.trim(),
-        description: descriptionInput.value.trim(),
-        image: subida.url
-      });
+    guardarTimeline(entradas);
+    renderizarTimeline();
+    form.reset();
+    preview.hidden = true;
+    previewImg.removeAttribute("src");
 
-      guardarTimeline(entradas);
-      renderizarTimeline();
-      form.reset();
-      preview.hidden = true;
-      previewImg.removeAttribute("src");
-
-      const shell = document.getElementById("timeline-form-shell");
-      const button = document.querySelector('[data-toggle-form="timeline-form-shell"]');
-      if (shell) {
-        shell.hidden = true;
-      }
-      if (button) {
-        button.textContent = "Anadir recuerdo";
-      }
-    } catch (error) {
-      alert(error instanceof Error ? error.message : "No se pudo guardar el recuerdo.");
-    } finally {
-      if (submitButton) {
-        submitButton.disabled = false;
-        submitButton.textContent = "Guardar en la linea del tiempo";
-      }
+    const shell = document.getElementById("timeline-form-shell");
+    const button = document.querySelector('[data-toggle-form="timeline-form-shell"]');
+    if (shell) {
+      shell.hidden = true;
+    }
+    if (button) {
+      button.textContent = "Anadir recuerdo";
     }
   });
 }

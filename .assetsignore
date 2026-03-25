@@ -1,9 +1,0 @@
-.git/
-.assetsignore
-access.js
-img/
-node_modules/
-private-assets-manifest.json
-scripts/
-src/
-wrangler.jsonc
