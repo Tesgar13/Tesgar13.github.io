@@ -15,6 +15,8 @@
   --shadow-soft: 0 18px 42px rgba(55, 83, 136, 0.12);
   --accent-red: #c7454f;
   --paper: #fffaf3;
+  --entrada-image: url("img/Entrada.png");
+  --hero-featured-image: url("img/fotofav.jpeg");
 }
 
 * {
@@ -106,7 +108,7 @@ body::before {
   inset: 0;
   background:
     linear-gradient(135deg, rgba(18, 30, 58, 0.9), rgba(74, 114, 191, 0.62)),
-    url("img/Entrada.png") center/cover;
+    var(--entrada-image) center/cover;
   filter: saturate(1.05);
 }
 
@@ -251,7 +253,7 @@ body::before {
   padding: 24px;
   background:
     linear-gradient(rgba(17, 17, 17, 0.82), rgba(17, 17, 17, 0.92)),
-    url("img/Entrada.png") center/cover;
+    var(--entrada-image) center/cover;
   z-index: 9999;
 }
 
@@ -451,7 +453,7 @@ body::before {
   border-radius: 42px;
   background:
     linear-gradient(135deg, rgba(25, 43, 82, 0.9), rgba(77, 110, 183, 0.74)),
-    url("img/fotofav.jpeg") center/cover;
+    var(--hero-featured-image) center/cover;
   box-shadow: var(--shadow);
 }
 

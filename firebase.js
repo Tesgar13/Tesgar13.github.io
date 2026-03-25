@@ -11,6 +11,14 @@ import {
   uploadBytes,
   getDownloadURL
 } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-storage.js";
+import {
+  getFirestore,
+  collection,
+  addDoc,
+  getDocs,
+  query,
+  orderBy
+} from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
 const firebaseConfig = {
   apiKey: "AIzaSyBdpxsejwbJdPb2LxbpQhtxedK3CXScrzw",
@@ -25,14 +33,21 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const storage = getStorage(app);
+const db = getFirestore(app);
 
 window.firebaseAuth = auth;
 window.firebaseStorage = storage;
+window.firebaseDb = db;
 window.firebaseFns = {
   signInWithEmailAndPassword,
   signOut,
   onAuthStateChanged,
   ref,
   uploadBytes,
-  getDownloadURL
+  getDownloadURL,
+  collection,
+  addDoc,
+  getDocs,
+  query,
+  orderBy
 };

@@ -1,6 +1,7 @@
 const fechaObjetivo = new Date("2029-01-11T23:59:00");
 const TIMELINE_KEY = "timelineEntries";
 const SONGS_KEY = "soundtrackEntries";
+const ASSET_MAP_KEY = "firebaseAssetMap";
 const MOCK_SLOTS = 10;
 let songActualIndex = -1;
 let turntablePlaying = false;
@@ -53,6 +54,19 @@ const planes = [
   "plan1", "plan2", "plan3", "plan4", "plan5",
   "plan6", "plan7", "plan8", "plan9"
 ];
+const STATIC_IMAGE_PATHS = [
+  "img/Entrada.png",
+  "img/fotofav.jpeg",
+  "img/GH.jpg",
+  "img/Marias.jpg",
+  "img/Lentejas.jpg",
+  "img/BocadilloJ.jpg"
+];
+const MIGRATABLE_ASSET_PATHS = Array.from(new Set([
+  ...STATIC_IMAGE_PATHS,
+  ...TIMELINE_SEED.map((entry) => entry.image)
+]));
+let assetUrlMap = leerStorageRecord(ASSET_MAP_KEY);
 
 function claveEstado(planId) {
   return `${planId}_estado`;
@@ -131,8 +145,47 @@ function leerStorageJson(key) {
   }
 }
 
+function leerStorageRecord(key) {
+  try {
+    const value = JSON.parse(localStorage.getItem(key));
+    return value && typeof value === "object" && !Array.isArray(value) ? value : {};
+  } catch (error) {
+    return {};
+  }
+}
+
 function escribirStorageJson(key, value) {
   localStorage.setItem(key, JSON.stringify(value));
+}
+
+function guardarAssetMap(map) {
+  assetUrlMap = map;
+  localStorage.setItem(ASSET_MAP_KEY, JSON.stringify(map));
+}
+
+function resolveImageUrl(path) {
+  if (!path || !path.startsWith("img/")) {
+    return path;
+  }
+
+  return assetUrlMap[path] || path;
+}
+
+function aplicarAssetsRemotosAlDom() {
+  const root = document.documentElement;
+  root.style.setProperty("--entrada-image", `url("${resolveImageUrl("img/Entrada.png")}")`);
+  root.style.setProperty("--hero-featured-image", `url("${resolveImageUrl("img/fotofav.jpeg")}")`);
+
+  document.querySelectorAll("img").forEach((image) => {
+    const originalPath = image.dataset.assetPath || image.getAttribute("src");
+
+    if (!originalPath || !originalPath.startsWith("img/")) {
+      return;
+    }
+
+    image.dataset.assetPath = originalPath;
+    image.src = resolveImageUrl(originalPath);
+  });
 }
 
 function sincronizarTimelineSemilla() {
@@ -168,6 +221,147 @@ function obtenerTimeline() {
 
 function guardarTimeline(entries) {
   escribirStorageJson(TIMELINE_KEY, entries);
+}
+
+async function guardarRecuerdoEnFirestore(entry, fileName = "") {
+  if (!window.firebaseDb || !window.firebaseFns) {
+    return;
+  }
+
+  const db = window.firebaseDb;
+  const { collection, addDoc } = window.firebaseFns;
+
+  await addDoc(collection(db, "recuerdos"), {
+    entryId: entry.id,
+    planId: entry.planId || "",
+    type: entry.type || "manual",
+    date: entry.date || hoyIso(),
+    title: entry.title || "",
+    note: entry.note || "",
+    description: entry.description || "",
+    url: entry.image || "",
+    image: entry.image || "",
+    createdAt: Date.now(),
+    name: fileName
+  });
+}
+
+async function cargarAssetMapFirestore() {
+  if (!window.firebaseDb || !window.firebaseFns) {
+    aplicarAssetsRemotosAlDom();
+    return;
+  }
+
+  const db = window.firebaseDb;
+  const { collection, getDocs } = window.firebaseFns;
+
+  try {
+    const snapshot = await getDocs(collection(db, "assets"));
+    const map = { ...assetUrlMap };
+
+    snapshot.forEach((doc) => {
+      const data = doc.data();
+
+      if (data.path && data.url) {
+        map[data.path] = data.url;
+      }
+    });
+
+    guardarAssetMap(map);
+  } catch (error) {
+    console.error("Error cargando assets:", error);
+  }
+
+  aplicarAssetsRemotosAlDom();
+}
+
+async function migrarAssetsLocalesAFirebase() {
+  if (!window.firebaseDb || !window.firebaseFns) {
+    aplicarAssetsRemotosAlDom();
+    return;
+  }
+
+  await cargarAssetMapFirestore();
+
+  const db = window.firebaseDb;
+  const { collection, addDoc } = window.firebaseFns;
+  const nextMap = { ...assetUrlMap };
+
+  for (const assetPath of MIGRATABLE_ASSET_PATHS) {
+    if (nextMap[assetPath]) {
+      continue;
+    }
+
+    try {
+      const response = await fetch(assetPath);
+
+      if (!response.ok) {
+        console.warn(`No se pudo leer el asset local ${assetPath}.`);
+        continue;
+      }
+
+      const blob = await response.blob();
+      const fileName = assetPath.split("/").pop() || `asset-${Date.now()}`;
+      const file = new File([blob], fileName, { type: blob.type || "application/octet-stream" });
+      const url = await subirImagenAFirebase(file, "assets");
+
+      nextMap[assetPath] = url;
+      guardarAssetMap(nextMap);
+
+      await addDoc(collection(db, "assets"), {
+        path: assetPath,
+        url,
+        name: fileName,
+        createdAt: Date.now()
+      });
+    } catch (error) {
+      console.error(`Error migrando ${assetPath}:`, error);
+    }
+  }
+
+  aplicarAssetsRemotosAlDom();
+}
+
+async function cargarRecuerdosFirestore() {
+  if (!window.firebaseDb || !window.firebaseFns) {
+    return;
+  }
+
+  const db = window.firebaseDb;
+  const { collection, getDocs, query, orderBy } = window.firebaseFns;
+
+  try {
+    const snapshot = await getDocs(query(collection(db, "recuerdos"), orderBy("createdAt", "desc")));
+    const locales = obtenerTimeline();
+    const porId = new Map(locales.map((entry) => [entry.id, entry]));
+
+    snapshot.forEach((doc) => {
+      const data = doc.data();
+
+      if (!data.url) {
+        return;
+      }
+
+      const entryId = data.entryId || `firebase:${doc.id}`;
+      const existente = porId.get(entryId) || {};
+
+      porId.set(entryId, {
+        ...existente,
+        id: entryId,
+        type: data.type || existente.type || "manual",
+        planId: data.planId || existente.planId || "",
+        date: data.date || existente.date || hoyIso(),
+        title: data.title || existente.title || "",
+        note: data.note || existente.note || data.title || "",
+        description: data.description || existente.description || "",
+        image: data.url
+      });
+    });
+
+    guardarTimeline(Array.from(porId.values()));
+  } catch (error) {
+    console.error("Error cargando recuerdos:", error);
+  }
 }
 
 function obtenerCanciones() {
@@ -210,6 +404,25 @@ function leerArchivoComoDataUrl(file) {
     reader.onerror = () => reject(new Error("No se pudo leer la imagen."));
     reader.readAsDataURL(file);
   });
+}
+
+async function subirImagenAFirebase(file, folder = "recuerdos") {
+  if (!file || !file.type.startsWith("image/")) {
+    throw new Error("El archivo debe ser una imagen.");
+  }
+
+  if (!window.firebaseStorage || !window.firebaseFns) {
+    throw new Error("Firebase no esta cargado.");
+  }
+
+  const { ref, uploadBytes, getDownloadURL } = window.firebaseFns;
+  const storage = window.firebaseStorage;
+  const safeName = file.name.replace(/[^a-zA-Z0-9._-]/g, "-");
+  const fileName = `${Date.now()}-${safeName}`;
+  const fileRef = ref(storage, `${folder}/${fileName}`);
+
+  await uploadBytes(fileRef, file);
+  return getDownloadURL(fileRef);
 }
 
 function actualizarCountdown() {
@@ -375,7 +588,7 @@ function renderizarTimeline() {
       <div class="timeline-item__content" role="button" tabindex="0" aria-label="Abrir recuerdo del ${formatearFecha(entry.date)}">
         <p class="timeline-item__date">${formatearFecha(entry.date)}</p>
         <div class="timeline-item__media">
-          <img src="${entry.image}" alt="${obtenerAltRecuerdo(entry)}" />
+          <img src="${resolveImageUrl(entry.image)}" alt="${obtenerAltRecuerdo(entry)}" />
         </div>
         <p class="timeline-item__note">${texto}</p>
         <p class="timeline-item__caption">${descripcion}</p>
@@ -441,7 +654,7 @@ function renderizarPortada(entradas) {
   const featured = document.createElement("article");
   featured.className = "cover-memory cover-memory--featured";
   featured.innerHTML = `
-    <img src="${destacada.image}" alt="${obtenerAltRecuerdo(destacada)}" />
+    <img src="${resolveImageUrl(destacada.image)}" alt="${obtenerAltRecuerdo(destacada)}" />
   `;
   featured.tabIndex = 0;
   featured.setAttribute("role", "button");
@@ -463,7 +676,7 @@ function renderizarPortada(entradas) {
     foto.style.left = posicion.left;
     foto.style.setProperty("--tilt", posicion.tilt);
     foto.innerHTML = `
-      <img src="${entry.image}" alt="${obtenerAltRecuerdo(entry)}" />
+      <img src="${resolveImageUrl(entry.image)}" alt="${obtenerAltRecuerdo(entry)}" />
     `;
     foto.tabIndex = 0;
     foto.setAttribute("role", "button");
@@ -698,17 +911,29 @@ async function completarPlan(planId) {
   try {
     if (boton) {
       boton.disabled = true;
-      boton.textContent = "Guardando recuerdo...";
+      boton.textContent = "Subiendo foto...";
     }
 
-    const imagenBase64 = await leerArchivoComoDataUrl(foto);
+    const imageUrl = await subirImagenAFirebase(foto, `recuerdos/planes/${planId}`);
     const fecha = hoyIso();
 
+    const entry = {
+      id: `plan:${planId}`,
+      type: "plan",
+      planId,
+      date: fecha,
+      title: titulo,
+      note: "",
+      description: "",
+      image: imageUrl
+    };
+
     localStorage.setItem(claveEstado(planId), "completado");
-    localStorage.setItem(claveFoto(planId), imagenBase64);
+    localStorage.setItem(claveFoto(planId), imageUrl);
     localStorage.setItem(claveFecha(planId), fecha);
 
-    crearEntradaPlan(planId, titulo, fecha, imagenBase64);
+    crearEntradaPlan(planId, titulo, fecha, imageUrl);
+    await guardarRecuerdoEnFirestore(entry, foto.name);
     actualizarEstados();
     renderizarTimeline();
   } catch (error) {
@@ -717,7 +942,7 @@ async function completarPlan(planId) {
       boton.textContent = "Completar plan";
     }
 
-    alert("No se pudo guardar la foto. Intentalo otra vez.");
+    alert(error.message || "No se pudo subir la foto. Intentalo otra vez.");
   }
 }
 
@@ -876,7 +1101,7 @@ function abrirModalRecuerdo(entryId) {
   }
 
   flip.classList.remove("is-flipped");
-  image.src = entry.image;
+  image.src = resolveImageUrl(entry.image);
   image.alt = obtenerAltRecuerdo(entry);
   date.textContent = formatearFecha(entry.date);
   noteInput.value = obtenerTextoRecuerdo(entry);
@@ -1090,32 +1315,50 @@ function prepararFormularioTimeline() {
       return;
     }
 
-    const imagen = await leerArchivoComoDataUrl(file);
-    const entradas = obtenerTimeline();
+    const submitButton = form.querySelector('button[type="submit"]');
 
-    entradas.push({
-      id: `manual:${Date.now()}`,
-      type: "manual",
-      date: dateInput.value,
-      title: titleInput.value.trim(),
-      note: titleInput.value.trim(),
-      description: descriptionInput.value.trim(),
-      image: imagen
-    });
+    try {
+      if (submitButton) {
+        submitButton.disabled = true;
+        submitButton.textContent = "Subiendo recuerdo...";
+      }
 
-    guardarTimeline(entradas);
-    renderizarTimeline();
-    form.reset();
-    preview.hidden = true;
-    previewImg.removeAttribute("src");
+      const imageUrl = await subirImagenAFirebase(file, "recuerdos/manuales");
+      const nuevaEntrada = {
+        id: `manual:${Date.now()}`,
+        type: "manual",
+        date: dateInput.value,
+        title: titleInput.value.trim(),
+        note: titleInput.value.trim(),
+        description: descriptionInput.value.trim(),
+        image: imageUrl
+      };
+      const entradas = obtenerTimeline();
 
-    const shell = document.getElementById("timeline-form-shell");
-    const button = document.querySelector('[data-toggle-form="timeline-form-shell"]');
-    if (shell) {
-      shell.hidden = true;
-    }
-    if (button) {
-      button.textContent = "Anadir recuerdo";
+      entradas.push(nuevaEntrada);
+
+      guardarTimeline(entradas);
+      await guardarRecuerdoEnFirestore(nuevaEntrada, file.name);
+      renderizarTimeline();
+      form.reset();
+      preview.hidden = true;
+      previewImg.removeAttribute("src");
+
+      const shell = document.getElementById("timeline-form-shell");
+      const button = document.querySelector('[data-toggle-form="timeline-form-shell"]');
+      if (shell) {
+        shell.hidden = true;
+      }
+      if (button) {
+        button.textContent = "Anadir recuerdo";
+      }
+    } catch (error) {
+      alert(error.message || "No se pudo subir el recuerdo.");
+    } finally {
+      if (submitButton) {
+        submitButton.disabled = false;
+        submitButton.textContent = "Guardar en la linea del tiempo";
+      }
     }
   });
 }
@@ -1238,7 +1481,7 @@ function prepararFormularioCanciones() {
   });
 }
 
-window.onload = function () {
+window.onload = async function () {
   insertarControlesDePlan();
   limpiarPlanesActivadosDePrueba();
   actualizarCountdown();
@@ -1250,6 +1493,9 @@ window.onload = function () {
   prepararModalRecuerdo();
   prepararTabs();
   prepararTocadiscos();
+  await migrarAssetsLocalesAFirebase();
+  await cargarRecuerdosFirestore();
+  actualizarEstados();
   renderizarTimeline();
   renderizarCanciones();
   setInterval(actualizarCountdown, 1000);
