@@ -11,30 +11,22 @@
   <script src="access.js"></script>
 </head>
 <body class="access-pending">
-  <div class="access-screen" id="access-screen" aria-hidden="true">
-    <div class="access-screen__backdrop"></div>
-    <section class="access-card" aria-labelledby="access-title">
-      <p class="access-card__eyebrow">CONTRASEÑA</p>
-      <h2 id="access-title">¿Te creías que iba a ser tan fácil?</h2>
-      <p class="access-card__text">
-        Necesitas una contraseña, hasta que no la encuentres no puedes entrar. 
-        Pero no voy a ser malo, te doy una pista, es uno de los mejores dias de mi vida.
-      </p>
-      <form id="access-form" class="access-form">
-        <label class="access-form__label" for="access-password">Contraseña</label>
-        <input
-          id="access-password"
-          class="access-form__input"
-          name="password"
-          type="password"
-          autocomplete="current-password"
-          placeholder="Escribe la contraseña"
-          required
-        />
-        <p id="access-error" class="access-form__error" hidden>La contraseña no es correcta. Inténtalo otra vez.</p>
-        <button class="access-form__button" type="submit">Enter</button>
+  <div id="auth-overlay" aria-hidden="true">
+    <div class="auth-box">
+      <h2>Acceso privado</h2>
+      <p>Inicia sesión para ver y subir fotos.</p>
+      <form id="auth-form" novalidate>
+        <input type="email" id="login-email" placeholder="Correo" autocomplete="email" required />
+        <input type="password" id="login-password" placeholder="Contraseña" autocomplete="current-password" required />
+        <button id="login-button" type="submit">Entrar</button>
+        <p id="login-error" aria-live="polite"></p>
       </form>
-    </section>
+    </div>
+  </div>
+
+  <div id="auth-bar" aria-live="polite">
+    <span id="auth-user"></span>
+    <button id="logout-button" type="button">Cerrar sesión</button>
   </div>
 
   <div class="site-shell">

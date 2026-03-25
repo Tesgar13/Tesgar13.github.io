@@ -1,59 +1,134 @@
-const PASSWORD_CORRECTA = "123456789";
-const CLAVE_ACCESO = "accesoConcedido";
-
 document.documentElement.classList.add("access-locked");
 
-function concederAcceso() {
-  sessionStorage.setItem(CLAVE_ACCESO, "true");
-  document.documentElement.classList.remove("access-locked");
-  document.body.classList.remove("access-pending");
-  document.body.classList.add("access-granted");
-
-  const pantalla = document.getElementById("access-screen");
-  if (pantalla) {
-    pantalla.hidden = true;
-    pantalla.setAttribute("aria-hidden", "true");
-    pantalla.style.display = "none";
-  }
-
-  const contenido = document.querySelector(".site-shell");
-  if (contenido) {
-    contenido.style.visibility = "visible";
-    contenido.style.opacity = "1";
-  }
+function setPendingAccessState() {
+  document.body.classList.add("access-pending");
+  document.body.classList.remove("access-granted");
+  document.documentElement.classList.add("access-locked");
 }
 
-document.addEventListener("DOMContentLoaded", () => {
-  const pantalla = document.getElementById("access-screen");
-  const form = document.getElementById("access-form");
-  const input = document.getElementById("access-password");
-  const error = document.getElementById("access-error");
+function setAuthenticatedState(user) {
+  const overlay = document.getElementById("auth-overlay");
+  const authBar = document.getElementById("auth-bar");
+  const authUser = document.getElementById("auth-user");
+  const loginError = document.getElementById("login-error");
+  const siteShell = document.querySelector(".site-shell");
 
-  if (sessionStorage.getItem(CLAVE_ACCESO) === "true") {
-    concederAcceso();
+  if (overlay) {
+    overlay.setAttribute("aria-hidden", "true");
+  }
+
+  if (authBar) {
+    authBar.style.display = "flex";
+  }
+
+  if (authUser) {
+    authUser.textContent = user?.email || "Sesion iniciada";
+  }
+
+  if (loginError) {
+    loginError.textContent = "";
+  }
+
+  if (siteShell) {
+    siteShell.style.visibility = "visible";
+    siteShell.style.opacity = "1";
+  }
+
+  document.body.classList.remove("access-pending");
+  document.body.classList.add("access-granted");
+  document.documentElement.classList.remove("access-locked");
+}
+
+function setLoggedOutState() {
+  const overlay = document.getElementById("auth-overlay");
+  const authBar = document.getElementById("auth-bar");
+  const authUser = document.getElementById("auth-user");
+  const siteShell = document.querySelector(".site-shell");
+
+  if (overlay) {
+    overlay.setAttribute("aria-hidden", "false");
+  }
+
+  if (authBar) {
+    authBar.style.display = "none";
+  }
+
+  if (authUser) {
+    authUser.textContent = "";
+  }
+
+  if (siteShell) {
+    siteShell.style.visibility = "";
+    siteShell.style.opacity = "";
+  }
+
+  setPendingAccessState();
+}
+
+window.addEventListener("load", () => {
+  const auth = window.firebaseAuth;
+  const { signInWithEmailAndPassword, signOut, onAuthStateChanged } = window.firebaseFns || {};
+
+  const form = document.getElementById("auth-form");
+  const emailInput = document.getElementById("login-email");
+  const passwordInput = document.getElementById("login-password");
+  const loginButton = document.getElementById("login-button");
+  const logoutButton = document.getElementById("logout-button");
+  const loginError = document.getElementById("login-error");
+
+  setPendingAccessState();
+
+  if (!auth || !signInWithEmailAndPassword || !signOut || !onAuthStateChanged) {
+    if (loginError) {
+      loginError.textContent = "No se pudo iniciar el acceso privado.";
+    }
+    setLoggedOutState();
     return;
   }
 
-  if (!pantalla || !form || !input || !error) {
-    return;
+  if (form && emailInput && passwordInput && loginButton) {
+    form.addEventListener("submit", async (event) => {
+      event.preventDefault();
+
+      const email = emailInput.value.trim();
+      const password = passwordInput.value;
+
+      loginError.textContent = "";
+      loginButton.disabled = true;
+
+      try {
+        await signInWithEmailAndPassword(auth, email, password);
+        passwordInput.value = "";
+      } catch (error) {
+        loginError.textContent = "Correo o clave incorrectos.";
+      } finally {
+        loginButton.disabled = false;
+      }
+    });
   }
 
-  pantalla.hidden = false;
-  pantalla.setAttribute("aria-hidden", "false");
-  input.focus();
+  if (logoutButton) {
+    logoutButton.addEventListener("click", async () => {
+      logoutButton.disabled = true;
 
-  form.addEventListener("submit", (event) => {
-    event.preventDefault();
+      try {
+        await signOut(auth);
+      } finally {
+        logoutButton.disabled = false;
+      }
+    });
+  }
 
-    if (input.value === PASSWORD_CORRECTA) {
-      error.hidden = true;
-      input.value = "";
-      concederAcceso();
+  onAuthStateChanged(auth, (user) => {
+    if (user) {
+      setAuthenticatedState(user);
       return;
     }
 
-    error.hidden = false;
-    input.value = "";
-    input.focus();
+    setLoggedOutState();
+
+    if (emailInput && !emailInput.value) {
+      emailInput.focus();
+    }
   });
 });
