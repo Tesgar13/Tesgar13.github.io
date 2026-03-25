@@ -17,7 +17,8 @@ import {
   addDoc,
   getDocs,
   query,
-  orderBy
+  orderBy,
+  limit
 } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
 const firebaseConfig = {
@@ -49,5 +50,6 @@ window.firebaseFns = {
   addDoc,
   getDocs,
   query,
-  orderBy
+  orderBy,
+  limit
 };

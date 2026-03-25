@@ -62,6 +62,9 @@ const STATIC_IMAGE_PATHS = [
   "img/Lentejas.jpg",
   "img/BocadilloJ.jpg"
 ];
+const ASSET_STORAGE_NAME_MAP = {
+  "img/BocadilloJ.jpg": "Bocadillo.jpg"
+};
 const MIGRATABLE_ASSET_PATHS = Array.from(new Set([
   ...STATIC_IMAGE_PATHS,
   ...TIMELINE_SEED.map((entry) => entry.image)
@@ -250,8 +253,24 @@ async function guardarRecuerdoEnFirestore(entry, fileName = "") {
   });
 }
 
+function sincronizarEstadosDePlanesDesdeTimeline() {
+  const entradas = obtenerTimeline();
+
+  planes.forEach((planId) => {
+    const entry = entradas.find((item) => item.id === `plan:${planId}` && item.image);
+
+    if (!entry) {
+      return;
+    }
+
+    localStorage.setItem(claveEstado(planId), "completado");
+    localStorage.setItem(claveFoto(planId), entry.image);
+    localStorage.setItem(claveFecha(planId), entry.date || hoyIso());
+  });
+}
+
 function storagePathDesdeAssetLocal(assetPath) {
-  const fileName = assetPath.split("/").pop();
+  const fileName = ASSET_STORAGE_NAME_MAP[assetPath] || assetPath.split("/").pop();
   return fileName ? `assets/${fileName}` : "";
 }
 
@@ -300,6 +319,12 @@ async function cargarRecuerdosFirestore() {
 
       const entryId = data.entryId || `firebase:${doc.id}`;
       const existente = porId.get(entryId) || {};
+      const existenteCreatedAt = Number(existente.createdAt || 0);
+      const actualCreatedAt = Number(data.createdAt || 0);
+
+      if (existente.id && existenteCreatedAt > actualCreatedAt) {
+        return;
+      }
 
       porId.set(entryId, {
         ...existente,
@@ -310,11 +335,13 @@ async function cargarRecuerdosFirestore() {
         title: data.title || existente.title || "",
         note: data.note || existente.note || data.title || "",
         description: data.description || existente.description || "",
-        image: data.url
+        image: data.url,
+        createdAt: actualCreatedAt
       });
     });
 
     guardarTimeline(Array.from(porId.values()));
+    sincronizarEstadosDePlanesDesdeTimeline();
   } catch (error) {
     console.error("Error cargando recuerdos:", error);
   }
@@ -1143,6 +1170,10 @@ function guardarTextoRecuerdoActual() {
   backTitle.textContent = obtenerTextoRecuerdo(actualizada);
   message.textContent = mensajeDetrasDeRecuerdo(actualizada);
   saved.hidden = false;
+
+  guardarRecuerdoEnFirestore(actualizada).catch((error) => {
+    console.error("No se pudo sincronizar el recuerdo:", error);
+  });
 }
 
 function prepararModalRecuerdo() {
