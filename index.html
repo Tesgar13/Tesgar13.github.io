@@ -8,35 +8,8 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Caveat:wght@500;700&family=Cormorant+Garamond:wght@500;600;700&family=Manrope:wght@400;500;600;700&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="style.css" />
-  <script src="access.js"></script>
 </head>
-<body class="access-pending">
-  <div class="access-screen" id="access-screen" aria-hidden="true">
-    <div class="access-screen__backdrop"></div>
-    <section class="access-card" aria-labelledby="access-title">
-      <p class="access-card__eyebrow">CONTRASEÑA</p>
-      <h2 id="access-title">¿Te creías que iba a ser tan fácil?</h2>
-      <p class="access-card__text">
-        Necesitas una contraseña, hasta que no la encuentres no puedes entrar. 
-        Pero no voy a ser malo, te doy una pista, es uno de los mejores dias de mi vida.
-      </p>
-      <form id="access-form" class="access-form">
-        <label class="access-form__label" for="access-password">Contraseña</label>
-        <input
-          id="access-password"
-          class="access-form__input"
-          name="password"
-          type="password"
-          autocomplete="current-password"
-          placeholder="Escribe la contraseña"
-          required
-        />
-        <p id="access-error" class="access-form__error" hidden>La contraseña no es correcta. Inténtalo otra vez.</p>
-        <button class="access-form__button" type="submit">Enter</button>
-      </form>
-    </section>
-  </div>
-
+<body>
   <div class="site-shell">
     <main class="main-content main-content--tabs">
       <section class="tab-panel tab-panel--portada is-active" id="tab-portada" data-tab-panel="portada">
@@ -138,7 +111,7 @@
         <article class="card" data-plan="plan1" data-plan-title="Donde todo empezó">
           <div class="card__inner">
             <div class="card__face card__face--front">
-              <img src="img/GH.jpg" alt="Plan 1" class="card__image" />
+              <img src="/private-media/img/GH.jpg" alt="Plan 1" class="card__image" />
               <div class="card__content">
                 <p class="card__number">Plan 1</p>
                 <h3>Donde todo empezó</h3>
@@ -170,7 +143,7 @@
         <article class="card" data-plan="plan2" data-plan-title="Hay sitio para aparcar">
           <div class="card__inner">
             <div class="card__face card__face--front">
-              <img src="img/Marias.jpg" alt="Plan 2" class="card__image" />
+              <img src="/private-media/img/Marias.jpg" alt="Plan 2" class="card__image" />
               <div class="card__content">
                 <p class="card__number">Plan 2</p>
                 <h3>¿Hay sitio para aparcar?</h3>
@@ -200,7 +173,7 @@
         <article class="card" data-plan="plan3" data-plan-title="Comida de viejas o de Naroa">
           <div class="card__inner">
             <div class="card__face card__face--front">
-              <img src="img/Lentejas.jpg" alt="Plan 3" class="card__image" />
+              <img src="/private-media/img/Lentejas.jpg" alt="Plan 3" class="card__image" />
               <div class="card__content">
                 <p class="card__number">Plan 3</p>
                 <h3>¿Comida de viejas o de Naroa?</h3>
@@ -230,7 +203,7 @@
         <article class="card" data-plan="plan4" data-plan-title="Solo para darle sabor">
           <div class="card__inner">
             <div class="card__face card__face--front">
-              <img src="img/BocadilloJ.jpg" alt="Plan 4" class="card__image" />
+              <img src="/private-media/img/BocadilloJ.jpg" alt="Plan 4" class="card__image" />
               <div class="card__content">
                 <p class="card__number">Plan 4</p>
                 <h3>Solo para darle sabor</h3>
@@ -260,7 +233,7 @@
         <article class="card" data-plan="plan5" data-plan-title="Paso con el coche y comemos">
           <div class="card__inner">
             <div class="card__face card__face--front">
-              <img src="img/GH.jpg" alt="Plan 5" class="card__image" />
+              <img src="/private-media/img/GH.jpg" alt="Plan 5" class="card__image" />
               <div class="card__content">
                 <p class="card__number">Plan 5</p>
                 <h3>¿Paso con el coche y comemos?</h3>
@@ -290,7 +263,7 @@
         <article class="card" data-plan="plan6" data-plan-title="En que momento dije que pagaba yo...">
           <div class="card__inner">
             <div class="card__face card__face--front">
-              <img src="img/Marias.jpg" alt="Plan 6" class="card__image" />
+              <img src="/private-media/img/Marias.jpg" alt="Plan 6" class="card__image" />
               <div class="card__content">
                 <p class="card__number">Plan 6</p>
                 <h3>En que momento dije que pagaba yo...</h3>
@@ -320,7 +293,7 @@
         <article class="card" data-plan="plan7" data-plan-title="Te apetece una hamburguesa">
           <div class="card__inner">
             <div class="card__face card__face--front">
-              <img src="img/Lentejas.jpg" alt="Plan 7" class="card__image" />
+              <img src="/private-media/img/Lentejas.jpg" alt="Plan 7" class="card__image" />
               <div class="card__content">
                 <p class="card__number">Plan 7</p>
                 <h3>¿Te apetece una hamburguesa?</h3>
@@ -350,7 +323,7 @@
         <article class="card" data-plan="plan8" data-plan-title="Unas aceitunas">
           <div class="card__inner">
             <div class="card__face card__face--front">
-              <img src="img/Aceitunas.jpg" alt="Plan 8" class="card__image" />
+              <img src="/private-media/img/Aceitunas.jpg" alt="Plan 8" class="card__image" />
               <div class="card__content">
                 <p class="card__number">Plan 8</p>
                 <h3>Unas aceitunas</h3>
@@ -380,7 +353,7 @@
         <article class="card" data-plan="plan9" data-plan-title="Plan sorpresa">
           <div class="card__inner">
             <div class="card__face card__face--front">
-              <img src="img/GH.jpg" alt="Plan 9" class="card__image" />
+              <img src="/private-media/img/GH.jpg" alt="Plan 9" class="card__image" />
               <div class="card__content">
                 <p class="card__number">Plan 9</p>
                 <h3>COCINO YO</h3>

@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Plan 1</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Caveat:wght@500;700&family=Cormorant+Garamond:wght@500;600;700&family=Manrope:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="../style.css" />
+</head>
+<body class="theme-comidas">
+  <main class="plan-page">
+    <a href="/" class="back-link">← Volver a la ruta</a>
+
+    <section class="plan-hero">
+      <div class="plan-hero__image-wrapper">
+        <img src="/private-media/img/plan1.jpg" alt="Plan 1" class="plan-hero__image" />
+      </div>
+
+      <div class="plan-hero__content">
+        <p class="plan-number">Plan 1</p>
+        <h1 class="plan-title">Donde todo empezo</h1>
+        <p class="plan-subtitle">Recuerdas donde fue nuestra primera comida juntos?</p>
+      </div>
+    </section>
+
+    <section class="plan-details">
+      <article class="plan-card">
+        <h2>En que consiste?</h2>
+        <p>
+          Bingo. Nuestra primera vez fue en Gose, que recuerdos, a penas comi y no te queria
+          decir que estaba nervioso. Con el tiempo descubriste lo que me pasaba. No recuerdo
+          mucho la comida, pero si la compania.
+        </p>
+        <p>
+          Repitamos el plan, pero esta vez me toca invitarte. Ademas, es uno de tus sitios
+          favoritos. Esta vez prometo comer jjj.
+        </p>
+      </article>
+
+      <article class="plan-card">
+        <h2>Detalles del plan</h2>
+        <p><strong>Lugar:</strong> Nombre del sitio o sorpresa</p>
+        <p><strong>Tipo:</strong> Cena, brunch, merienda, tapeo, desayuno, etc.</p>
+        <p><strong>Pista:</strong> Puedes anadir una pista especial aqui.</p>
+      </article>
+
+      <article class="plan-card plan-card--action">
+        <h2>Activacion</h2>
+        <p id="mensaje-plan1" class="plan-message">
+          Cuando llegue el momento, activa este plan para marcarlo como realizado.
+        </p>
+        <button id="boton-plan1" class="activate-button" type="button" onclick="activarPlan('plan1')">
+          Activar plan
+        </button>
+      </article>
+    </section>
+  </main>
+
+  <script src="../script.js"></script>
+</body>
+</html>
