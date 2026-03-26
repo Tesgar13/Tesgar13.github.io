@@ -575,6 +575,15 @@ function cerrarTarjetas() {
   document.body.classList.remove("card-overlay-open");
 }
 
+function alternarPolaroid(item) {
+  if (!item || item.classList.contains("timeline-item--placeholder")) {
+    return;
+  }
+
+  const activa = item.classList.toggle("is-flipped");
+  item.setAttribute("aria-pressed", activa ? "true" : "false");
+}
+
 function abrirTarjeta(card) {
   const yaAbierta = card.classList.contains("is-open");
   cerrarTarjetas();
@@ -694,31 +703,36 @@ function renderizarTimeline() {
   entradas.forEach((entry) => {
     const texto = obtenerTextoRecuerdo(entry);
     const descripcion = obtenerDescripcionRecuerdo(entry);
-    const etiqueta = entry.type === "plan"
-      ? "Plan completado"
-      : (entry.type === "manual" ? "Recuerdo manual" : "Recuerdo clavado");
     const item = document.createElement("article");
-    item.className = "timeline-item";
+    item.className = "timeline-item polaroid-card";
     item.dataset.entryId = entry.id;
+    item.setAttribute("role", "button");
+    item.setAttribute("tabindex", "0");
+    item.setAttribute("aria-pressed", "false");
+    item.setAttribute("aria-label", `Girar recuerdo del ${formatearFecha(entry.date)}`);
     item.innerHTML = `
       <div class="timeline-item__dot">${formatearFecha(entry.date)}</div>
-      <div class="timeline-item__content" role="button" tabindex="0" aria-label="Abrir recuerdo del ${formatearFecha(entry.date)}">
-        <p class="timeline-item__date">${formatearFecha(entry.date)}</p>
-        <div class="timeline-item__media">
-          <img src="${resolveImageUrl(entry.image)}" alt="${obtenerAltRecuerdo(entry)}" />
-        </div>
-        <p class="timeline-item__note">${texto}</p>
-        <p class="timeline-item__caption">${descripcion}</p>
-        <span class="timeline-item__tag">${etiqueta}</span>
+      <div class="timeline-item__content polaroid-card__inner">
+        <section class="polaroid-card__face polaroid-card__face--front">
+          <div class="polaroid-card__photo-frame">
+            <div class="timeline-item__media polaroid-card__media">
+              <img src="${resolveImageUrl(entry.image)}" alt="${obtenerAltRecuerdo(entry)}" />
+            </div>
+          </div>
+          <p class="timeline-item__note polaroid-card__title">${texto}</p>
+        </section>
+        <section class="polaroid-card__face polaroid-card__face--back">
+          <p class="timeline-item__date polaroid-card__date">${formatearFecha(entry.date)}</p>
+          <p class="timeline-item__caption polaroid-card__description">${descripcion}</p>
+        </section>
       </div>
     `;
 
-    const content = item.querySelector(".timeline-item__content");
-    content.addEventListener("click", () => abrirModalRecuerdo(entry.id));
-    content.addEventListener("keydown", (event) => {
+    item.addEventListener("click", () => alternarPolaroid(item));
+    item.addEventListener("keydown", (event) => {
       if (event.key === "Enter" || event.key === " ") {
         event.preventDefault();
-        abrirModalRecuerdo(entry.id);
+        alternarPolaroid(item);
       }
     });
 
@@ -727,15 +741,20 @@ function renderizarTimeline() {
 
   for (let i = entradas.length; i < MOCK_SLOTS; i += 1) {
     const placeholder = document.createElement("article");
-    placeholder.className = "timeline-item timeline-item--placeholder";
+    placeholder.className = "timeline-item timeline-item--placeholder polaroid-card";
     placeholder.innerHTML = `
       <div class="timeline-item__dot">Espacio</div>
-      <div class="timeline-item__content" aria-hidden="true">
-        <p class="timeline-item__date">Fecha pendiente</p>
-        <div class="timeline-item__media timeline-item__media--placeholder"></div>
-        <p class="timeline-item__note">${DEFAULT_MEMORY_NOTE}</p>
-        <p class="timeline-item__caption">${DEFAULT_MEMORY_DESCRIPTION}</p>
-        <span class="timeline-item__tag">Hueco reservado</span>
+      <div class="timeline-item__content polaroid-card__inner" aria-hidden="true">
+        <section class="polaroid-card__face polaroid-card__face--front">
+          <div class="polaroid-card__photo-frame">
+            <div class="timeline-item__media timeline-item__media--placeholder polaroid-card__media"></div>
+          </div>
+          <p class="timeline-item__note polaroid-card__title">${DEFAULT_MEMORY_NOTE}</p>
+        </section>
+        <section class="polaroid-card__face polaroid-card__face--back">
+          <p class="timeline-item__date polaroid-card__date">Fecha pendiente</p>
+          <p class="timeline-item__caption polaroid-card__description">${DEFAULT_MEMORY_DESCRIPTION}</p>
+        </section>
       </div>
     `;
     contenedor.appendChild(placeholder);
