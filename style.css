@@ -1976,15 +1976,14 @@ body.card-overlay-open {
 .memory-flip__face--front {
   align-items: center;
   justify-content: center;
-  background:
-    radial-gradient(circle at top, rgba(255, 255, 255, 0.94), rgba(243, 235, 223, 0.98)),
-    linear-gradient(180deg, #fffdf9, #f3eadf);
+  background: transparent;
 }
 
 .memory-flip__face--back {
   transform: rotateY(180deg);
-  justify-content: space-between;
-  background: linear-gradient(180deg, rgba(255, 250, 243, 0.98), rgba(248, 241, 231, 0.98));
+  align-items: center;
+  justify-content: center;
+  background: transparent;
 }
 
 .memory-flip__date,
@@ -1998,27 +1997,30 @@ body.card-overlay-open {
 }
 
 .memory-polaroid {
-  width: min(100%, 560px);
-  background: #fff;
-  padding: 18px 18px 28px;
-  border-radius: 10px;
+  width: fit-content;
+  max-width: min(100%, 560px);
+  background: linear-gradient(180deg, #ffffff, #fffdf8);
+  padding: 18px 18px 34px;
+  border-radius: 18px 18px 24px 24px;
+  border: 1px solid rgba(78, 61, 47, 0.12);
   box-shadow:
-    0 24px 42px rgba(58, 34, 24, 0.2),
+    0 28px 40px rgba(74, 53, 39, 0.16),
     0 2px 0 rgba(255, 255, 255, 0.8) inset;
   transform: rotate(-1.2deg);
 }
 
 .memory-flip__media {
-  width: 100%;
+  width: fit-content;
+  max-width: 100%;
   overflow: hidden;
-  border-radius: 2px;
+  border-radius: 6px;
   display: grid;
   place-items: center;
-  padding: 10px;
-  min-height: min(62vh, 620px);
-  background: #f4efe8;
-  border: 1px solid rgba(69, 43, 29, 0.08);
-  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.6);
+  padding: 0;
+  min-height: 0;
+  background: transparent;
+  border: 0;
+  box-shadow: none;
 }
 
 .memory-flip__media img {
@@ -2026,16 +2028,16 @@ body.card-overlay-open {
   width: auto;
   height: auto;
   max-width: 100%;
-  max-height: min(58vh, 580px);
+  max-height: min(60vh, 560px);
   object-fit: contain;
-  border-radius: 2px;
+  border-radius: 4px;
   box-shadow: 0 8px 20px rgba(45, 27, 16, 0.1);
 }
 
 .memory-polaroid__caption {
-  padding: 18px 10px 0;
+  padding: 16px 6px 0;
   text-align: center;
-  min-height: 88px;
+  min-height: 0;
 }
 
 .memory-polaroid__caption h3 {
@@ -2054,7 +2056,15 @@ body.card-overlay-open {
 .memory-note {
   display: grid;
   gap: 18px;
-  padding: 6px 6px 0;
+  width: min(100%, 560px);
+  padding: 24px 22px 28px;
+  background:
+    linear-gradient(180deg, rgba(243, 234, 215, 0.98), rgba(235, 223, 198, 0.98)),
+    repeating-linear-gradient(0deg, rgba(125, 97, 69, 0.04) 0 2px, transparent 2px 24px);
+  border: 1px solid rgba(120, 92, 63, 0.14);
+  border-radius: 18px 18px 24px 24px;
+  box-shadow: 0 28px 40px rgba(74, 53, 39, 0.16);
+  transform: rotate(1deg);
 }
 
 .memory-note__date {
@@ -2125,10 +2135,11 @@ body.card-overlay-open {
   justify-content: center;
   gap: 12px;
   flex-wrap: wrap;
+  width: min(100%, 560px);
 }
 
 .memory-flip__actions--back {
-  justify-content: space-between;
+  justify-content: center;
 }
 
 @keyframes spin {
