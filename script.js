@@ -575,15 +575,6 @@ function cerrarTarjetas() {
   document.body.classList.remove("card-overlay-open");
 }
 
-function alternarPolaroid(item) {
-  if (!item || item.classList.contains("timeline-item--placeholder")) {
-    return;
-  }
-
-  const activa = item.classList.toggle("is-flipped");
-  item.setAttribute("aria-pressed", activa ? "true" : "false");
-}
-
 function abrirTarjeta(card) {
   const yaAbierta = card.classList.contains("is-open");
   cerrarTarjetas();
@@ -708,8 +699,7 @@ function renderizarTimeline() {
     item.dataset.entryId = entry.id;
     item.setAttribute("role", "button");
     item.setAttribute("tabindex", "0");
-    item.setAttribute("aria-pressed", "false");
-    item.setAttribute("aria-label", `Girar recuerdo del ${formatearFecha(entry.date)}`);
+    item.setAttribute("aria-label", `Abrir recuerdo del ${formatearFecha(entry.date)}`);
     item.innerHTML = `
       <div class="timeline-item__dot">${formatearFecha(entry.date)}</div>
       <div class="timeline-item__content polaroid-card__inner">
@@ -721,18 +711,14 @@ function renderizarTimeline() {
           </div>
           <p class="timeline-item__note polaroid-card__title">${texto}</p>
         </section>
-        <section class="polaroid-card__face polaroid-card__face--back">
-          <p class="timeline-item__date polaroid-card__date">${formatearFecha(entry.date)}</p>
-          <p class="timeline-item__caption polaroid-card__description">${descripcion}</p>
-        </section>
       </div>
     `;
 
-    item.addEventListener("click", () => alternarPolaroid(item));
+    item.addEventListener("click", () => abrirModalRecuerdo(entry.id));
     item.addEventListener("keydown", (event) => {
       if (event.key === "Enter" || event.key === " ") {
         event.preventDefault();
-        alternarPolaroid(item);
+        abrirModalRecuerdo(entry.id);
       }
     });
 
@@ -750,10 +736,6 @@ function renderizarTimeline() {
             <div class="timeline-item__media timeline-item__media--placeholder polaroid-card__media"></div>
           </div>
           <p class="timeline-item__note polaroid-card__title">${DEFAULT_MEMORY_NOTE}</p>
-        </section>
-        <section class="polaroid-card__face polaroid-card__face--back">
-          <p class="timeline-item__date polaroid-card__date">Fecha pendiente</p>
-          <p class="timeline-item__caption polaroid-card__description">${DEFAULT_MEMORY_DESCRIPTION}</p>
         </section>
       </div>
     `;

@@ -1346,14 +1346,13 @@ body.card-overlay-open {
 .timeline-item__dot {
   position: relative;
   width: 104px;
-  padding: 12px 14px;
-  border-radius: 20px;
-  background: linear-gradient(180deg, rgba(255, 250, 243, 0.96), rgba(249, 243, 233, 0.92));
-  border: 1px solid rgba(150, 120, 102, 0.18);
-  box-shadow: 0 16px 30px rgba(118, 90, 68, 0.12);
-  font-size: 0.85rem;
+  padding: 6px 0;
+  background: transparent;
+  border: 0;
+  box-shadow: none;
+  font-size: 0.8rem;
   line-height: 1.4;
-  color: #765950;
+  color: #8a6b59;
   text-transform: uppercase;
   letter-spacing: 0.08em;
   font-weight: 800;
@@ -1363,19 +1362,19 @@ body.card-overlay-open {
 .timeline-item__dot::after {
   content: "";
   position: absolute;
-  right: -17px;
+  right: -12px;
   top: 50%;
-  width: 28px;
-  height: 3px;
+  width: 14px;
+  height: 14px;
   transform: translateY(-50%);
-  background: var(--accent-red);
-  border-radius: 999px;
+  background: #b4555a;
+  border-radius: 50%;
+  box-shadow: 0 0 0 6px rgba(180, 85, 90, 0.12);
 }
 
 .timeline-item__content {
   position: relative;
   width: min(100%, 390px);
-  min-height: 520px;
   cursor: pointer;
   transform-origin: top center;
   transition: transform 0.28s ease;
@@ -1387,10 +1386,6 @@ body.card-overlay-open {
 
 .timeline-item:hover .timeline-item__content {
   transform: translateY(-8px) rotate(0deg);
-}
-
-.timeline-item.is-flipped:hover .timeline-item__content {
-  transform: translateY(-8px) rotateY(180deg);
 }
 
 .timeline-item:nth-child(odd) .timeline-item__content {
@@ -1467,7 +1462,6 @@ body.card-overlay-open {
 }
 
 .polaroid-card {
-  perspective: 1600px;
   outline: none;
 }
 
@@ -1477,21 +1471,13 @@ body.card-overlay-open {
 
 .polaroid-card__inner {
   position: relative;
-  min-height: 520px;
-  transform-style: preserve-3d;
-  transition: transform 0.82s cubic-bezier(0.22, 1, 0.36, 1), box-shadow 0.28s ease;
-}
-
-.polaroid-card.is-flipped .polaroid-card__inner {
-  transform: rotateY(180deg);
+  transition: box-shadow 0.28s ease;
 }
 
 .polaroid-card__face {
-  position: absolute;
-  inset: 0;
+  position: relative;
   display: flex;
   flex-direction: column;
-  backface-visibility: hidden;
   border-radius: 18px 18px 24px 24px;
   overflow: hidden;
   box-shadow: 0 28px 40px rgba(74, 53, 39, 0.16);
@@ -1503,40 +1489,26 @@ body.card-overlay-open {
   border: 1px solid rgba(78, 61, 47, 0.12);
 }
 
-.polaroid-card__face--back {
-  gap: 18px;
-  padding: 28px 24px 34px;
-  background:
-    linear-gradient(180deg, rgba(243, 234, 215, 0.98), rgba(235, 223, 198, 0.98)),
-    repeating-linear-gradient(0deg, rgba(125, 97, 69, 0.04) 0 2px, transparent 2px 24px);
-  border: 1px solid rgba(120, 92, 63, 0.14);
-  transform: rotateY(180deg);
-}
-
 .polaroid-card__photo-frame {
-  flex: 1;
   display: flex;
 }
 
 .polaroid-card__media {
   width: 100%;
-  min-height: 332px;
   display: grid;
   place-items: center;
-  padding: 12px;
-  border-radius: 8px;
-  background:
-    radial-gradient(circle at top, rgba(255, 255, 255, 0.66), transparent 44%),
-    linear-gradient(180deg, #f6efe6, #efe4d6);
-  border: 1px solid rgba(112, 88, 63, 0.12);
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.86);
+  padding: 0;
+  border-radius: 6px;
+  background: transparent;
+  border: 0;
+  box-shadow: none;
 }
 
 .polaroid-card__media img {
-  width: 100%;
-  height: 100%;
+  width: auto;
+  height: auto;
   max-width: 100%;
-  max-height: 320px;
+  max-height: 430px;
   object-fit: contain;
   object-position: center;
   border-radius: 4px;
@@ -1544,34 +1516,13 @@ body.card-overlay-open {
 }
 
 .polaroid-card__title {
-  margin-top: 20px;
+  margin-top: 16px;
   font-family: "Cormorant Garamond", serif;
   font-size: clamp(1.8rem, 3vw, 2.2rem);
   line-height: 1;
   font-weight: 600;
   text-align: center;
   color: #2f2a22;
-}
-
-.polaroid-card__date,
-.polaroid-card__description {
-  font-family: "Caveat", cursive;
-  color: #5a4534;
-  text-align: left;
-}
-
-.polaroid-card__date {
-  font-size: clamp(1.65rem, 2.2vw, 2rem);
-  line-height: 1.1;
-  transform: rotate(-2.2deg);
-}
-
-.polaroid-card__description {
-  font-size: clamp(1.6rem, 2.4vw, 2.1rem);
-  line-height: 1.18;
-  letter-spacing: 0.01em;
-  transform: rotate(1.1deg);
-  text-wrap: balance;
 }
 
 .final-message {
@@ -2320,8 +2271,8 @@ body.card-overlay-open {
 }
 
 .tab-panel--recuerdos .timeline-item__dot {
-  background: rgba(255, 247, 236, 0.96);
-  border-radius: 24px 18px 22px 20px / 18px 22px 20px 24px;
+  background: transparent;
+  border-radius: 0;
 }
 
 .tab-panel--recuerdos .timeline-item__content {
@@ -2936,9 +2887,10 @@ body.card-overlay-open {
   }
 
   .timeline-item__dot::after {
-    left: -18px;
+    left: -16px;
     right: auto;
-    width: 18px;
+    width: 12px;
+    height: 12px;
   }
 
   .timeline-item__content,
@@ -2960,14 +2912,6 @@ body.card-overlay-open {
 
   .timeline-item__media img {
     max-height: 300px;
-  }
-
-  .polaroid-card__inner {
-    min-height: 480px;
-  }
-
-  .polaroid-card__media {
-    min-height: 280px;
   }
 
   .vinyl-showcase {
