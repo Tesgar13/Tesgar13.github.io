@@ -11,8 +11,8 @@ let audioPlayer = null;
 let audioObjectUrl = "";
 const PORTADA_DESTACADA_ID = "memory:fotofav";
 const DEFAULT_MEMORY_NOTE = "Escribe aqui una frase vuestra.";
-const DEFAULT_MEMORY_DESCRIPTION = "Pon aqui una descripcion pequena que luego cambiaras.";
-const DEFAULT_SONG_NOTE = "Escribe aqui por que esta cancion es vuestra.";
+const DEFAULT_MEMORY_DESCRIPTION = "Pon aqui una Descripción pequena que luego cambiaras.";
+const DEFAULT_SONG_NOTE = "Escribe aqui por que esta canción es vuestra.";
 const DEBUG_PLAN_RESET_KEY = "debugPlanResetDone";
 const TIMELINE_SEED = [
   { id: "seed:dedo", type: "seed", date: "2023-03-07", title: "", note: "", description: "", image: "img/dedo.jpeg" },
@@ -32,14 +32,14 @@ const TIMELINE_SEED = [
   { id: PORTADA_DESTACADA_ID, type: "seed", date: "2024-04-27", title: "", note: "", description: "", image: "img/fotofav.jpeg" }
 ];
 const PLAN_SEED = [
-  { id: "plan1", number: 1, slug: "plan1", title: "Donde todo empezo", frontText: "¿Recuerdas donde fue nuestra primera comida juntos?", backText: "Nuestra primera comida juntos, aunque no fue todo lo bien que podia ir. Esta vez prometo no parecer raro y no comer nada, ya no voy a estar nervioso (espero jjj).", metaLabel: "Pista", metaText: "Uno de tus sitios de hamburguesas favoritos.", status: "pendiente", active: true, visible: true, order: 1, imagePath: "img/GH.jpg", message: "Para completarlo, sube una foto y guarda el recuerdo." },
-  { id: "plan2", number: 2, slug: "plan2", title: "¿Hay sitio para aparcar?", frontText: "Uno de tus sitios favoritos, primera vez cenando juntos, ¿donde sera?", backText: "Yo habia salido de entrenar, fui a STZ y mi mayor preocupacion era donde aparcar (no habia tantos sitios como decias).", metaLabel: "Promesa", metaText: "Esta vez no me preocupare por aparcar (me vienes a buscar).", status: "pendiente", active: true, visible: true, order: 2, imagePath: "img/Marias.jpg", message: "Para completarlo, sube una foto y guarda el recuerdo." },
-  { id: "plan3", number: 3, slug: "plan3", title: "¿Comida de viejas o de Naroa?", frontText: "Ummm... que puede ser?", backText: "Ya sean del mercadona, de bote, de la uni, de tu ama, de un restaurante, con curry... de cualquier manera estan buenas.", metaLabel: "Problema", metaText: "Nunca las hemos comido juntos, si tu tenias lentejas yo tenia otra cosa, NO PUEDE SER ESO.", status: "pendiente", active: true, visible: true, order: 3, imagePath: "img/Lentejas.jpg", message: "Para completarlo, sube una foto y guarda el recuerdo." },
-  { id: "plan4", number: 4, slug: "plan4", title: "Solo para darle sabor", frontText: "Una de las cosas que mas veces hemos comido, en uno de los sitios donde mas hemos estado.", backText: "Un clasico, bocadillo de jamon CON pimiento, aunque despues me lo comia yo. Cuantas veces lo habremos hecho, aunque a veces no daba ni tiempo a comerlo...", metaLabel: "Plan", metaText: "Comernos un bocadillito juntos aunque no tiene por que ser donde siempre, pero si con la de siempre.", status: "pendiente", active: true, visible: true, order: 4, imagePath: "img/Jamon.jpg", message: "Para completarlo, sube una foto y guarda el recuerdo." },
+  { id: "plan1", number: 1, slug: "plan1", title: "Donde todo empezó", frontText: "¿Recuerdas dónde fue nuestra primera comida juntos?", backText: "Nuestra primera comida juntos, aunque no fue todo lo bien que podía ir. Esta vez prometo no parecer raro y no comer nada, ya no voy a estar nervioso (espero jjj).", metaLabel: "Pista", metaText: "Uno de tus sitios de hamburguesas favoritos.", status: "pendiente", active: true, visible: true, order: 1, imagePath: "img/GH.jpg", message: "Para completarlo, sube una foto y guarda el recuerdo." },
+  { id: "plan2", number: 2, slug: "plan2", title: "¿Hay sitio para aparcar?", frontText: "Uno de tus sitios favoritos, primera vez cenando juntos, ¿donde sera?", backText: "Yo habia salido de entrenar, fui a STZ y mi mayor preocupacion era dónde aparcar (no había tantos sitios como decías).", metaLabel: "Promesa", metaText: "Esta vez no me preocupare por aparcar (me vienes a buscar).", status: "pendiente", active: true, visible: true, order: 2, imagePath: "img/Marias.jpg", message: "Para completarlo, sube una foto y guarda el recuerdo." },
+  { id: "plan3", number: 3, slug: "plan3", title: "¿Comida de viejas o de Naroa?", frontText: "Ummm... que puede ser?", backText: "Ya sean del Mercadona, de bote, de la uni, de tu ama, de un restaurante, con curry... de cualquier manera estan buenas.", metaLabel: "Problema", metaText: "Nunca las hemos comido juntos, si tú tenías lentejas, yo tenía otra cosa, NO PUEDE SER ESO.", status: "pendiente", active: true, visible: true, order: 3, imagePath: "img/Lentejas.jpg", message: "Para completarlo, sube una foto y guarda el recuerdo." },
+  { id: "plan4", number: 4, slug: "plan4", title: "Solo para darle sabor", frontText: "Una de las cosas que más veces hemos comido, en uno de los sitios donde mas hemos estado.", backText: "Un clásico, bocadillo de jamon CON pimiento, aunque después me lo comía yo. Cuantas veces lo habremos hecho, aunque a veces no daba ni tiempo a comerlo...", metaLabel: "Plan", metaText: "Comernos un bocadillito juntos aunque no tiene por que ser donde siempre, pero si con la de siempre.", status: "pendiente", active: true, visible: true, order: 4, imagePath: "img/Jamon.jpg", message: "Para completarlo, sube una foto y guarda el recuerdo." },
   { id: "plan5", number: 5, slug: "plan5", title: "¿Paso con el coche y comemos?", frontText: "Pausa para comer, llevo comida, un paseo.", backText: "Una Naroa no tan jefa como ahora, salio a comer con un chico que le llevo la comida.", metaLabel: "Plan", metaText: "CBO, en el coche, en la calle o donde sea.", status: "pendiente", active: true, visible: true, order: 5, imagePath: "img/MCD.jpg", message: "Para completarlo, sube una foto y guarda el recuerdo." },
   { id: "plan6", number: 6, slug: "plan6", title: "En que momento dije que pagaba yo...", frontText: "De los mejores desayunos, pero mi tarjeta sigue sufriendo.", backText: "TOP desayunos de mi vida, pero en que momento dije que pagaba yo. Es bromiii contigo no me importa arruinarme jjj", metaLabel: "Plan", metaText: "Desayunito rico donde sea, con jamon obviamente y zumo jjj.", status: "pendiente", active: true, visible: true, order: 6, imagePath: "img/Desayuno.jpg", message: "Para completarlo, sube una foto y guarda el recuerdo." },
-  { id: "plan7", number: 7, slug: "plan7", title: "¿Te apetece una hamburguesa?", frontText: "Cuantas veces hemos comido hamburguesas juntos... y en que sitios tan ricos.", backText: "No podia faltar una parada en la rutita para comer hamburguesas (la primera no cuenta). Take a Buey, Champions Burger, Aitaren...", metaLabel: "Propuesta", metaText: "Hamburguesa en un sitio rico, el que quieras, hayamos comido ya o no. ¿Aceptas?.", status: "pendiente", active: true, visible: true, order: 7, imagePath: "img/Hamburguesa.jpg", message: "Para completarlo, sube una foto y guarda el recuerdo." },
-  { id: "plan8", number: 8, slug: "plan8", title: "Unas aceitunas", frontText: "Aceitunas, vinito, algun juego y la mejor compania. ¿Que mas se puede pedir?", backText: "De los mejores planes juntos, vinito y aceitunas, no se puede anadir nada mas.", metaLabel: "Plan", metaText: "Unas aceitunitas ricas con la mejor compania.", status: "pendiente", active: true, visible: true, order: 8, imagePath: "img/Aceitunas.jpg", message: "Para completarlo, sube una foto y guarda el recuerdo." },
+  { id: "plan7", number: 7, slug: "plan7", title: "¿Te apetece una hamburguesa?", frontText: "Cuántas veces hemos comido hamburguesas juntos... y en que sitios tan ricos.", backText: "No podía faltar una parada en la rutita para comer hamburguesas (la primera no cuenta). Take a Buey, Champions Burger, Aitaren...", metaLabel: "Propuesta", metaText: "Hamburguesa en un sitio rico, el que quieras, hayamos comido ya o no. ¿Aceptas?.", status: "pendiente", active: true, visible: true, order: 7, imagePath: "img/Hamburguesa.jpg", message: "Para completarlo, sube una foto y guarda el recuerdo." },
+  { id: "plan8", number: 8, slug: "plan8", title: "Unas aceitunas", frontText: "Aceitunas, vinito, algun juego y la mejor compañía. ¿Que mas se puede pedir?", backText: "De los mejores planes juntos, vinito y aceitunas, no se puede anadir nada mas.", metaLabel: "Plan", metaText: "Unas aceitunitas ricas con la mejor compañía.", status: "pendiente", active: true, visible: true, order: 8, imagePath: "img/Aceitunas.jpg", message: "Para completarlo, sube una foto y guarda el recuerdo." },
   { id: "plan9", number: 9, slug: "plan9", title: "COCINO YO", frontText: "Ahora me toca a mi.", backText: "COMO PUEDE SER QUE YO NUNCA TE HAYA COCINADO?????. Tu me hiciste una hamburguesa muuuy rica, pero yo a ti nunca nada como puede ser eso???", metaLabel: "Pista", metaText: "Tengo ya algo en mente, lo hemos comido muchas veces.", status: "pendiente", active: true, visible: true, order: 9, imagePath: "img/Cocina.jpg", message: "Para completarlo, sube una foto y guarda el recuerdo." }
 ];
 const MEMORY_SEED = TIMELINE_SEED.map((entry, index) => ({
@@ -73,7 +73,7 @@ const LETTERS = [
     unlockAt: 9,
     title: "La carta final",
     preview: "Solo aparece cuando la ruta ya esta completa.",
-    message: "Terminamos esta ruta, pero no la historia. Lo bonito de llegar aqui es saber que siempre se puede empezar otra, con mas planes, mas fotos, mas canciones y mas nosotros."
+    message: "Terminamos esta ruta, pero no la historia. Lo bonito de llegar aqui es saber que siempre se puede empezar otra, con mas planes, mas fotos, mas canciónes y mas nosotros."
   }
 ];
 const SONG_LIBRARY = [
@@ -104,7 +104,7 @@ const SONG_LIBRARY = [
     slot: 3,
     title: "Paris in the Rain",
     artist: "Lauv",
-    note: "Sirve de ejemplo para una cancion suave, intima y muy facil de reemplazar por la vuestra.",
+    note: "Sirve de ejemplo para una canción suave, intima y muy facil de reemplazar por la vuestra.",
     coverImage: "img/cafe.jpeg",
     audio: "",
     spotifyUrl: "",
@@ -195,7 +195,7 @@ function obtenerTextoRecuerdo(entry) {
   return DEFAULT_MEMORY_NOTE;
 }
 
-function obtenerDescripcionRecuerdo(entry) {
+function obtenerDescripciónRecuerdo(entry) {
   if (entry.type !== "manual" && !(entry.note && entry.note.trim())) {
     return DEFAULT_MEMORY_DESCRIPTION;
   }
@@ -221,7 +221,7 @@ function escapeHtml(value) {
     .replace(/'/g, "&#39;");
 }
 
-function normalizarCancion(song, fallbackIndex = 0) {
+function normalizarcanción(song, fallbackIndex = 0) {
   const slotNumber = Number(song?.slot);
   const orderNumber = Number(song?.order || slotNumber || fallbackIndex + 1);
 
@@ -241,8 +241,8 @@ function normalizarCancion(song, fallbackIndex = 0) {
   };
 }
 
-function ordenarCanciones(canciones) {
-  return [...canciones].sort((a, b) => {
+function ordenarcanciónes(canciónes) {
+  return [...canciónes].sort((a, b) => {
     const porOrden = Number(a.order || 0) - Number(b.order || 0);
     if (porOrden !== 0) {
       return porOrden;
@@ -257,21 +257,21 @@ function ordenarCanciones(canciones) {
   });
 }
 
-function inicializarBibliotecaCanciones() {
-  songLibraryState = ordenarCanciones(SONG_LIBRARY.map((song, index) => normalizarCancion(song, index)));
+function inicializarBibliotecacanciónes() {
+  songLibraryState = ordenarcanciónes(SONG_LIBRARY.map((song, index) => normalizarcanción(song, index)));
   if (songActualIndex >= songLibraryState.length) {
     songActualIndex = songLibraryState.length ? 0 : -1;
   }
 }
 
-function obtenerNumeroHuecoCancion(canciones) {
-  const maxSlot = canciones.reduce((maximo, song) => Math.max(maximo, Number(song.slot || 0)), 0);
+function obtenerNúmeroHuecocanción(canciónes) {
+  const maxSlot = canciónes.reduce((maximo, song) => Math.max(maximo, Number(song.slot || 0)), 0);
   return maxSlot + 1;
 }
 
-function obtenerCanciones() {
+function obtenercanciónes() {
   if (!songLibraryState.length && SONG_LIBRARY.length) {
-    inicializarBibliotecaCanciones();
+    inicializarBibliotecacanciónes();
   }
 
   return songLibraryState.filter((song) => song.visible !== false);
@@ -327,7 +327,7 @@ function obtenerTimeline() {
   return [...memoryLibraryState].filter((entry) => entry.visible !== false).sort((a, b) => new Date(b.date) - new Date(a.date));
 }
 
-async function guardarCancionEnFirestore(song) {
+async function guardarcanciónEnFirestore(song) {
   if (!window.firebaseDb || !window.firebaseFns) {
     throw new Error("Firebase no esta cargado.");
   }
@@ -349,7 +349,7 @@ async function guardarCancionEnFirestore(song) {
   });
 }
 
-async function cargarCancionesFirestore() {
+async function cargarcanciónesFirestore() {
   if (!window.firebaseDb || !window.firebaseFns) {
     return;
   }
@@ -359,7 +359,7 @@ async function cargarCancionesFirestore() {
 
   try {
     const snapshot = await getDocs(query(collection(db, "songs"), orderBy("createdAt", "desc")));
-    const base = obtenerCanciones();
+    const base = obtenercanciónes();
     const porId = new Map(base.map((song) => [song.id, song]));
     const idsRemotos = new Set();
 
@@ -372,7 +372,7 @@ async function cargarCancionesFirestore() {
         return;
       }
 
-      porId.set(songId, normalizarCancion({
+      porId.set(songId, normalizarcanción({
         id: songId,
         slot: Number(data.slot || 0),
         title: data.title || "",
@@ -388,13 +388,13 @@ async function cargarCancionesFirestore() {
 
     await Promise.all(base
       .filter((song) => !idsRemotos.has(song.id))
-      .map((song) => guardarCancionEnFirestore(song).catch((error) => {
-        console.error(`No se pudo respaldar la cancion ${song.title} en Firestore.`, error);
+      .map((song) => guardarcanciónEnFirestore(song).catch((error) => {
+        console.error(`No se pudo respaldar la canción ${song.title} en Firestore.`, error);
       })));
 
-    songLibraryState = ordenarCanciones(Array.from(porId.values()));
+    songLibraryState = ordenarcanciónes(Array.from(porId.values()));
   } catch (error) {
-    console.error("No se pudieron cargar las canciones desde Firestore.", error);
+    console.error("No se pudieron cargar las canciónes desde Firestore.", error);
   }
 }
 
@@ -477,9 +477,9 @@ async function prepararFuenteAudio(audioUrl) {
   }
 }
 
-function renderizarDiscoCancion(song) {
+function renderizarDiscocanción(song) {
   const cover = resolveSongCover(song);
-  const alt = song?.title ? `Portada de ${song.title}` : "Portada de la cancion";
+  const alt = song?.title ? `Portada de ${song.title}` : "Portada de la canción";
 
   if (cover) {
     return `
@@ -500,15 +500,15 @@ function renderizarDiscoCancion(song) {
 }
 
 function mensajeDetrasDeRecuerdo(entry) {
-  const descripcion = obtenerDescripcionRecuerdo(entry);
+  const Descripción = obtenerDescripciónRecuerdo(entry);
 
   if (entry.type === "plan") {
-    return descripcion === DEFAULT_MEMORY_DESCRIPTION
+    return Descripción === DEFAULT_MEMORY_DESCRIPTION
       ? "Esta parada ya forma parte de vuestra ruta. Aqui puedes escribir lo que os guardo esta foto."
-      : descripcion;
+      : Descripción;
   }
 
-  return descripcion;
+  return Descripción;
 }
 
 function leerStorageJson(key) {
@@ -1194,7 +1194,7 @@ function renderizarPortada(entradas) {
   if (!entradas.length) {
     board.innerHTML = `
       <div class="cover-board__empty">
-        <p>Todavia no hay fotos clavadas en vuestra historia. En cuanto guardes recuerdos, iran apareciendo aqui.</p>
+        <p>Todavía no hay fotos clavadas en vuestra historia. En cuanto guardes recuerdos, iran apareciendo aqui.</p>
       </div>
     `;
     return;
@@ -1249,7 +1249,7 @@ function renderizarPortada(entradas) {
   });
 }
 
-function renderizarCanciones() {
+function renderizarcanciónes() {
   const contenedor = document.getElementById("songs-list");
   const empty = document.getElementById("songs-empty");
 
@@ -1257,21 +1257,21 @@ function renderizarCanciones() {
     return;
   }
 
-  const canciones = obtenerCanciones();
+  const canciónes = obtenercanciónes();
   contenedor.innerHTML = "";
-  if (songActualIndex >= canciones.length) {
-    songActualIndex = canciones.length ? 0 : -1;
+  if (songActualIndex >= canciónes.length) {
+    songActualIndex = canciónes.length ? 0 : -1;
   }
-  actualizarTocadiscos(canciones);
+  actualizarTocadiscos(canciónes);
 
-  if (!canciones.length) {
+  if (!canciónes.length) {
     empty.hidden = false;
-    empty.textContent = "Todavia no hay canciones en la biblioteca. Anade la primera con el formulario.";
+    empty.textContent = "Todavía no hay canciónes en la biblioteca. Anade la primera con el formulario.";
   } else {
     empty.hidden = true;
   }
 
-  canciones.forEach((song, index) => {
+  canciónes.forEach((song, index) => {
     const isActive = index === songActualIndex;
     const isPlaying = isActive && turntablePlaying;
     const item = document.createElement("article");
@@ -1282,7 +1282,7 @@ function renderizarCanciones() {
     item.innerHTML = `
       <div class="song-item__sleeve">
         <div class="song-item__record" aria-hidden="true">
-          ${renderizarDiscoCancion(song)}
+          ${renderizarDiscocanción(song)}
         </div>
         <span class="song-item__play-state">${isPlaying ? "Sonando" : (song.audio ? "Play" : "Sin audio")}</span>
       </div>
@@ -1302,30 +1302,30 @@ function renderizarCanciones() {
         return;
       }
 
-      alternarCancion(index);
+      alternarcanción(index);
     });
     item.addEventListener("keydown", (event) => {
       if (event.key === "Enter" || event.key === " ") {
         event.preventDefault();
-        alternarCancion(index);
+        alternarcanción(index);
       }
     });
     contenedor.appendChild(item);
   });
 
-  for (let i = canciones.length; i < MOCK_SLOTS; i += 1) {
+  for (let i = canciónes.length; i < MOCK_SLOTS; i += 1) {
     const item = document.createElement("article");
     item.className = "song-item song-item--placeholder";
-    const slot = obtenerNumeroHuecoCancion(canciones) + (i - canciones.length);
+    const slot = obtenerNúmeroHuecocanción(canciónes) + (i - canciónes.length);
     item.innerHTML = `
       <div class="song-item__sleeve">
         <div class="song-item__record" aria-hidden="true">
-          ${renderizarDiscoCancion({ title: "Tu foto", artist: "Aqui", coverImage: "" })}
+          ${renderizarDiscocanción({ title: "Tu foto", artist: "Aqui", coverImage: "" })}
         </div>
       </div>
       <div class="song-item__content">
         <p class="song-item__eyebrow">Hueco ${slot}</p>
-        <h4>Cancion pendiente</h4>
+        <h4>canción pendiente</h4>
         <p class="song-item__artist">Artista pendiente</p>
         <p>${DEFAULT_SONG_NOTE}</p>
       </div>
@@ -1333,11 +1333,11 @@ function renderizarCanciones() {
     contenedor.appendChild(item);
   }
 
-  marcarCancionActiva();
-  prepararCarruselCanciones();
+  marcarcanciónActiva();
+  prepararCarruselcanciónes();
 }
 
-function marcarCancionActiva() {
+function marcarcanciónActiva() {
   document.querySelectorAll(".songs-list .song-item").forEach((item, index) => {
     const activa = index === songActualIndex;
     item.classList.toggle("song-item--active", activa);
@@ -1363,16 +1363,16 @@ function asegurarAudioGlobal() {
 
   audioPlayer.addEventListener("play", () => {
     turntablePlaying = true;
-    actualizarTocadiscos(obtenerCanciones());
-    marcarCancionActiva();
+    actualizarTocadiscos(obtenercanciónes());
+    marcarcanciónActiva();
     actualizarControlesAudio();
   });
 
   audioPlayer.addEventListener("pause", () => {
     if (!audioPlayer.ended) {
       turntablePlaying = false;
-      actualizarTocadiscos(obtenerCanciones());
-      marcarCancionActiva();
+      actualizarTocadiscos(obtenercanciónes());
+      marcarcanciónActiva();
     }
     actualizarControlesAudio();
   });
@@ -1380,8 +1380,8 @@ function asegurarAudioGlobal() {
   audioPlayer.addEventListener("ended", () => {
     turntablePlaying = false;
     audioPlayer.currentTime = 0;
-    actualizarTocadiscos(obtenerCanciones());
-    marcarCancionActiva();
+    actualizarTocadiscos(obtenercanciónes());
+    marcarcanciónActiva();
     actualizarControlesAudio();
   });
 
@@ -1436,9 +1436,9 @@ function cambiarVolumen(delta) {
   actualizarControlesAudio();
 }
 
-async function reproducirCancion(index, { restart = false } = {}) {
-  const canciones = obtenerCanciones();
-  const song = canciones[index];
+async function reproducircanción(index, { restart = false } = {}) {
+  const canciónes = obtenercanciónes();
+  const song = canciónes[index];
 
   if (!song) {
     return;
@@ -1448,15 +1448,15 @@ async function reproducirCancion(index, { restart = false } = {}) {
   const audioUrl = resolveSongAudio(song);
   if (!audioUrl) {
     turntablePlaying = false;
-    actualizarTocadiscos(canciones);
-    marcarCancionActiva();
+    actualizarTocadiscos(canciónes);
+    marcarcanciónActiva();
     return;
   }
 
   const player = asegurarAudioGlobal();
-  const mismaCancion = player.dataset.songId === song.id;
+  const mismacanción = player.dataset.songId === song.id;
 
-  if (!mismaCancion) {
+  if (!mismacanción) {
     const playableAudioUrl = await prepararFuenteAudio(audioUrl);
     player.src = playableAudioUrl;
     player.dataset.audioUrl = audioUrl;
@@ -1470,14 +1470,14 @@ async function reproducirCancion(index, { restart = false } = {}) {
 
   player.play().catch((error) => {
     turntablePlaying = false;
-    console.error(`No se pudo reproducir la cancion ${song.title}. URL usada: ${player.dataset.audioUrl || audioUrl}`, error);
-    actualizarTocadiscos(canciones);
-    marcarCancionActiva();
+    console.error(`No se pudo reproducir la canción ${song.title}. URL usada: ${player.dataset.audioUrl || audioUrl}`, error);
+    actualizarTocadiscos(canciónes);
+    marcarcanciónActiva();
     actualizarControlesAudio();
   });
 }
 
-function detenerCancionActual() {
+function detenercanciónActual() {
   const player = asegurarAudioGlobal();
   if (player.src) {
     player.pause();
@@ -1491,24 +1491,24 @@ function detenerCancionActual() {
 
   liberarAudioTemporal();
   turntablePlaying = false;
-  actualizarTocadiscos(obtenerCanciones());
-  marcarCancionActiva();
+  actualizarTocadiscos(obtenercanciónes());
+  marcarcanciónActiva();
   actualizarControlesAudio();
 }
 
-function alternarCancion(index) {
+function alternarcanción(index) {
   const player = asegurarAudioGlobal();
-  const mismaCancion = songActualIndex === index && player.dataset.songId === obtenerCanciones()[index]?.id;
+  const mismacanción = songActualIndex === index && player.dataset.songId === obtenercanciónes()[index]?.id;
 
-  if (mismaCancion && !player.paused) {
+  if (mismacanción && !player.paused) {
     player.pause();
     return;
   }
 
-  reproducirCancion(index);
+  reproducircanción(index);
 }
 
-function actualizarTocadiscos(canciones) {
+function actualizarTocadiscos(canciónes) {
   const record = document.getElementById("turntable-record");
   const title = document.getElementById("turntable-title");
   const artist = document.getElementById("turntable-artist");
@@ -1522,11 +1522,11 @@ function actualizarTocadiscos(canciones) {
     return;
   }
 
-  if (!canciones.length) {
+  if (!canciónes.length) {
     record.classList.remove("is-spinning");
-    title.textContent = "Sin cancion";
-    artist.textContent = "Abre la biblioteca y anade la primera cancion.";
-    nowPlaying.textContent = "Todavia no esta sonando nada.";
+    title.textContent = "Sin canción";
+    artist.textContent = "Abre la biblioteca y anade la primera canción.";
+    nowPlaying.textContent = "Todavía no esta sonando nada.";
     coverImage.hidden = true;
     coverImage.removeAttribute("src");
     coverFallback.hidden = false;
@@ -1542,7 +1542,7 @@ function actualizarTocadiscos(canciones) {
     songActualIndex = 0;
   }
 
-  const song = canciones[songActualIndex];
+  const song = canciónes[songActualIndex];
   const spotifyUrl = song.spotifyUrl || "";
   const appleUrl = song.appleMusicUrl || "";
   const coverUrl = resolveSongCover(song);
@@ -1558,7 +1558,7 @@ function actualizarTocadiscos(canciones) {
   if (coverUrl) {
     coverImage.hidden = false;
     coverImage.src = coverUrl;
-    coverImage.alt = song.title ? `Portada de ${song.title}` : "Portada de la cancion";
+    coverImage.alt = song.title ? `Portada de ${song.title}` : "Portada de la canción";
     coverFallback.hidden = true;
     coverFallback.textContent = "";
   } else {
@@ -1586,22 +1586,22 @@ function actualizarTocadiscos(canciones) {
 }
 
 function moverTocadiscos(direccion) {
-  const canciones = obtenerCanciones();
+  const canciónes = obtenercanciónes();
 
-  if (!canciones.length) {
+  if (!canciónes.length) {
     return;
   }
 
   if (songActualIndex < 0) {
     songActualIndex = 0;
   } else {
-    songActualIndex = (songActualIndex + direccion + canciones.length) % canciones.length;
+    songActualIndex = (songActualIndex + direccion + canciónes.length) % canciónes.length;
   }
 
-  reproducirCancion(songActualIndex, { restart: true });
+  reproducircanción(songActualIndex, { restart: true });
 }
 
-function prepararCarruselCanciones() {
+function prepararCarruselcanciónes() {
   const contenedor = document.getElementById("songs-list");
   const prev = document.getElementById("songs-carousel-prev");
   const next = document.getElementById("songs-carousel-next");
@@ -1756,7 +1756,7 @@ function actualizarEstados() {
 
     if (mensaje) {
       if (estaCompletado) {
-        mensaje.textContent = "Este plan ya esta completado y su foto ya forma parte de la linea del tiempo.";
+        mensaje.textContent = "Este plan ya esta completado y su foto ya forma parte de la línea del tiempo.";
       } else if (estaActivado) {
         mensaje.textContent = "El plan esta activado. Cuando le des a completar, te pedira una foto y se guardara automaticamente con la fecha de hoy.";
       } else {
@@ -1815,7 +1815,7 @@ function renderizarCartas(completados) {
                 ${unlocked ? "Desbloqueada" : `Se abre con ${letter.unlockAt} planes`}
               </span>
               <h3 class="letter-card__title">${letter.title}</h3>
-              <p class="letter-card__text">${unlocked ? letter.preview : "Todavia esta cerrada. Seguid completando planes para abrirla."}</p>
+              <p class="letter-card__text">${unlocked ? letter.preview : "Todavía está bloqueada. Hay que seguir haciendo planes para abrirla."}</p>
             </div>
             <button class="activate-button letter-card__action" type="button" ${unlocked ? "" : "disabled"}>
               ${unlocked ? "Abrir carta" : "Bloqueada"}
@@ -1865,7 +1865,7 @@ function abrirModalRecuerdo(entryId) {
   image.alt = obtenerAltRecuerdo(entry);
   date.textContent = formatearFecha(entry.date);
   title.textContent = obtenerTextoRecuerdo(entry);
-  descriptionInput.value = obtenerDescripcionRecuerdo(entry);
+  descriptionInput.value = obtenerDescripciónRecuerdo(entry);
   saved.hidden = true;
   modal.dataset.entryId = entryId;
   modal.hidden = false;
@@ -1896,7 +1896,7 @@ function guardarTextoRecuerdoActual() {
     return;
   }
 
-  const descripcion = descriptionInput.value.trim();
+  const Descripción = descriptionInput.value.trim();
 
   const actualizadas = obtenerTimeline().map((entry) => {
     if (entry.id !== modal.dataset.entryId) {
@@ -1905,7 +1905,7 @@ function guardarTextoRecuerdoActual() {
 
       return {
         ...entry,
-        description: descripcion
+        description: Descripción
       };
     });
 
@@ -2096,14 +2096,14 @@ function prepararFormularioTimeline() {
         shell.hidden = true;
       }
       if (button) {
-        button.textContent = "Anadir recuerdo";
+        button.textContent = "Añadir recuerdo";
       }
     } catch (error) {
       alert(error.message || "No se pudo subir el recuerdo.");
     } finally {
       if (submitButton) {
         submitButton.disabled = false;
-        submitButton.textContent = "Guardar en la linea del tiempo";
+        submitButton.textContent = "Guardar en la línea del tiempo";
       }
     }
   });
@@ -2121,7 +2121,7 @@ function prepararTogglesDeFormulario() {
       const abierto = !shell.hidden;
       shell.hidden = abierto;
       button.textContent = abierto
-        ? (button.dataset.toggleForm === "song-form-shell" ? "Anadir nueva cancion" : "Anadir recuerdo")
+        ? (button.dataset.toggleForm === "song-form-shell" ? "Anadir nueva canción" : "Añadir recuerdo")
         : "Cerrar";
     });
   });
@@ -2168,11 +2168,11 @@ function prepararTocadiscos() {
   prev.addEventListener("click", () => moverTocadiscos(-1));
   next.addEventListener("click", () => moverTocadiscos(1));
   stop.addEventListener("click", () => {
-    detenerCancionActual();
+    detenercanciónActual();
   });
   play.addEventListener("click", () => {
-    const canciones = obtenerCanciones();
-    if (!canciones.length) {
+    const canciónes = obtenercanciónes();
+    if (!canciónes.length) {
       return;
     }
 
@@ -2180,7 +2180,7 @@ function prepararTocadiscos() {
       songActualIndex = 0;
     }
 
-    reproducirCancion(songActualIndex);
+    reproducircanción(songActualIndex);
   });
 
   progress.addEventListener("input", () => {
@@ -2205,7 +2205,7 @@ function prepararTocadiscos() {
   actualizarControlesAudio();
 }
 
-function prepararFormularioCanciones() {
+function prepararFormulariocanciónes() {
   const form = document.getElementById("song-form");
 
   if (!form) {
@@ -2228,7 +2228,7 @@ function prepararFormularioCanciones() {
     const submitButton = form.querySelector('button[type="submit"]');
 
     if (!titleInput.value.trim() || !artistInput.value.trim()) {
-      alert("La cancion necesita al menos titulo y artista.");
+      alert("La canción necesita al menos titulo y artista.");
       return;
     }
 
@@ -2253,13 +2253,13 @@ function prepararFormularioCanciones() {
       }
 
       if (!audio) {
-        throw new Error("Para anadir una cancion reproducible necesitas una ruta de audio o subir un archivo.");
+        throw new Error("Para anadir una canción reproducible necesitas una ruta de audio o subir un archivo.");
       }
 
-      const canciones = obtenerCanciones();
-      const nuevaCancion = normalizarCancion({
+      const canciónes = obtenercanciónes();
+      const nuevacanción = normalizarcanción({
         id: `song:${Date.now()}`,
-        slot: slotInput?.value ? Number(slotInput.value) : obtenerNumeroHuecoCancion(canciones),
+        slot: slotInput?.value ? Number(slotInput.value) : obtenerNúmeroHuecocanción(canciónes),
         title: titleInput.value.trim(),
         artist: artistInput.value.trim(),
         note: noteInput.value.trim(),
@@ -2268,18 +2268,18 @@ function prepararFormularioCanciones() {
         spotifyUrl: spotifyInput.value.trim(),
         appleMusicUrl: appleInput.value.trim(),
         isCustom: true
-      }, canciones.length);
+      }, canciónes.length);
 
       if (submitButton) {
         submitButton.disabled = true;
-        submitButton.textContent = "Guardando cancion...";
+        submitButton.textContent = "Guardando canción...";
       }
 
-      await guardarCancionEnFirestore(nuevaCancion);
-      songLibraryState = ordenarCanciones([...canciones, nuevaCancion]);
-      songActualIndex = songLibraryState.findIndex((song) => song.id === nuevaCancion.id);
-      renderizarCanciones();
-      actualizarTocadiscos(obtenerCanciones());
+      await guardarcanciónEnFirestore(nuevacanción);
+      songLibraryState = ordenarcanciónes([...canciónes, nuevacanción]);
+      songActualIndex = songLibraryState.findIndex((song) => song.id === nuevacanción.id);
+      renderizarcanciónes();
+      actualizarTocadiscos(obtenercanciónes());
       form.reset();
 
       const shell = document.getElementById("song-form-shell");
@@ -2288,21 +2288,21 @@ function prepararFormularioCanciones() {
         shell.hidden = true;
       }
       if (button) {
-        button.textContent = "Anadir nueva cancion";
+        button.textContent = "Anadir nueva canción";
       }
     } catch (error) {
-      alert(error.message || "No se pudo anadir la cancion.");
+      alert(error.message || "No se pudo anadir la canción.");
     } finally {
       if (submitButton) {
         submitButton.disabled = false;
-        submitButton.textContent = "Anadir cancion";
+        submitButton.textContent = "Anadir canción";
       }
     }
   });
 }
 
 function inicializarMusica() {
-  inicializarBibliotecaCanciones();
+  inicializarBibliotecacanciónes();
   asegurarAudioGlobal();
 }
 
@@ -2375,7 +2375,7 @@ async function seedFirebaseContent() {
   const colecciones = [
     { name: "plans", items: PLAN_SEED, normalize: normalizarPlan },
     { name: "memories", items: MEMORY_SEED, normalize: normalizarRecuerdo },
-    { name: "songs", items: SONG_LIBRARY, normalize: normalizarCancion }
+    { name: "songs", items: SONG_LIBRARY, normalize: normalizarcanción }
   ];
 
   for (const collectionInfo of colecciones) {
@@ -2485,7 +2485,7 @@ async function cargarRecuerdosFirestore() {
   }
 }
 
-async function cargarCancionesFirestore() {
+async function cargarcanciónesFirestore() {
   if (!window.firebaseDb || !window.firebaseFns) {
     inicializarMusica();
     return;
@@ -2496,31 +2496,31 @@ async function cargarCancionesFirestore() {
   try {
     const snapshot = await getDocs(query(collection(db, "songs"), orderBy("order", "asc")));
     songLibraryState = snapshot.docs.length
-      ? ordenarCanciones(await Promise.all(snapshot.docs.map(async (item, index) => {
-        const song = normalizarCancion({ id: item.data().songId || item.id, ...item.data() }, index);
+      ? ordenarcanciónes(await Promise.all(snapshot.docs.map(async (item, index) => {
+        const song = normalizarcanción({ id: item.data().songId || item.id, ...item.data() }, index);
         if (song.coverImage && !song.coverImage.startsWith("img/") && !/^https?:/i.test(song.coverImage)) {
-          song.coverImage = await resolverStoragePath(song.coverImage, "portada de la cancion");
+          song.coverImage = await resolverStoragePath(song.coverImage, "portada de la canción");
         }
         if (song.audio && !/^https?:/i.test(song.audio)) {
-          song.audio = await resolverStoragePath(song.audio, "audio de la cancion");
+          song.audio = await resolverStoragePath(song.audio, "audio de la canción");
         }
         return song;
       })))
-      : ordenarCanciones(SONG_LIBRARY.map((song, index) => normalizarCancion(song, index)));
+      : ordenarcanciónes(SONG_LIBRARY.map((song, index) => normalizarcanción(song, index)));
   } catch (error) {
-    console.error("No se pudieron cargar las canciones desde Firestore.", error);
-    songLibraryState = ordenarCanciones(SONG_LIBRARY.map((song, index) => normalizarCancion(song, index)));
+    console.error("No se pudieron cargar las canciónes desde Firestore.", error);
+    songLibraryState = ordenarcanciónes(SONG_LIBRARY.map((song, index) => normalizarcanción(song, index)));
   }
 }
 
-async function guardarCancionEnFirestore(song) {
+async function guardarcanciónEnFirestore(song) {
   if (!window.firebaseDb || !window.firebaseFns) {
     throw new Error("Firebase no esta cargado.");
   }
 
   const db = window.firebaseDb;
   const { doc, setDoc } = window.firebaseFns;
-  const normalizada = normalizarCancion(song);
+  const normalizada = normalizarcanción(song);
   await setDoc(doc(db, "songs", normalizada.id), { ...normalizada, songId: normalizada.id }, { merge: true });
 }
 
@@ -2620,7 +2620,7 @@ function actualizarEstados() {
 
     if (mensaje) {
       mensaje.textContent = estaCompletado
-        ? "Este plan ya esta completado y su foto ya forma parte de la linea del tiempo."
+        ? "Este plan ya esta completado y su foto ya forma parte de la línea del tiempo."
         : (estaActivado
           ? "El plan esta activado. Cuando le des a completar, te pedira una foto y se guardara automaticamente con la fecha de hoy."
           : (plan.message || "Primero activa el plan. Cuando lo hagais, podras completarlo con una foto."));
@@ -2713,7 +2713,7 @@ window.onload = async function () {
   actualizarCountdown();
   renderizarPlanes();
   prepararFormularioTimeline();
-  prepararFormularioCanciones();
+  prepararFormulariocanciónes();
   prepararTogglesDeFormulario();
   prepararModalRecuerdo();
   prepararTabs();
@@ -2723,10 +2723,10 @@ window.onload = async function () {
   await seedFirebaseContent();
   await cargarPlanesFirestore();
   await cargarRecuerdosFirestore();
-  await cargarCancionesFirestore();
+  await cargarcanciónesFirestore();
   renderizarPlanes();
   actualizarEstados();
   renderizarTimeline();
-  renderizarCanciones();
+  renderizarcanciónes();
   setInterval(actualizarCountdown, 1000);
 };
