@@ -147,6 +147,128 @@ const ASSET_STORAGE_NAME_MAP = {
   "img/MCD.jpg": "MCD",
   "img/Cocina.jpg": "Cocina"
 };
+
+function buscarFuncionGlobalPorPartes(partes) {
+  const normalizedParts = partes.map((part) => String(part).toLowerCase());
+
+  for (const key of Object.getOwnPropertyNames(window)) {
+    const candidate = window[key];
+    if (typeof candidate !== "function") {
+      continue;
+    }
+
+    const normalizedKey = key.toLowerCase();
+    if (normalizedParts.every((part) => normalizedKey.includes(part))) {
+      return candidate;
+    }
+  }
+
+  return null;
+}
+
+const legacySongFns = {
+  getSongs: buscarFuncionGlobalPorPartes(["obtener", "canci"]),
+  renderSongs: buscarFuncionGlobalPorPartes(["renderizar", "canci"]),
+  playSong: buscarFuncionGlobalPorPartes(["reproducir", "canci"]),
+  stopSong: buscarFuncionGlobalPorPartes(["detener", "canci"]),
+  prepareSongForm: buscarFuncionGlobalPorPartes(["preparar", "formulario", "canci"]),
+  loadSongs: buscarFuncionGlobalPorPartes(["cargar", "canci", "firestore"])
+};
+
+actualizarControlesAudio = function () {
+};
+
+prepararTocadiscos = function () {
+  const toggle = document.getElementById("turntable-toggle");
+  const library = document.getElementById("song-library");
+  const prev = document.getElementById("turntable-prev");
+  const next = document.getElementById("turntable-next");
+  const stop = document.getElementById("turntable-stop");
+  const play = document.getElementById("turntable-play");
+
+  if (!toggle || !library || !prev || !next || !stop || !play) {
+    return;
+  }
+
+  if (toggle.dataset.musicReady === "true") {
+    return;
+  }
+  toggle.dataset.musicReady = "true";
+
+  const alternarBiblioteca = () => {
+    const abierto = !library.hidden;
+    library.hidden = abierto;
+    toggle.setAttribute("aria-expanded", abierto ? "false" : "true");
+  };
+
+  toggle.addEventListener("click", (event) => {
+    if (event.target.closest("a")) {
+      return;
+    }
+
+    alternarBiblioteca();
+  });
+
+  toggle.addEventListener("keydown", (event) => {
+    if (event.key !== "Enter" && event.key !== " ") {
+      return;
+    }
+
+    event.preventDefault();
+    alternarBiblioteca();
+  });
+
+  prev.addEventListener("click", () => moverTocadiscos(-1));
+  next.addEventListener("click", () => moverTocadiscos(1));
+  stop.addEventListener("click", () => {
+    if (legacySongFns.stopSong) {
+      legacySongFns.stopSong();
+    }
+  });
+  play.addEventListener("click", () => {
+    const songs = legacySongFns.getSongs ? legacySongFns.getSongs() : [];
+    if (!songs.length) {
+      return;
+    }
+
+    if (songActualIndex < 0) {
+      songActualIndex = 0;
+    }
+
+    if (legacySongFns.playSong) {
+      legacySongFns.playSong(songActualIndex);
+    }
+  });
+};
+
+window.onload = async function () {
+  inicializarContenidoDesdeSemillas();
+  actualizarCountdown();
+  renderizarPlanes();
+  prepararFormularioTimeline();
+  if (legacySongFns.prepareSongForm) {
+    legacySongFns.prepareSongForm();
+  }
+  prepararTogglesDeFormulario();
+  prepararModalRecuerdo();
+  prepararTabs();
+  prepararTocadiscos();
+  await esperarAuthFirebase();
+  await cargarAssetsDesdeStorage();
+  await seedFirebaseContent();
+  await cargarPlanesFirestore();
+  await cargarRecuerdosFirestore();
+  if (legacySongFns.loadSongs) {
+    await legacySongFns.loadSongs();
+  }
+  renderizarPlanes();
+  actualizarEstados();
+  renderizarTimeline();
+  if (legacySongFns.renderSongs) {
+    legacySongFns.renderSongs();
+  }
+  setInterval(actualizarCountdown, 1000);
+};
 const MIGRATABLE_ASSET_PATHS = Array.from(new Set([
   ...STATIC_IMAGE_PATHS,
   ...TIMELINE_SEED.map((entry) => entry.image),
