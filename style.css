@@ -1341,22 +1341,19 @@ body.card-overlay-open {
   grid-template-columns: 120px minmax(0, 1fr);
   gap: 18px;
   align-items: center;
+  --polaroid-offset: 18px;
+  --polaroid-tilt: 0deg;
+  --polaroid-lift: 0px;
 }
 
 .timeline-item__dot {
   position: relative;
-  width: 104px;
-  padding: 6px 0;
+  width: 28px;
+  min-height: 24px;
+  padding: 0;
   background: transparent;
   border: 0;
   box-shadow: none;
-  font-size: 0.8rem;
-  line-height: 1.4;
-  color: #8a6b59;
-  text-transform: uppercase;
-  letter-spacing: 0.08em;
-  font-weight: 800;
-  text-align: center;
 }
 
 .timeline-item__dot::after {
@@ -1378,6 +1375,9 @@ body.card-overlay-open {
   cursor: pointer;
   transform-origin: top center;
   transition: transform 0.28s ease;
+  margin-left: var(--polaroid-offset);
+  margin-top: var(--polaroid-lift);
+  transform: rotate(var(--polaroid-tilt));
 }
 
 .tab-panel--recuerdos .timeline-item__content {
@@ -1386,16 +1386,6 @@ body.card-overlay-open {
 
 .timeline-item:hover .timeline-item__content {
   transform: translateY(-8px) rotate(0deg);
-}
-
-.timeline-item:nth-child(odd) .timeline-item__content {
-  margin-left: 10px;
-  transform: rotate(-2.8deg);
-}
-
-.timeline-item:nth-child(even) .timeline-item__content {
-  margin-left: 34px;
-  transform: rotate(2.6deg);
 }
 
 .timeline-item__content::before {
@@ -1463,6 +1453,9 @@ body.card-overlay-open {
 
 .polaroid-card {
   outline: none;
+  --polaroid-pin-left: 50%;
+  --polaroid-pin-top: 10px;
+  --polaroid-shadow: 0 28px 40px rgba(74, 53, 39, 0.16);
 }
 
 .polaroid-card:focus-visible .polaroid-card__inner {
@@ -1474,19 +1467,51 @@ body.card-overlay-open {
   transition: box-shadow 0.28s ease;
 }
 
+.polaroid-card__inner::before {
+  content: "";
+  position: absolute;
+  left: var(--polaroid-pin-left);
+  top: var(--polaroid-pin-top);
+  width: 18px;
+  height: 18px;
+  transform: translateX(-50%);
+  border-radius: 50%;
+  background:
+    radial-gradient(circle at 30% 30%, #f7d0d6, #c34e58 72%);
+  box-shadow:
+    0 7px 14px rgba(120, 31, 40, 0.28),
+    inset 0 1px 1px rgba(255, 255, 255, 0.55);
+  z-index: 3;
+}
+
 .polaroid-card__face {
   position: relative;
   display: flex;
   flex-direction: column;
   border-radius: 18px 18px 24px 24px;
   overflow: hidden;
-  box-shadow: 0 28px 40px rgba(74, 53, 39, 0.16);
+  box-shadow: var(--polaroid-shadow);
 }
 
 .polaroid-card__face--front {
   padding: 18px 18px 34px;
   background: linear-gradient(180deg, #ffffff, #fffdf8);
   border: 1px solid rgba(78, 61, 47, 0.12);
+}
+
+.polaroid-card__face--front::before {
+  content: "";
+  position: absolute;
+  top: 18px;
+  left: var(--polaroid-pin-left);
+  width: 30px;
+  height: 12px;
+  transform: translateX(-50%) rotate(-4deg);
+  border-radius: 3px;
+  background: linear-gradient(180deg, rgba(247, 233, 210, 0.72), rgba(227, 205, 176, 0.44));
+  box-shadow: 0 2px 6px rgba(70, 45, 25, 0.12);
+  opacity: 0.8;
+  z-index: 2;
 }
 
 .polaroid-card__photo-frame {
@@ -1523,6 +1548,16 @@ body.card-overlay-open {
   font-weight: 500;
   text-align: center;
   color: #42362b;
+}
+
+.polaroid-card__date {
+  margin: 14px 0 0;
+  text-align: center;
+  font-size: 0.82rem;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  font-weight: 800;
+  color: #8a6b59;
 }
 
 .final-message {
@@ -1986,16 +2021,6 @@ body.card-overlay-open {
   background: transparent;
 }
 
-.memory-flip__date,
-.memory-flip__eyebrow {
-  margin: 0 0 14px;
-  font-size: 0.8rem;
-  text-transform: uppercase;
-  letter-spacing: 0.14em;
-  font-weight: 800;
-  color: #9c5f69;
-}
-
 .memory-polaroid {
   width: fit-content;
   max-width: min(100%, 560px);
@@ -2040,6 +2065,15 @@ body.card-overlay-open {
   min-height: 0;
 }
 
+.memory-polaroid__date {
+  margin: 0 0 8px;
+  font-size: 0.82rem;
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+  font-weight: 800;
+  color: #8a6b59;
+}
+
 .memory-polaroid__caption h3 {
   margin: 0;
   font-family: "Caveat", "Cormorant Garamond", serif;
@@ -2058,32 +2092,16 @@ body.card-overlay-open {
   gap: 18px;
   width: min(100%, 560px);
   padding: 24px 22px 28px;
-  background: linear-gradient(180deg, #ffffff, #fffdf8);
+  background: #ffffff;
   border: 1px solid rgba(78, 61, 47, 0.12);
   border-radius: 18px 18px 24px 24px;
   box-shadow: 0 28px 40px rgba(74, 53, 39, 0.16);
   transform: rotate(1deg);
 }
 
-.memory-note__date {
-  margin: 0;
-  font-family: "Caveat", "Cormorant Garamond", serif;
-  font-size: clamp(2rem, 3.6vw, 2.8rem);
-  line-height: 1;
-  color: #7d4e59;
-}
-
 .memory-flip__field {
   display: grid;
   gap: 8px;
-}
-
-.memory-flip__field span {
-  font-size: 0.76rem;
-  text-transform: uppercase;
-  letter-spacing: 0.14em;
-  font-weight: 800;
-  color: #9c5f69;
 }
 
 .memory-flip__field input,
@@ -2181,13 +2199,22 @@ body.card-overlay-open {
 }
 
 .tab-panel--recuerdos .timeline-section {
+  border: 16px solid #4b2f1d;
   background:
+    linear-gradient(90deg, rgba(66, 38, 20, 0.22) 0 2%, rgba(0, 0, 0, 0) 2% 14%, rgba(92, 55, 31, 0.18) 14% 16%, rgba(0, 0, 0, 0) 16% 30%, rgba(60, 35, 18, 0.18) 30% 32%, rgba(0, 0, 0, 0) 32% 100%),
+    radial-gradient(circle at 1px 1px, rgba(88, 53, 28, 0.22) 0 1px, transparent 1.2px),
+    radial-gradient(circle at 3px 3px, rgba(255, 228, 196, 0.08) 0 0.9px, transparent 1.1px),
+    repeating-linear-gradient(45deg, rgba(120, 76, 41, 0.08) 0 2px, rgba(0, 0, 0, 0) 2px 7px),
     radial-gradient(circle at 8% 14%, rgba(255, 238, 209, 0.32), transparent 16%),
     radial-gradient(circle at 90% 20%, rgba(130, 80, 46, 0.1), transparent 18%),
     linear-gradient(135deg, rgba(173, 120, 77, 0.14), transparent 24%),
     linear-gradient(180deg, #b68457 0%, #a9774f 38%, #926744 100%);
+  background-size: 220px 100%, 9px 9px, 13px 13px, 18px 18px, auto, auto, auto, auto;
   box-shadow:
+    inset 0 0 0 3px rgba(120, 76, 41, 0.65),
+    inset 0 0 0 12px rgba(93, 59, 35, 0.32),
     inset 0 1px 0 rgba(255, 241, 220, 0.26),
+    0 0 0 2px rgba(34, 18, 9, 0.42),
     0 34px 70px rgba(83, 50, 27, 0.22);
 }
 
@@ -2196,10 +2223,11 @@ body.card-overlay-open {
   position: absolute;
   inset: 0;
   background:
-    radial-gradient(circle, rgba(255, 232, 204, 0.08) 0 1px, transparent 1px),
+    radial-gradient(circle, rgba(255, 232, 204, 0.12) 0 1px, transparent 1px),
+    repeating-linear-gradient(135deg, rgba(77, 46, 24, 0.08) 0 3px, rgba(0, 0, 0, 0) 3px 9px),
     radial-gradient(circle at 30% 20%, rgba(120, 76, 41, 0.12), transparent 22%),
     radial-gradient(circle at 70% 80%, rgba(255, 230, 198, 0.08), transparent 18%);
-  background-size: 14px 14px, auto, auto;
+  background-size: 14px 14px, 24px 24px, auto, auto;
   mix-blend-mode: multiply;
   pointer-events: none;
 }
@@ -2286,14 +2314,6 @@ body.card-overlay-open {
 
 .tab-panel--recuerdos .timeline-item__content {
   width: min(100%, 410px);
-}
-
-.tab-panel--recuerdos .timeline-item:nth-child(odd) .timeline-item__content {
-  transform: rotate(-4deg);
-}
-
-.tab-panel--recuerdos .timeline-item:nth-child(even) .timeline-item__content {
-  transform: rotate(3.5deg);
 }
 
 .tab-panel--recuerdos .timeline-item:hover .timeline-item__content {
@@ -2891,15 +2911,15 @@ body.card-overlay-open {
   }
 
   .timeline-item__dot {
-    width: fit-content;
-    max-width: 130px;
+    width: 28px;
+    max-width: 28px;
   }
 
   .timeline-item__dot::after {
-    left: -16px;
-    right: auto;
-    width: 12px;
-    height: 12px;
+      left: -14px;
+      right: auto;
+      width: 12px;
+      height: 12px;
   }
 
   .timeline-item__content,
@@ -2907,6 +2927,7 @@ body.card-overlay-open {
   .timeline-item:nth-child(even) .timeline-item__content {
     width: 100%;
     margin-left: 0;
+    margin-top: 0;
     transform: rotate(0deg);
   }
 
@@ -3026,7 +3047,6 @@ body.card-overlay-open {
   }
 
   .memory-polaroid__caption h3,
-  .memory-note__date,
   .memory-flip__field input,
   .memory-flip__field--plain textarea {
     font-size: 1.9rem;

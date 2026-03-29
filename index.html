@@ -525,11 +525,14 @@
             </div>
           </section>
 
-          <section class="song-library" id="song-library" hidden>
-            <div class="panel-action">
-              <p class="panel-action__eyebrow">Colección</p>
-              <button class="timeline-form__button panel-action__button" type="button" data-toggle-form="song-form-shell">Anadir nueva canción</button>
-            </div>
+            <section class="song-library" id="song-library" hidden>
+              <div class="panel-action">
+                <p class="panel-action__eyebrow">Colección</p>
+                <div class="panel-action__buttons">
+                  <button class="timeline-form__button panel-action__button" type="button" data-toggle-form="song-form-shell">Anadir nueva canción</button>
+                  <button class="timeline-form__button timeline-form__button--ghost panel-action__button" type="button" id="songs-clear-button">Borrar canciones</button>
+                </div>
+              </div>
             <div class="form-shell" id="song-form-shell" hidden>
               <h3>Guardar una nueva canción</h3>
               <form id="song-form" class="timeline-form">
@@ -585,6 +588,7 @@
                 <img id="memory-modal-image" alt="Recuerdo ampliado" />
               </div>
               <div class="memory-polaroid__caption">
+                <p class="memory-polaroid__date" id="memory-modal-date"></p>
                 <h3 id="memory-modal-title">Recuerdo</h3>
               </div>
             </div>
@@ -594,14 +598,10 @@
           </section>
           <section class="memory-flip__face memory-flip__face--back">
             <div class="memory-note">
-              <p class="memory-flip__eyebrow">Detras de la polaroid</p>
-              <p class="memory-note__date" id="memory-modal-date"></p>
               <label class="memory-flip__field memory-flip__field--plain">
-                <span>Titulo</span>
                 <input id="memory-modal-note-input" type="text" maxlength="90" placeholder="Escribe aqui una frase vuestra" />
               </label>
               <label class="memory-flip__field memory-flip__field--plain">
-                <span>Descripcion</span>
                 <textarea id="memory-modal-description-input" rows="6" maxlength="220" placeholder="Pon aqui una descripcion pequena"></textarea>
               </label>
               <p class="memory-flip__saved" id="memory-modal-saved" hidden>Texto guardado.</p>

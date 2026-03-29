@@ -16,6 +16,7 @@ import {
   collection,
   addDoc,
   getDocs,
+  deleteDoc,
   query,
   orderBy,
   limit
@@ -49,6 +50,7 @@ window.firebaseFns = {
   collection,
   addDoc,
   getDocs,
+  deleteDoc,
   query,
   orderBy,
   limit

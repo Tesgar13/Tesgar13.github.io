@@ -64,7 +64,14 @@ const STATIC_IMAGE_PATHS = [
   "img/Jamon.jpg",
   "img/cocina.jpg"
 ];
-const ASSET_STORAGE_NAME_MAP = {};
+const ASSET_STORAGE_NAME_MAP = {
+  "img/Hamburguesa.jpg": "Hamburguesa",
+  "img/Desayuno.jpg": "Desayuno",
+  "img/Aceitunas.jpg": "Aceitunas",
+  "img/Jamon.jpg": "Jamon",
+  "img/MCD.jpg": "MCD",
+  "img/cocina.jpg": "cocina"
+};
 const MIGRATABLE_ASSET_PATHS = Array.from(new Set([
   ...STATIC_IMAGE_PATHS,
   ...TIMELINE_SEED.map((entry) => entry.image)
@@ -269,9 +276,23 @@ function sincronizarEstadosDePlanesDesdeTimeline() {
   });
 }
 
-function storagePathDesdeAssetLocal(assetPath) {
-  const fileName = ASSET_STORAGE_NAME_MAP[assetPath] || assetPath.split("/").pop();
-  return fileName ? `assets/${fileName}` : "";
+function storagePathsDesdeAssetLocal(assetPath) {
+  const originalName = assetPath.split("/").pop() || "";
+  const mappedName = ASSET_STORAGE_NAME_MAP[assetPath] || "";
+  const stem = originalName.replace(/\.[^.]+$/, "");
+  const candidates = Array.from(new Set([
+    mappedName,
+    originalName,
+    stem,
+    `${stem}.jpg`,
+    `${stem}.jpeg`,
+    `${stem}.png`,
+    `${mappedName}.jpg`,
+    `${mappedName}.jpeg`,
+    `${mappedName}.png`
+  ].filter(Boolean)));
+
+  return candidates.map((fileName) => `assets/${fileName}`);
 }
 
 async function cargarAssetsDesdeStorage() {
@@ -285,12 +306,19 @@ async function cargarAssetsDesdeStorage() {
   const nextMap = { ...assetUrlMap };
 
   await Promise.all(MIGRATABLE_ASSET_PATHS.map(async (assetPath) => {
-    try {
-      const remoteUrl = await getDownloadURL(ref(storage, storagePathDesdeAssetLocal(assetPath)));
-      nextMap[assetPath] = remoteUrl;
-    } catch (error) {
-      console.error(`No se pudo cargar ${assetPath} desde Firebase Storage.`, error);
+    const candidatePaths = storagePathsDesdeAssetLocal(assetPath);
+
+    for (const candidatePath of candidatePaths) {
+      try {
+        const remoteUrl = await getDownloadURL(ref(storage, candidatePath));
+        nextMap[assetPath] = remoteUrl;
+        return;
+      } catch (error) {
+        // Probamos la siguiente variante del nombre antes de descartarlo.
+      }
     }
+
+    console.error(`No se pudo cargar ${assetPath} desde Firebase Storage.`);
   }));
 
   guardarAssetMap(nextMap);
@@ -413,6 +441,18 @@ async function cargarCancionesFirestore() {
   } catch (error) {
     console.error("Error cargando canciones:", error);
   }
+}
+
+async function borrarCancionesFirestore() {
+  if (!window.firebaseDb || !window.firebaseFns) {
+    return;
+  }
+
+  const db = window.firebaseDb;
+  const { collection, getDocs, query, orderBy, deleteDoc } = window.firebaseFns;
+  const snapshot = await getDocs(query(collection(db, "songs"), orderBy("createdAt", "desc")));
+
+  await Promise.all(snapshot.docs.map((songDoc) => deleteDoc(songDoc.ref)));
 }
 
 async function guardarEstadoPlanEnFirestore(planId, status, extra = {}) {
@@ -674,6 +714,14 @@ function crearEntradaPlan(planId, titulo, fecha, imagen) {
 function renderizarTimeline() {
   const contenedor = document.getElementById("timeline");
   const empty = document.getElementById("timeline-empty");
+  const polaroidLayouts = [
+    { offset: "8px", tilt: "-4.8deg", lift: "6px", pinLeft: "48%", pinTop: "9px", shadow: "0 30px 42px rgba(58, 36, 20, 0.24)" },
+    { offset: "42px", tilt: "3.4deg", lift: "-10px", pinLeft: "54%", pinTop: "11px", shadow: "0 24px 34px rgba(72, 44, 24, 0.2)" },
+    { offset: "18px", tilt: "-1.6deg", lift: "12px", pinLeft: "44%", pinTop: "10px", shadow: "0 34px 44px rgba(63, 39, 22, 0.22)" },
+    { offset: "54px", tilt: "5.2deg", lift: "-4px", pinLeft: "57%", pinTop: "8px", shadow: "0 26px 36px rgba(68, 41, 22, 0.22)" },
+    { offset: "4px", tilt: "-3.1deg", lift: "10px", pinLeft: "46%", pinTop: "12px", shadow: "0 32px 46px rgba(61, 39, 24, 0.2)" },
+    { offset: "36px", tilt: "1.9deg", lift: "-12px", pinLeft: "52%", pinTop: "9px", shadow: "0 22px 32px rgba(71, 45, 28, 0.18)" }
+  ];
 
   if (!contenedor || !empty) {
     return;
@@ -693,15 +741,21 @@ function renderizarTimeline() {
 
   entradas.forEach((entry) => {
     const texto = obtenerTextoRecuerdo(entry);
-    const descripcion = obtenerDescripcionRecuerdo(entry);
+    const layout = polaroidLayouts[contenedor.children.length % polaroidLayouts.length];
     const item = document.createElement("article");
     item.className = "timeline-item polaroid-card";
     item.dataset.entryId = entry.id;
+    item.style.setProperty("--polaroid-offset", layout.offset);
+    item.style.setProperty("--polaroid-tilt", layout.tilt);
+    item.style.setProperty("--polaroid-lift", layout.lift);
+    item.style.setProperty("--polaroid-pin-left", layout.pinLeft);
+    item.style.setProperty("--polaroid-pin-top", layout.pinTop);
+    item.style.setProperty("--polaroid-shadow", layout.shadow);
     item.setAttribute("role", "button");
     item.setAttribute("tabindex", "0");
     item.setAttribute("aria-label", `Abrir recuerdo del ${formatearFecha(entry.date)}`);
     item.innerHTML = `
-      <div class="timeline-item__dot">${formatearFecha(entry.date)}</div>
+      <div class="timeline-item__dot" aria-hidden="true"></div>
       <div class="timeline-item__content polaroid-card__inner">
         <section class="polaroid-card__face polaroid-card__face--front">
           <div class="polaroid-card__photo-frame">
@@ -709,6 +763,7 @@ function renderizarTimeline() {
               <img src="${resolveImageUrl(entry.image)}" alt="${obtenerAltRecuerdo(entry)}" />
             </div>
           </div>
+          <p class="polaroid-card__date">${formatearFecha(entry.date)}</p>
           <p class="timeline-item__note polaroid-card__title">${texto}</p>
         </section>
       </div>
@@ -726,15 +781,23 @@ function renderizarTimeline() {
   });
 
   for (let i = entradas.length; i < MOCK_SLOTS; i += 1) {
+    const layout = polaroidLayouts[i % polaroidLayouts.length];
     const placeholder = document.createElement("article");
     placeholder.className = "timeline-item timeline-item--placeholder polaroid-card";
+    placeholder.style.setProperty("--polaroid-offset", layout.offset);
+    placeholder.style.setProperty("--polaroid-tilt", layout.tilt);
+    placeholder.style.setProperty("--polaroid-lift", layout.lift);
+    placeholder.style.setProperty("--polaroid-pin-left", layout.pinLeft);
+    placeholder.style.setProperty("--polaroid-pin-top", layout.pinTop);
+    placeholder.style.setProperty("--polaroid-shadow", layout.shadow);
     placeholder.innerHTML = `
-      <div class="timeline-item__dot">Espacio</div>
+      <div class="timeline-item__dot" aria-hidden="true"></div>
       <div class="timeline-item__content polaroid-card__inner" aria-hidden="true">
         <section class="polaroid-card__face polaroid-card__face--front">
           <div class="polaroid-card__photo-frame">
             <div class="timeline-item__media timeline-item__media--placeholder polaroid-card__media"></div>
           </div>
+          <p class="polaroid-card__date">Fecha pendiente</p>
           <p class="timeline-item__note polaroid-card__title">${DEFAULT_MEMORY_NOTE}</p>
         </section>
       </div>
@@ -1605,6 +1668,40 @@ function prepararFormularioCanciones() {
   });
 }
 
+function prepararBorradoCanciones() {
+  const button = document.getElementById("songs-clear-button");
+
+  if (!button) {
+    return;
+  }
+
+  button.addEventListener("click", async () => {
+    const confirmar = window.confirm("Se van a borrar todas las canciones guardadas. Quieres continuar?");
+
+    if (!confirmar) {
+      return;
+    }
+
+    const textoOriginal = button.textContent;
+    button.disabled = true;
+    button.textContent = "Borrando...";
+
+    try {
+      await borrarCancionesFirestore();
+      guardarCanciones([]);
+      songActualIndex = -1;
+      turntablePlaying = false;
+      renderizarCanciones();
+    } catch (error) {
+      console.error("No se pudieron borrar las canciones.", error);
+      alert("No se pudieron borrar las canciones. Revisa la consola o vuelve a intentarlo.");
+    } finally {
+      button.disabled = false;
+      button.textContent = textoOriginal;
+    }
+  });
+}
+
 window.onload = async function () {
   insertarControlesDePlan();
   limpiarPlanesActivadosDePrueba();
@@ -1613,6 +1710,7 @@ window.onload = async function () {
   prepararTarjetas();
   prepararFormularioTimeline();
   prepararFormularioCanciones();
+  prepararBorradoCanciones();
   prepararTogglesDeFormulario();
   prepararModalRecuerdo();
   prepararTabs();
