@@ -1365,6 +1365,7 @@ function asegurarAudioGlobal() {
     turntablePlaying = true;
     actualizarTocadiscos(obtenerCanciones());
     marcarCancionActiva();
+    actualizarControlesAudio();
   });
 
   audioPlayer.addEventListener("pause", () => {
@@ -1373,6 +1374,7 @@ function asegurarAudioGlobal() {
       actualizarTocadiscos(obtenerCanciones());
       marcarCancionActiva();
     }
+    actualizarControlesAudio();
   });
 
   audioPlayer.addEventListener("ended", () => {
@@ -1380,9 +1382,58 @@ function asegurarAudioGlobal() {
     audioPlayer.currentTime = 0;
     actualizarTocadiscos(obtenerCanciones());
     marcarCancionActiva();
+    actualizarControlesAudio();
   });
 
+  audioPlayer.addEventListener("timeupdate", actualizarControlesAudio);
+  audioPlayer.addEventListener("loadedmetadata", actualizarControlesAudio);
+  audioPlayer.addEventListener("volumechange", actualizarControlesAudio);
+
+  if (!audioPlayer.dataset.volumeInitialized) {
+    audioPlayer.volume = 0.85;
+    audioPlayer.dataset.volumeInitialized = "true";
+  }
+
   return audioPlayer;
+}
+
+function formatearTiempoAudio(seconds) {
+  if (!Number.isFinite(seconds) || seconds < 0) {
+    return "0:00";
+  }
+
+  const totalSeconds = Math.floor(seconds);
+  const minutes = Math.floor(totalSeconds / 60);
+  const remainingSeconds = totalSeconds % 60;
+  return `${minutes}:${String(remainingSeconds).padStart(2, "0")}`;
+}
+
+function actualizarControlesAudio() {
+  const player = asegurarAudioGlobal();
+  const progress = document.getElementById("turntable-progress");
+  const currentTime = document.getElementById("turntable-time-current");
+  const totalTime = document.getElementById("turntable-time-total");
+  const volume = document.getElementById("turntable-volume");
+
+  if (!progress || !currentTime || !totalTime || !volume) {
+    return;
+  }
+
+  const duration = Number.isFinite(player.duration) ? player.duration : 0;
+  const time = Number.isFinite(player.currentTime) ? player.currentTime : 0;
+  const progressValue = duration > 0 ? (time / duration) * 100 : 0;
+
+  progress.value = String(progressValue);
+  currentTime.textContent = formatearTiempoAudio(time);
+  totalTime.textContent = formatearTiempoAudio(duration);
+  volume.value = String(player.volume ?? 0.85);
+}
+
+function cambiarVolumen(delta) {
+  const player = asegurarAudioGlobal();
+  const nextVolume = Math.max(0, Math.min(1, (player.volume ?? 0.85) + delta));
+  player.volume = Number(nextVolume.toFixed(2));
+  actualizarControlesAudio();
 }
 
 async function reproducirCancion(index, { restart = false } = {}) {
@@ -1415,11 +1466,14 @@ async function reproducirCancion(index, { restart = false } = {}) {
     player.currentTime = 0;
   }
 
+  actualizarControlesAudio();
+
   player.play().catch((error) => {
     turntablePlaying = false;
     console.error(`No se pudo reproducir la cancion ${song.title}. URL usada: ${player.dataset.audioUrl || audioUrl}`, error);
     actualizarTocadiscos(canciones);
     marcarCancionActiva();
+    actualizarControlesAudio();
   });
 }
 
@@ -1439,6 +1493,7 @@ function detenerCancionActual() {
   turntablePlaying = false;
   actualizarTocadiscos(obtenerCanciones());
   marcarCancionActiva();
+  actualizarControlesAudio();
 }
 
 function alternarCancion(index) {
@@ -2079,8 +2134,12 @@ function prepararTocadiscos() {
   const next = document.getElementById("turntable-next");
   const stop = document.getElementById("turntable-stop");
   const play = document.getElementById("turntable-play");
+  const progress = document.getElementById("turntable-progress");
+  const volume = document.getElementById("turntable-volume");
+  const volumeDown = document.getElementById("turntable-volume-down");
+  const volumeUp = document.getElementById("turntable-volume-up");
 
-  if (!toggle || !library || !prev || !next || !stop || !play) {
+  if (!toggle || !library || !prev || !next || !stop || !play || !progress || !volume || !volumeDown || !volumeUp) {
     return;
   }
 
@@ -2123,6 +2182,27 @@ function prepararTocadiscos() {
 
     reproducirCancion(songActualIndex);
   });
+
+  progress.addEventListener("input", () => {
+    const player = asegurarAudioGlobal();
+    if (!Number.isFinite(player.duration) || player.duration <= 0) {
+      return;
+    }
+
+    player.currentTime = (Number(progress.value) / 100) * player.duration;
+    actualizarControlesAudio();
+  });
+
+  volume.addEventListener("input", () => {
+    const player = asegurarAudioGlobal();
+    player.volume = Number(volume.value);
+    actualizarControlesAudio();
+  });
+
+  volumeDown.addEventListener("click", () => cambiarVolumen(-0.1));
+  volumeUp.addEventListener("click", () => cambiarVolumen(0.1));
+
+  actualizarControlesAudio();
 }
 
 function prepararFormularioCanciones() {

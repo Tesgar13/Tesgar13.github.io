@@ -2602,7 +2602,7 @@ body.card-overlay-open {
   letter-spacing: 0.14em;
   font-size: 0.78rem;
   font-weight: 800;
-  color: rgba(255, 234, 208, 0.78);
+  color: rgba(53, 30, 19, 0.76);
 }
 
 .turntable__label h3 {
@@ -2610,12 +2610,13 @@ body.card-overlay-open {
   font-family: "Cormorant Garamond", serif;
   font-size: clamp(3rem, 5vw, 5rem);
   line-height: 0.92;
+  color: #1f120b;
 }
 
 .turntable__label p {
   margin: 0;
   max-width: 24rem;
-  color: rgba(255, 241, 226, 0.84);
+  color: rgba(35, 20, 12, 0.86);
   line-height: 1.8;
 }
 
@@ -2700,6 +2701,60 @@ body.card-overlay-open {
 .turntable-controls__button--primary {
   background: linear-gradient(180deg, #d79b61, #ad6c3d);
   color: #fff8f2;
+}
+
+.turntable-playback {
+  display: grid;
+  gap: 14px;
+  margin-top: 16px;
+  padding: 18px 20px;
+  border-radius: 28px;
+  background: linear-gradient(180deg, rgba(255, 245, 234, 0.92), rgba(236, 211, 186, 0.94));
+  box-shadow: 0 16px 28px rgba(16, 7, 4, 0.14);
+}
+
+.turntable-progress,
+.turntable-volume {
+  display: grid;
+  align-items: center;
+  gap: 14px;
+}
+
+.turntable-progress {
+  grid-template-columns: auto 1fr auto;
+}
+
+.turntable-volume {
+  grid-template-columns: auto 1fr auto;
+}
+
+.turntable-progress__time {
+  min-width: 3rem;
+  font-size: 0.86rem;
+  font-weight: 700;
+  color: #6c4731;
+  text-align: center;
+}
+
+.turntable-progress__slider,
+.turntable-volume__slider {
+  width: 100%;
+  accent-color: #b16c3e;
+  cursor: pointer;
+}
+
+.turntable-volume__button {
+  width: 42px;
+  height: 42px;
+  border: 0;
+  border-radius: 50%;
+  background: linear-gradient(180deg, rgba(247, 227, 207, 0.98), rgba(231, 202, 173, 0.98));
+  color: #6b4229;
+  font: inherit;
+  font-size: 1.15rem;
+  font-weight: 800;
+  cursor: pointer;
+  box-shadow: 0 12px 20px rgba(16, 7, 4, 0.12);
 }
 
 .song-library {
@@ -3160,6 +3215,15 @@ body.card-overlay-open {
 
   .turntable-controls {
     grid-template-columns: repeat(2, 1fr);
+  }
+
+  .turntable-progress,
+  .turntable-volume {
+    grid-template-columns: 1fr;
+  }
+
+  .turntable-progress__time {
+    min-width: 0;
   }
 
   .memory-flip__inner {
