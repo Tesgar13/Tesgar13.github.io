@@ -443,6 +443,15 @@ async function prepararFuenteAudio(audioUrl) {
   }
 
   try {
+    const resolvedUrl = new URL(audioUrl, window.location.href);
+    if (resolvedUrl.origin !== window.location.origin) {
+      return audioUrl;
+    }
+  } catch (error) {
+    return audioUrl;
+  }
+
+  try {
     const response = await fetch(audioUrl, {
       method: "GET",
       mode: "cors",
@@ -1351,7 +1360,6 @@ function asegurarAudioGlobal() {
     audioPlayer = new Audio();
     audioPlayer.preload = "metadata";
   }
-  audioPlayer.crossOrigin = "anonymous";
 
   audioPlayer.addEventListener("play", () => {
     turntablePlaying = true;
