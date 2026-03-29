@@ -1337,6 +1337,7 @@ body.card-overlay-open {
   --polaroid-tilt: 0deg;
   --polaroid-lift: 0px;
   --polaroid-width: 320px;
+  pointer-events: auto;
 }
 
 .timeline-item__dot {
@@ -1356,6 +1357,7 @@ body.card-overlay-open {
   margin-left: var(--polaroid-offset);
   margin-top: var(--polaroid-lift);
   transform: rotate(var(--polaroid-tilt));
+  pointer-events: auto;
 }
 
 .tab-panel--recuerdos .timeline-item__content {
@@ -1460,6 +1462,7 @@ body.card-overlay-open {
     0 7px 14px rgba(120, 31, 40, 0.28),
     inset 0 1px 1px rgba(255, 255, 255, 0.55);
   z-index: 3;
+  pointer-events: none;
 }
 
 .polaroid-card__face {
@@ -1469,6 +1472,7 @@ body.card-overlay-open {
   border-radius: 18px 18px 24px 24px;
   overflow: hidden;
   box-shadow: var(--polaroid-shadow);
+  pointer-events: auto;
 }
 
 .polaroid-card__face--front {
