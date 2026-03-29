@@ -1,6 +1,7 @@
 const fechaObjetivo = new Date("2029-01-11T23:59:00");
 const TIMELINE_KEY = "timelineEntries";
 const SONGS_KEY = "soundtrackEntries";
+const SONGS_LEGACY_CLEANUP_KEY = "soundtrackLegacyCleanupDone";
 const ASSET_MAP_KEY = "firebaseAssetMap";
 const MOCK_SLOTS = 10;
 let songActualIndex = -1;
@@ -383,6 +384,22 @@ function guardarCanciones(entries) {
   escribirStorageJson(SONGS_KEY, entries);
 }
 
+function limpiarCancionesLocalesLegacy() {
+  if (localStorage.getItem(SONGS_LEGACY_CLEANUP_KEY) === "true") {
+    return;
+  }
+
+  const canciones = obtenerCanciones();
+  const pareceColeccionLegacy = canciones.length === MOCK_SLOTS
+    && canciones.every((song) => typeof song?.id === "string" && song.id.startsWith("song:"));
+
+  if (pareceColeccionLegacy) {
+    guardarCanciones([]);
+  }
+
+  localStorage.setItem(SONGS_LEGACY_CLEANUP_KEY, "true");
+}
+
 async function guardarCancionEnFirestore(song) {
   if (!window.firebaseDb || !window.firebaseFns) {
     return;
@@ -715,12 +732,12 @@ function renderizarTimeline() {
   const contenedor = document.getElementById("timeline");
   const empty = document.getElementById("timeline-empty");
   const polaroidLayouts = [
-    { offset: "8px", tilt: "-4.8deg", lift: "6px", pinLeft: "48%", pinTop: "9px", shadow: "0 30px 42px rgba(58, 36, 20, 0.24)" },
-    { offset: "42px", tilt: "3.4deg", lift: "-10px", pinLeft: "54%", pinTop: "11px", shadow: "0 24px 34px rgba(72, 44, 24, 0.2)" },
-    { offset: "18px", tilt: "-1.6deg", lift: "12px", pinLeft: "44%", pinTop: "10px", shadow: "0 34px 44px rgba(63, 39, 22, 0.22)" },
-    { offset: "54px", tilt: "5.2deg", lift: "-4px", pinLeft: "57%", pinTop: "8px", shadow: "0 26px 36px rgba(68, 41, 22, 0.22)" },
-    { offset: "4px", tilt: "-3.1deg", lift: "10px", pinLeft: "46%", pinTop: "12px", shadow: "0 32px 46px rgba(61, 39, 24, 0.2)" },
-    { offset: "36px", tilt: "1.9deg", lift: "-12px", pinLeft: "52%", pinTop: "9px", shadow: "0 22px 32px rgba(71, 45, 28, 0.18)" }
+    { offset: "6px", tilt: "-5.4deg", lift: "10px", width: "292px", pinLeft: "22%", pinTop: "42px", shadow: "0 30px 42px rgba(58, 36, 20, 0.24)" },
+    { offset: "34px", tilt: "4.1deg", lift: "-14px", width: "330px", pinLeft: "74%", pinTop: "38px", shadow: "0 24px 34px rgba(72, 44, 24, 0.2)" },
+    { offset: "14px", tilt: "-1.8deg", lift: "18px", width: "308px", pinLeft: "43%", pinTop: "34px", shadow: "0 34px 44px rgba(63, 39, 22, 0.22)" },
+    { offset: "46px", tilt: "5.6deg", lift: "-2px", width: "286px", pinLeft: "63%", pinTop: "46px", shadow: "0 26px 36px rgba(68, 41, 22, 0.22)" },
+    { offset: "2px", tilt: "-3.4deg", lift: "14px", width: "342px", pinLeft: "31%", pinTop: "36px", shadow: "0 32px 46px rgba(61, 39, 24, 0.2)" },
+    { offset: "28px", tilt: "2.2deg", lift: "-18px", width: "300px", pinLeft: "81%", pinTop: "40px", shadow: "0 22px 32px rgba(71, 45, 28, 0.18)" }
   ];
 
   if (!contenedor || !empty) {
@@ -748,6 +765,7 @@ function renderizarTimeline() {
     item.style.setProperty("--polaroid-offset", layout.offset);
     item.style.setProperty("--polaroid-tilt", layout.tilt);
     item.style.setProperty("--polaroid-lift", layout.lift);
+    item.style.setProperty("--polaroid-width", layout.width);
     item.style.setProperty("--polaroid-pin-left", layout.pinLeft);
     item.style.setProperty("--polaroid-pin-top", layout.pinTop);
     item.style.setProperty("--polaroid-shadow", layout.shadow);
@@ -787,6 +805,7 @@ function renderizarTimeline() {
     placeholder.style.setProperty("--polaroid-offset", layout.offset);
     placeholder.style.setProperty("--polaroid-tilt", layout.tilt);
     placeholder.style.setProperty("--polaroid-lift", layout.lift);
+    placeholder.style.setProperty("--polaroid-width", layout.width);
     placeholder.style.setProperty("--polaroid-pin-left", layout.pinLeft);
     placeholder.style.setProperty("--polaroid-pin-top", layout.pinTop);
     placeholder.style.setProperty("--polaroid-shadow", layout.shadow);
@@ -1275,12 +1294,11 @@ function abrirModalRecuerdo(entryId) {
   const image = document.getElementById("memory-modal-image");
   const date = document.getElementById("memory-modal-date");
   const title = document.getElementById("memory-modal-title");
-  const noteInput = document.getElementById("memory-modal-note-input");
   const descriptionInput = document.getElementById("memory-modal-description-input");
   const saved = document.getElementById("memory-modal-saved");
   const entry = obtenerTimeline().find((item) => item.id === entryId);
 
-  if (!modal || !flip || !image || !date || !title || !noteInput || !descriptionInput || !saved || !entry) {
+  if (!modal || !flip || !image || !date || !title || !descriptionInput || !saved || !entry) {
     return;
   }
 
@@ -1289,7 +1307,6 @@ function abrirModalRecuerdo(entryId) {
   image.alt = obtenerAltRecuerdo(entry);
   date.textContent = formatearFecha(entry.date);
   title.textContent = obtenerTextoRecuerdo(entry);
-  noteInput.value = obtenerTextoRecuerdo(entry);
   descriptionInput.value = obtenerDescripcionRecuerdo(entry);
   saved.hidden = true;
   modal.dataset.entryId = entryId;
@@ -1313,36 +1330,26 @@ function cerrarModalRecuerdo() {
 
 function guardarTextoRecuerdoActual() {
   const modal = document.getElementById("memory-modal");
-  const noteInput = document.getElementById("memory-modal-note-input");
   const descriptionInput = document.getElementById("memory-modal-description-input");
   const saved = document.getElementById("memory-modal-saved");
   const title = document.getElementById("memory-modal-title");
 
-  if (!modal || !noteInput || !descriptionInput || !saved || !title || !modal.dataset.entryId) {
+  if (!modal || !descriptionInput || !saved || !title || !modal.dataset.entryId) {
     return;
   }
 
-  const texto = noteInput.value.trim();
   const descripcion = descriptionInput.value.trim();
-
-  if (!texto) {
-    alert("Pon al menos una frase corta para esa foto.");
-    noteInput.focus();
-    return;
-  }
 
   const actualizadas = obtenerTimeline().map((entry) => {
     if (entry.id !== modal.dataset.entryId) {
       return entry;
     }
 
-    return {
-      ...entry,
-      title: entry.type === "manual" ? texto : entry.title,
-      note: texto,
-      description: descripcion
-    };
-  });
+      return {
+        ...entry,
+        description: descripcion
+      };
+    });
 
   guardarTimeline(actualizadas);
   renderizarTimeline();
@@ -1366,11 +1373,10 @@ function prepararModalRecuerdo() {
   const turn = document.getElementById("memory-modal-turn");
   const back = document.getElementById("memory-modal-return");
   const save = document.getElementById("memory-modal-save");
-  const noteInput = document.getElementById("memory-modal-note-input");
   const descriptionInput = document.getElementById("memory-modal-description-input");
   const saved = document.getElementById("memory-modal-saved");
 
-  if (!modal || !flip || !turn || !back || !save || !noteInput || !descriptionInput || !saved) {
+  if (!modal || !flip || !turn || !back || !save || !descriptionInput || !saved) {
     return;
   }
 
@@ -1387,9 +1393,6 @@ function prepararModalRecuerdo() {
   });
 
   save.addEventListener("click", guardarTextoRecuerdoActual);
-  noteInput.addEventListener("input", () => {
-    saved.hidden = true;
-  });
   descriptionInput.addEventListener("input", () => {
     saved.hidden = true;
   });
@@ -1715,6 +1718,7 @@ window.onload = async function () {
   prepararModalRecuerdo();
   prepararTabs();
   prepararTocadiscos();
+  limpiarCancionesLocalesLegacy();
   await esperarAuthFirebase();
   await cargarAssetsDesdeStorage();
   await cargarEstadosPlanesFirestore();
