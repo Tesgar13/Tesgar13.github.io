@@ -1414,8 +1414,9 @@ function actualizarControlesAudio() {
   const currentTime = document.getElementById("turntable-time-current");
   const totalTime = document.getElementById("turntable-time-total");
   const volume = document.getElementById("turntable-volume");
+  const volumeValue = document.getElementById("turntable-volume-value");
 
-  if (!progress || !currentTime || !totalTime || !volume) {
+  if (!progress || !currentTime || !totalTime || !volume || !volumeValue) {
     return;
   }
 
@@ -1427,6 +1428,7 @@ function actualizarControlesAudio() {
   currentTime.textContent = formatearTiempoAudio(time);
   totalTime.textContent = formatearTiempoAudio(duration);
   volume.value = String(player.volume ?? 0.85);
+  volumeValue.textContent = `${Math.round((player.volume ?? 0.85) * 100)}%`;
 }
 
 function cambiarVolumen(delta) {
@@ -2138,8 +2140,9 @@ function prepararTocadiscos() {
   const volume = document.getElementById("turntable-volume");
   const volumeDown = document.getElementById("turntable-volume-down");
   const volumeUp = document.getElementById("turntable-volume-up");
+  const volumeValue = document.getElementById("turntable-volume-value");
 
-  if (!toggle || !library || !prev || !next || !stop || !play || !progress || !volume || !volumeDown || !volumeUp) {
+  if (!toggle || !library || !prev || !next || !stop || !play || !progress || !volume || !volumeDown || !volumeUp || !volumeValue) {
     return;
   }
 
@@ -2199,8 +2202,17 @@ function prepararTocadiscos() {
     actualizarControlesAudio();
   });
 
-  volumeDown.addEventListener("click", () => cambiarVolumen(-0.1));
-  volumeUp.addEventListener("click", () => cambiarVolumen(0.1));
+  volumeDown.addEventListener("click", (event) => {
+    event.preventDefault();
+    event.stopPropagation();
+    cambiarVolumen(-0.1);
+  });
+
+  volumeUp.addEventListener("click", (event) => {
+    event.preventDefault();
+    event.stopPropagation();
+    cambiarVolumen(0.1);
+  });
 
   actualizarControlesAudio();
 }

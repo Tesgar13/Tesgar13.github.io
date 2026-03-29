@@ -535,9 +535,16 @@
                 <span class="turntable-progress__time" id="turntable-time-total">0:00</span>
               </div>
               <div class="turntable-volume" aria-label="Controles de volumen">
-                <button class="turntable-volume__button" type="button" id="turntable-volume-down" aria-label="Bajar volumen">-</button>
+                <button class="turntable-volume__button turntable-volume__button--down" type="button" id="turntable-volume-down" aria-label="Bajar volumen">
+                  <span aria-hidden="true">◂</span>
+                  <span>Bajar</span>
+                </button>
                 <input class="turntable-volume__slider" id="turntable-volume" type="range" min="0" max="1" value="0.85" step="0.05" aria-label="Volumen" />
-                <button class="turntable-volume__button" type="button" id="turntable-volume-up" aria-label="Subir volumen">+</button>
+                <button class="turntable-volume__button turntable-volume__button--up" type="button" id="turntable-volume-up" aria-label="Subir volumen">
+                  <span>Subir</span>
+                  <span aria-hidden="true">▸</span>
+                </button>
+                <span class="turntable-volume__value" id="turntable-volume-value">85%</span>
               </div>
             </div>
           </section>
