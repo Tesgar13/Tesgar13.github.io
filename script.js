@@ -9,6 +9,7 @@ let turntablePlaying = false;
 const PORTADA_DESTACADA_ID = "seed:fotofav";
 const DEFAULT_MEMORY_NOTE = "Escribe aqui una frase vuestra.";
 const DEFAULT_MEMORY_DESCRIPTION = "Pon aqui una descripcion pequena que luego cambiaras.";
+const DEFAULT_SONG_NOTE = "Escribe aqui por que esta cancion es vuestra.";
 const DEBUG_PLAN_RESET_KEY = "debugPlanResetDone";
 const TIMELINE_SEED = [
   { id: "seed:dedo", type: "seed", date: "2023-03-07", title: "", note: "", description: "", image: "img/dedo.jpeg" },
@@ -50,6 +51,48 @@ const LETTERS = [
     message: "Terminamos esta ruta, pero no la historia. Lo bonito de llegar aqui es saber que siempre se puede empezar otra, con mas planes, mas fotos, mas canciones y mas nosotros."
   }
 ];
+const SONGS_SEED = [
+  {
+    id: "seed-song:1",
+    slot: 1,
+    title: "Saturno",
+    artist: "Pablo Alboran",
+    note: "La que siempre parece llegar al sitio exacto, aunque la escuchemos en dias distintos.",
+    coverImage: "img/fotofav.jpeg",
+    spotifyLink: "",
+    appleLink: ""
+  },
+  {
+    id: "seed-song:2",
+    slot: 2,
+    title: "Ojitos Lindos",
+    artist: "Bad Bunny, Bomba Estereo",
+    note: "Perfecta para dejar una foto bonita en el centro del vinilo y una nota vuestra debajo.",
+    coverImage: "img/rosa.jpeg",
+    spotifyLink: "",
+    appleLink: ""
+  },
+  {
+    id: "seed-song:3",
+    slot: 3,
+    title: "Paris in the Rain",
+    artist: "Lauv",
+    note: "Sirve de ejemplo para una cancion suave, intima y muy facil de reemplazar por la vuestra.",
+    coverImage: "img/cafe.jpeg",
+    spotifyLink: "",
+    appleLink: ""
+  },
+  {
+    id: "seed-song:4",
+    slot: 4,
+    title: "Until I Found You",
+    artist: "Stephen Sanchez",
+    note: "Deja aqui una razon pequena, personal y concreta para recordar por que se quedo con vosotros.",
+    coverImage: "img/imaginaria.jpeg",
+    spotifyLink: "",
+    appleLink: ""
+  }
+];
 
 const planes = [
   "plan1", "plan2", "plan3", "plan4", "plan5",
@@ -58,6 +101,9 @@ const planes = [
 const STATIC_IMAGE_PATHS = [
   "img/Entrada.png",
   "img/fotofav.jpeg",
+  "img/GH.jpg",
+  "img/Marias.jpg",
+  "img/Lentejas.jpg",
   "img/MCD.jpg",
   "img/Desayuno.jpg",
   "img/Hamburguesa.jpg",
@@ -66,6 +112,9 @@ const STATIC_IMAGE_PATHS = [
   "img/cocina.jpg"
 ];
 const ASSET_STORAGE_NAME_MAP = {
+  "img/GH.jpg": "GH",
+  "img/Marias.jpg": "Marias",
+  "img/Lentejas.jpg": "Lentejas",
   "img/Hamburguesa.jpg": "Hamburguesa",
   "img/Desayuno.jpg": "Desayuno",
   "img/Aceitunas.jpg": "Aceitunas",
@@ -136,6 +185,96 @@ function obtenerAltRecuerdo(entry) {
   return texto === DEFAULT_MEMORY_NOTE ? `Recuerdo del ${formatearFecha(entry.date)}` : texto;
 }
 
+function normalizarCancion(song, fallbackIndex = 0) {
+  const slotNumber = Number(song?.slot);
+
+  return {
+    id: song?.id || `song:${Date.now()}-${fallbackIndex}`,
+    slot: Number.isFinite(slotNumber) && slotNumber > 0 ? slotNumber : fallbackIndex + 1,
+    title: song?.title || "",
+    artist: song?.artist || "",
+    note: song?.note || "",
+    coverImage: song?.coverImage || song?.image || "",
+    spotifyLink: song?.spotifyLink || song?.link || "",
+    appleLink: song?.appleLink || "",
+    createdAt: Number(song?.createdAt || 0)
+  };
+}
+
+function ordenarCanciones(canciones) {
+  return [...canciones].sort((a, b) => {
+    const porSlot = Number(a.slot || 0) - Number(b.slot || 0);
+    if (porSlot !== 0) {
+      return porSlot;
+    }
+
+    return Number(a.createdAt || 0) - Number(b.createdAt || 0);
+  });
+}
+
+function sincronizarCancionesSemilla() {
+  const existentes = leerStorageJson(SONGS_KEY).map((song, index) => normalizarCancion(song, index));
+  const porId = new Map(existentes.map((song) => [song.id, song]));
+  let cambio = false;
+
+  SONGS_SEED.forEach((song, index) => {
+    const normalizada = normalizarCancion(song, index);
+    const existente = porId.get(song.id);
+
+    if (!existente || existente.id.startsWith("seed-song:")) {
+      porId.set(song.id, {
+        ...existente,
+        ...normalizada
+      });
+      cambio = true;
+    }
+  });
+
+  const canciones = ordenarCanciones(Array.from(porId.values()));
+  if (cambio || canciones.length !== existentes.length) {
+    escribirStorageJson(SONGS_KEY, canciones);
+  }
+
+  return canciones;
+}
+
+function obtenerNumeroHuecoCancion(index, canciones) {
+  const existentes = new Set(canciones.map((song) => Number(song.slot || 0)).filter(Boolean));
+  let slot = index + 1;
+
+  while (existentes.has(slot)) {
+    slot += 1;
+  }
+
+  return slot;
+}
+
+function resolveSongCover(song) {
+  return resolveImageUrl(song?.coverImage || song?.image || "");
+}
+
+function renderizarDiscoCancion(song) {
+  const cover = resolveSongCover(song);
+  const alt = song?.title ? `Portada de ${song.title}` : "Portada de la cancion";
+
+  if (cover) {
+    return `
+      <div class="song-item__record-label">
+        <img src="${cover}" alt="${alt}" />
+      </div>
+      <div class="song-item__record-hole" aria-hidden="true"></div>
+    `;
+  }
+
+  return `
+    <div class="song-item__record-label song-item__record-label--fallback">
+      <span>${song?.title || "Tu foto"}</span>
+      <small>${song?.artist || "Portada"}</small>
+    </div>
+    <div class="song-item__record-hole" aria-hidden="true"></div>
+  `;
+}
+
 function mensajeDetrasDeRecuerdo(entry) {
   const descripcion = obtenerDescripcionRecuerdo(entry);
 
@@ -179,6 +318,14 @@ function resolveImageUrl(path) {
     return path;
   }
 
+  return assetUrlMap[path] || path;
+}
+
+function resolveStorageAssetUrl(path) {
+  if (!path || !path.startsWith("img/")) {
+    return "";
+  }
+
   return assetUrlMap[path] || "";
 }
 
@@ -187,16 +334,28 @@ function aplicarAssetsRemotosAlDom() {
   root.style.setProperty("--entrada-image", `url("${resolveImageUrl("img/Entrada.png")}")`);
   root.style.setProperty("--hero-featured-image", `url("${resolveImageUrl("img/fotofav.jpeg")}")`);
 
-  document.querySelectorAll("img").forEach((image) => {
-    const originalPath = image.dataset.assetPath || image.getAttribute("src");
+  document.querySelectorAll("img[data-asset-path]").forEach((image) => {
+    const originalPath = image.dataset.assetPath;
 
     if (!originalPath || !originalPath.startsWith("img/")) {
       return;
     }
 
-    image.dataset.assetPath = originalPath;
-    const remoteUrl = resolveImageUrl(originalPath);
+    const remoteUrl = resolveStorageAssetUrl(originalPath);
 
+    if (remoteUrl) {
+      image.src = remoteUrl;
+    }
+  });
+
+  document.querySelectorAll("img:not([data-asset-path])").forEach((image) => {
+    const originalPath = image.getAttribute("src");
+
+    if (!originalPath || !originalPath.startsWith("img/")) {
+      return;
+    }
+
+    const remoteUrl = resolveImageUrl(originalPath);
     if (remoteUrl) {
       image.src = remoteUrl;
     }
@@ -281,7 +440,13 @@ function storagePathsDesdeAssetLocal(assetPath) {
   const originalName = assetPath.split("/").pop() || "";
   const mappedName = ASSET_STORAGE_NAME_MAP[assetPath] || "";
   const stem = originalName.replace(/\.[^.]+$/, "");
+  const relativePath = assetPath.replace(/^\.?\/*/, "");
+  const relativeWithoutImg = relativePath.replace(/^img\//i, "");
   const candidates = Array.from(new Set([
+    `assets/${relativePath}`,
+    `assets/${relativeWithoutImg}`,
+    relativePath,
+    relativeWithoutImg,
     mappedName,
     originalName,
     stem,
@@ -293,7 +458,22 @@ function storagePathsDesdeAssetLocal(assetPath) {
     `${mappedName}.png`
   ].filter(Boolean)));
 
-  return candidates.map((fileName) => `assets/${fileName}`);
+  return candidates.map((candidate) => (
+    candidate.startsWith("assets/") || candidate.startsWith("img/") ? candidate : `assets/${candidate}`
+  ));
+}
+
+function recogerAssetPathsDelDom() {
+  return Array.from(document.querySelectorAll("img[data-asset-path]"))
+    .map((image) => image.dataset.assetPath || "")
+    .filter((assetPath) => assetPath.startsWith("img/"));
+}
+
+function obtenerAssetPathsAResolver() {
+  return Array.from(new Set([
+    ...MIGRATABLE_ASSET_PATHS,
+    ...recogerAssetPathsDelDom()
+  ]));
 }
 
 async function cargarAssetsDesdeStorage() {
@@ -306,7 +486,7 @@ async function cargarAssetsDesdeStorage() {
   const storage = window.firebaseStorage;
   const nextMap = { ...assetUrlMap };
 
-  await Promise.all(MIGRATABLE_ASSET_PATHS.map(async (assetPath) => {
+  await Promise.all(obtenerAssetPathsAResolver().map(async (assetPath) => {
     const candidatePaths = storagePathsDesdeAssetLocal(assetPath);
 
     for (const candidatePath of candidatePaths) {
@@ -319,7 +499,7 @@ async function cargarAssetsDesdeStorage() {
       }
     }
 
-    console.error(`No se pudo cargar ${assetPath} desde Firebase Storage.`);
+    console.error(`No se pudo cargar ${assetPath} desde Firebase Storage. Rutas probadas: ${candidatePaths.join(", ")}`);
   }));
 
   guardarAssetMap(nextMap);
@@ -377,11 +557,11 @@ async function cargarRecuerdosFirestore() {
 }
 
 function obtenerCanciones() {
-  return leerStorageJson(SONGS_KEY);
+  return sincronizarCancionesSemilla();
 }
 
 function guardarCanciones(entries) {
-  escribirStorageJson(SONGS_KEY, entries);
+  escribirStorageJson(SONGS_KEY, ordenarCanciones(entries.map((song, index) => normalizarCancion(song, index))));
 }
 
 function limpiarCancionesLocalesLegacy() {
@@ -394,7 +574,7 @@ function limpiarCancionesLocalesLegacy() {
     && canciones.every((song) => typeof song?.id === "string" && song.id.startsWith("song:"));
 
   if (pareceColeccionLegacy) {
-    guardarCanciones([]);
+    guardarCanciones(SONGS_SEED);
   }
 
   localStorage.setItem(SONGS_LEGACY_CLEANUP_KEY, "true");
@@ -410,8 +590,10 @@ async function guardarCancionEnFirestore(song) {
 
   await addDoc(collection(db, "songs"), {
     songId: song.id,
+    slot: Number(song.slot || 0),
     title: song.title || "",
     artist: song.artist || "",
+    coverImage: song.coverImage || song.image || "",
     spotifyLink: song.spotifyLink || song.link || "",
     appleLink: song.appleLink || "",
     note: song.note || "",
@@ -445,8 +627,10 @@ async function cargarCancionesFirestore() {
 
       porId.set(songId, {
         id: songId,
+        slot: Number(data.slot || existente.slot || 0),
         title: data.title || "",
         artist: data.artist || "",
+        coverImage: data.coverImage || existente.coverImage || "",
         spotifyLink: data.spotifyLink || "",
         appleLink: data.appleLink || "",
         note: data.note || "",
@@ -769,31 +953,23 @@ function renderizarTimeline() {
     item.style.setProperty("--polaroid-pin-left", layout.pinLeft);
     item.style.setProperty("--polaroid-pin-top", layout.pinTop);
     item.style.setProperty("--polaroid-shadow", layout.shadow);
-    item.setAttribute("role", "button");
-    item.setAttribute("tabindex", "0");
-    item.setAttribute("aria-label", `Abrir recuerdo del ${formatearFecha(entry.date)}`);
     item.innerHTML = `
-      <div class="timeline-item__dot" aria-hidden="true"></div>
-      <div class="timeline-item__content polaroid-card__inner">
+      <button class="timeline-item__content polaroid-card__button polaroid-card__inner" type="button" aria-label="Abrir recuerdo del ${formatearFecha(entry.date)}">
         <section class="polaroid-card__face polaroid-card__face--front">
           <div class="polaroid-card__photo-frame">
             <div class="timeline-item__media polaroid-card__media">
               <img src="${resolveImageUrl(entry.image)}" alt="${obtenerAltRecuerdo(entry)}" />
             </div>
           </div>
-          <p class="polaroid-card__date">${formatearFecha(entry.date)}</p>
           <p class="timeline-item__note polaroid-card__title">${texto}</p>
         </section>
-      </div>
+      </button>
     `;
 
-    item.addEventListener("click", () => abrirModalRecuerdo(entry.id));
-    item.addEventListener("keydown", (event) => {
-      if (event.key === "Enter" || event.key === " ") {
-        event.preventDefault();
-        abrirModalRecuerdo(entry.id);
-      }
-    });
+    const trigger = item.querySelector(".polaroid-card__button");
+    if (trigger) {
+      trigger.addEventListener("click", () => abrirModalRecuerdo(entry.id));
+    }
 
     contenedor.appendChild(item);
   });
@@ -810,13 +986,11 @@ function renderizarTimeline() {
     placeholder.style.setProperty("--polaroid-pin-top", layout.pinTop);
     placeholder.style.setProperty("--polaroid-shadow", layout.shadow);
     placeholder.innerHTML = `
-      <div class="timeline-item__dot" aria-hidden="true"></div>
       <div class="timeline-item__content polaroid-card__inner" aria-hidden="true">
         <section class="polaroid-card__face polaroid-card__face--front">
           <div class="polaroid-card__photo-frame">
             <div class="timeline-item__media timeline-item__media--placeholder polaroid-card__media"></div>
           </div>
-          <p class="polaroid-card__date">Fecha pendiente</p>
           <p class="timeline-item__note polaroid-card__title">${DEFAULT_MEMORY_NOTE}</p>
         </section>
       </div>
@@ -921,13 +1095,15 @@ function renderizarCanciones() {
     item.className = "song-item";
     item.innerHTML = `
       <div class="song-item__sleeve">
-        <div class="song-item__record" aria-hidden="true"></div>
+        <div class="song-item__record" aria-hidden="true">
+          ${renderizarDiscoCancion(song)}
+        </div>
       </div>
       <div class="song-item__content">
-        <p class="song-item__eyebrow">En funda</p>
+        <p class="song-item__eyebrow">Pista ${String(song.slot || index + 1).padStart(2, "0")}</p>
         <h4>${song.title}</h4>
         <p class="song-item__artist">${song.artist}</p>
-        <p>${song.note || ""}</p>
+        <p>${song.note || DEFAULT_SONG_NOTE}</p>
         <div class="song-item__links">
           ${spotifyLink ? `<a class="song-item__link" href="${spotifyLink}" target="_blank" rel="noopener noreferrer">Spotify</a>` : ""}
           ${appleLink ? `<a class="song-item__link" href="${appleLink}" target="_blank" rel="noopener noreferrer">Apple Music</a>` : ""}
@@ -946,15 +1122,18 @@ function renderizarCanciones() {
   for (let i = canciones.length; i < MOCK_SLOTS; i += 1) {
     const item = document.createElement("article");
     item.className = "song-item song-item--placeholder";
+    const slot = obtenerNumeroHuecoCancion(i, canciones);
     item.innerHTML = `
       <div class="song-item__sleeve">
-        <div class="song-item__record" aria-hidden="true"></div>
+        <div class="song-item__record" aria-hidden="true">
+          ${renderizarDiscoCancion({ title: "Tu foto", artist: "Aqui", coverImage: "" })}
+        </div>
       </div>
       <div class="song-item__content">
-        <p class="song-item__eyebrow">Hueco ${i + 1}</p>
-        <h4>Titulo pendiente</h4>
+        <p class="song-item__eyebrow">Hueco ${slot}</p>
+        <h4>Cancion pendiente</h4>
         <p class="song-item__artist">Artista pendiente</p>
-        <p>Aqui ira la nota que acompane a la cancion y explique por que se ha quedado con vosotros.</p>
+        <p>${DEFAULT_SONG_NOTE}</p>
       </div>
     `;
     contenedor.appendChild(item);
@@ -981,8 +1160,10 @@ function actualizarTocadiscos(canciones) {
   const artist = document.getElementById("turntable-artist");
   const spotifyLink = document.getElementById("turntable-link-spotify");
   const appleLink = document.getElementById("turntable-link-apple");
+  const coverImage = document.getElementById("turntable-cover-image");
+  const coverFallback = document.getElementById("turntable-cover-fallback");
 
-  if (!record || !title || !artist || !spotifyLink || !appleLink) {
+  if (!record || !title || !artist || !spotifyLink || !appleLink || !coverImage || !coverFallback) {
     return;
   }
 
@@ -990,6 +1171,10 @@ function actualizarTocadiscos(canciones) {
     record.classList.remove("is-spinning");
     title.textContent = "Sin cancion";
     artist.textContent = "Toca el tocadiscos para ver la coleccion";
+    coverImage.hidden = true;
+    coverImage.removeAttribute("src");
+    coverFallback.hidden = false;
+    coverFallback.textContent = "Sin portada";
     spotifyLink.hidden = true;
     spotifyLink.removeAttribute("href");
     appleLink.hidden = true;
@@ -1004,9 +1189,23 @@ function actualizarTocadiscos(canciones) {
   const song = canciones[songActualIndex];
   const spotifyUrl = song.spotifyLink || song.link || "";
   const appleUrl = song.appleLink || "";
+  const coverUrl = resolveSongCover(song);
   record.classList.toggle("is-spinning", turntablePlaying);
   title.textContent = song.title;
   artist.textContent = song.note || song.artist;
+
+  if (coverUrl) {
+    coverImage.hidden = false;
+    coverImage.src = coverUrl;
+    coverImage.alt = song.title ? `Portada de ${song.title}` : "Portada de la cancion";
+    coverFallback.hidden = true;
+    coverFallback.textContent = "";
+  } else {
+    coverImage.hidden = true;
+    coverImage.removeAttribute("src");
+    coverFallback.hidden = false;
+    coverFallback.textContent = song.title || "Sin portada";
+  }
 
   if (spotifyUrl) {
     spotifyLink.hidden = false;
@@ -1638,6 +1837,7 @@ function prepararFormularioCanciones() {
     const spotifyInput = document.getElementById("song-link-spotify");
     const appleInput = document.getElementById("song-link-apple");
     const noteInput = document.getElementById("song-note");
+    const coverInput = document.getElementById("song-cover-image");
 
     if (!titleInput.value.trim() || !artistInput.value.trim()) {
       alert("La cancion necesita al menos titulo y artista.");
@@ -1647,8 +1847,10 @@ function prepararFormularioCanciones() {
     const canciones = obtenerCanciones();
     const nuevaCancion = {
       id: `song:${Date.now()}`,
+      slot: canciones.length + 1,
       title: titleInput.value.trim(),
       artist: artistInput.value.trim(),
+      coverImage: coverInput ? coverInput.value.trim() : "",
       spotifyLink: spotifyInput.value.trim(),
       appleLink: appleInput.value.trim(),
       note: noteInput.value.trim()

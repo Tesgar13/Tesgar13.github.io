@@ -13,8 +13,8 @@
 <body class="access-pending">
   <div id="auth-overlay" aria-hidden="true">
     <div class="auth-box">
-      <h2>Acceso privado</h2>
-      <p>Inicia sesión para ver y subir fotos.</p>
+      <h2>¿Te creías que iba a ser tan fácil?</h2>
+      <p>En la carta hay escondida una contraseña, tienes que encontrarla y meterla.</p>
       <form id="auth-form" novalidate>
         <input type="email" id="login-email" placeholder="Correo" autocomplete="email" required />
         <input type="password" id="login-password" placeholder="Contraseña" autocomplete="current-password" required />
@@ -500,7 +500,12 @@
               </div>
               <div class="turntable__deck">
                 <div class="turntable__platter-ring"></div>
-                <div class="turntable__platter" id="turntable-record"></div>
+                <div class="turntable__platter" id="turntable-record">
+                  <div class="turntable__platter-center">
+                    <img id="turntable-cover-image" alt="Portada de la cancion actual" hidden />
+                    <span id="turntable-cover-fallback">Sin portada</span>
+                  </div>
+                </div>
                 <div class="turntable__label">
                   <p class="turntable__eyebrow">Musiquita</p>
                   <h3 id="turntable-title">Sin cancion</h3>
@@ -556,6 +561,10 @@
                   <span>Nota</span>
                   <textarea id="song-note" rows="4" maxlength="180" placeholder="Que la hace especial"></textarea>
                 </label>
+                <label class="field">
+                  <span>Imagen del vinilo</span>
+                  <input id="song-cover-image" type="text" maxlength="240" placeholder="img/fotofav.jpeg o https://..." />
+                </label>
                 <button class="timeline-form__button" type="submit">Guardar cancion</button>
               </form>
             </div>
@@ -588,7 +597,6 @@
                 <img id="memory-modal-image" alt="Recuerdo ampliado" />
               </div>
               <div class="memory-polaroid__caption">
-                <p class="memory-polaroid__date" id="memory-modal-date"></p>
                 <h3 id="memory-modal-title">Recuerdo</h3>
               </div>
             </div>
@@ -598,6 +606,7 @@
           </section>
           <section class="memory-flip__face memory-flip__face--back">
             <div class="memory-note">
+              <p class="memory-note__date" id="memory-modal-date"></p>
               <label class="memory-flip__field memory-flip__field--plain">
                 <textarea id="memory-modal-description-input" rows="6" maxlength="220" placeholder="Pon aqui una descripcion pequena"></textarea>
               </label>
