@@ -8,6 +8,7 @@ let planLibraryState = [];
 let memoryLibraryState = [];
 let songLibraryState = [];
 let audioPlayer = null;
+let audioObjectUrl = "";
 const PORTADA_DESTACADA_ID = "memory:fotofav";
 const DEFAULT_MEMORY_NOTE = "Escribe aqui una frase vuestra.";
 const DEFAULT_MEMORY_DESCRIPTION = "Pon aqui una descripcion pequena que luego cambiaras.";
@@ -403,6 +404,68 @@ function resolveSongCover(song) {
 
 function resolveSongAudio(song) {
   return song?.audio || "";
+}
+
+function inferAudioMimeType(audioUrl) {
+  const normalizedUrl = String(audioUrl || "").toLowerCase();
+
+  if (normalizedUrl.endsWith(".mp3")) {
+    return "audio/mpeg";
+  }
+
+  if (normalizedUrl.endsWith(".wav")) {
+    return "audio/wav";
+  }
+
+  if (normalizedUrl.endsWith(".ogg")) {
+    return "audio/ogg";
+  }
+
+  if (normalizedUrl.endsWith(".m4a")) {
+    return "audio/mp4";
+  }
+
+  return "";
+}
+
+function liberarAudioTemporal() {
+  if (!audioObjectUrl) {
+    return;
+  }
+
+  URL.revokeObjectURL(audioObjectUrl);
+  audioObjectUrl = "";
+}
+
+async function prepararFuenteAudio(audioUrl) {
+  if (!audioUrl || audioUrl.startsWith("blob:") || audioUrl.startsWith("data:")) {
+    return audioUrl;
+  }
+
+  try {
+    const response = await fetch(audioUrl, {
+      method: "GET",
+      mode: "cors",
+      credentials: "omit"
+    });
+
+    if (!response.ok) {
+      throw new Error(`No se pudo descargar el audio (${response.status}).`);
+    }
+
+    const audioBlob = await response.blob();
+    const mimeType = audioBlob.type || inferAudioMimeType(audioUrl) || "audio/mpeg";
+    const playableBlob = audioBlob.type === mimeType
+      ? audioBlob
+      : new Blob([audioBlob], { type: mimeType });
+
+    liberarAudioTemporal();
+    audioObjectUrl = URL.createObjectURL(playableBlob);
+    return audioObjectUrl;
+  } catch (error) {
+    console.warn(`No se pudo normalizar el audio antes de reproducirlo. Se intentara usar la URL original: ${audioUrl}`, error);
+    return audioUrl;
+  }
 }
 
 function renderizarDiscoCancion(song) {
@@ -1314,7 +1377,7 @@ function asegurarAudioGlobal() {
   return audioPlayer;
 }
 
-function reproducirCancion(index, { restart = false } = {}) {
+async function reproducirCancion(index, { restart = false } = {}) {
   const canciones = obtenerCanciones();
   const song = canciones[index];
 
@@ -1335,7 +1398,9 @@ function reproducirCancion(index, { restart = false } = {}) {
   const mismaCancion = player.dataset.songId === song.id;
 
   if (!mismaCancion) {
-    player.src = audioUrl;
+    const playableAudioUrl = await prepararFuenteAudio(audioUrl);
+    player.src = playableAudioUrl;
+    player.dataset.audioUrl = audioUrl;
     player.dataset.songId = song.id;
     player.load();
   } else if (restart) {
@@ -1344,7 +1409,7 @@ function reproducirCancion(index, { restart = false } = {}) {
 
   player.play().catch((error) => {
     turntablePlaying = false;
-    console.error(`No se pudo reproducir la cancion ${song.title}. URL usada: ${audioUrl}`, error);
+    console.error(`No se pudo reproducir la cancion ${song.title}. URL usada: ${player.dataset.audioUrl || audioUrl}`, error);
     actualizarTocadiscos(canciones);
     marcarCancionActiva();
   });
@@ -1357,6 +1422,12 @@ function detenerCancionActual() {
     player.currentTime = 0;
   }
 
+  if (player.dataset.songId) {
+    delete player.dataset.songId;
+    delete player.dataset.audioUrl;
+  }
+
+  liberarAudioTemporal();
   turntablePlaying = false;
   actualizarTocadiscos(obtenerCanciones());
   marcarCancionActiva();
