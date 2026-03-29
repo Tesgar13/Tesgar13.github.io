@@ -1,11 +1,11 @@
 const fechaObjetivo = new Date("2029-01-11T23:59:00");
 const TIMELINE_KEY = "timelineEntries";
-const SONGS_KEY = "soundtrackEntries";
-const SONGS_LEGACY_CLEANUP_KEY = "soundtrackLegacyCleanupDone";
 const ASSET_MAP_KEY = "firebaseAssetMap";
 const MOCK_SLOTS = 10;
 let songActualIndex = -1;
 let turntablePlaying = false;
+let songLibraryState = [];
+let audioPlayer = null;
 const PORTADA_DESTACADA_ID = "seed:fotofav";
 const DEFAULT_MEMORY_NOTE = "Escribe aqui una frase vuestra.";
 const DEFAULT_MEMORY_DESCRIPTION = "Pon aqui una descripcion pequena que luego cambiaras.";
@@ -51,46 +51,50 @@ const LETTERS = [
     message: "Terminamos esta ruta, pero no la historia. Lo bonito de llegar aqui es saber que siempre se puede empezar otra, con mas planes, mas fotos, mas canciones y mas nosotros."
   }
 ];
-const SONGS_SEED = [
+const SONG_LIBRARY = [
   {
-    id: "seed-song:1",
+    id: "song-1",
     slot: 1,
     title: "Saturno",
     artist: "Pablo Alboran",
     note: "La que siempre parece llegar al sitio exacto, aunque la escuchemos en dias distintos.",
     coverImage: "img/fotofav.jpeg",
-    spotifyLink: "",
-    appleLink: ""
+    audio: "",
+    spotifyUrl: "",
+    appleMusicUrl: ""
   },
   {
-    id: "seed-song:2",
+    id: "song-2",
     slot: 2,
     title: "Ojitos Lindos",
     artist: "Bad Bunny, Bomba Estereo",
     note: "Perfecta para dejar una foto bonita en el centro del vinilo y una nota vuestra debajo.",
     coverImage: "img/rosa.jpeg",
-    spotifyLink: "",
-    appleLink: ""
+    audio: "",
+    spotifyUrl: "",
+    appleMusicUrl: ""
   },
   {
-    id: "seed-song:3",
+    id: "song-3",
     slot: 3,
     title: "Paris in the Rain",
     artist: "Lauv",
     note: "Sirve de ejemplo para una cancion suave, intima y muy facil de reemplazar por la vuestra.",
     coverImage: "img/cafe.jpeg",
-    spotifyLink: "",
-    appleLink: ""
+    audio: "",
+    spotifyUrl: "",
+    appleMusicUrl: ""
   },
   {
-    id: "seed-song:4",
+    id: "song-4",
     slot: 4,
     title: "Until I Found You",
     artist: "Stephen Sanchez",
     note: "Deja aqui una razon pequena, personal y concreta para recordar por que se quedo con vosotros.",
     coverImage: "img/imaginaria.jpeg",
-    spotifyLink: "",
-    appleLink: ""
+    audio: "",
+    spotifyUrl: "",
+    appleMusicUrl: ""
   }
 ];
 
@@ -185,6 +189,15 @@ function obtenerAltRecuerdo(entry) {
   return texto === DEFAULT_MEMORY_NOTE ? `Recuerdo del ${formatearFecha(entry.date)}` : texto;
 }
 
+function escapeHtml(value) {
+  return String(value || "")
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#39;");
+}
+
 function normalizarCancion(song, fallbackIndex = 0) {
   const slotNumber = Number(song?.slot);
 
@@ -195,9 +208,10 @@ function normalizarCancion(song, fallbackIndex = 0) {
     artist: song?.artist || "",
     note: song?.note || "",
     coverImage: song?.coverImage || song?.image || "",
-    spotifyLink: song?.spotifyLink || song?.link || "",
-    appleLink: song?.appleLink || "",
-    createdAt: Number(song?.createdAt || 0)
+    audio: song?.audio || song?.audioUrl || "",
+    spotifyUrl: song?.spotifyUrl || "",
+    appleMusicUrl: song?.appleMusicUrl || "",
+    isCustom: Boolean(song?.isCustom)
   };
 }
 
@@ -208,49 +222,36 @@ function ordenarCanciones(canciones) {
       return porSlot;
     }
 
-    return Number(a.createdAt || 0) - Number(b.createdAt || 0);
+    return a.title.localeCompare(b.title, "es");
   });
 }
 
-function sincronizarCancionesSemilla() {
-  const existentes = leerStorageJson(SONGS_KEY).map((song, index) => normalizarCancion(song, index));
-  const porId = new Map(existentes.map((song) => [song.id, song]));
-  let cambio = false;
-
-  SONGS_SEED.forEach((song, index) => {
-    const normalizada = normalizarCancion(song, index);
-    const existente = porId.get(song.id);
-
-    if (!existente || existente.id.startsWith("seed-song:")) {
-      porId.set(song.id, {
-        ...existente,
-        ...normalizada
-      });
-      cambio = true;
-    }
-  });
-
-  const canciones = ordenarCanciones(Array.from(porId.values()));
-  if (cambio || canciones.length !== existentes.length) {
-    escribirStorageJson(SONGS_KEY, canciones);
+function inicializarBibliotecaCanciones() {
+  songLibraryState = ordenarCanciones(SONG_LIBRARY.map((song, index) => normalizarCancion(song, index)));
+  if (songActualIndex >= songLibraryState.length) {
+    songActualIndex = songLibraryState.length ? 0 : -1;
   }
-
-  return canciones;
 }
 
-function obtenerNumeroHuecoCancion(index, canciones) {
-  const existentes = new Set(canciones.map((song) => Number(song.slot || 0)).filter(Boolean));
-  let slot = index + 1;
+function obtenerNumeroHuecoCancion(canciones) {
+  const maxSlot = canciones.reduce((maximo, song) => Math.max(maximo, Number(song.slot || 0)), 0);
+  return maxSlot + 1;
+}
 
-  while (existentes.has(slot)) {
-    slot += 1;
+function obtenerCanciones() {
+  if (!songLibraryState.length && SONG_LIBRARY.length) {
+    inicializarBibliotecaCanciones();
   }
 
-  return slot;
+  return songLibraryState;
 }
 
 function resolveSongCover(song) {
   return resolveImageUrl(song?.coverImage || song?.image || "");
+}
+
+function resolveSongAudio(song) {
+  return song?.audio || "";
 }
 
 function renderizarDiscoCancion(song) {
@@ -260,7 +261,7 @@ function renderizarDiscoCancion(song) {
   if (cover) {
     return `
       <div class="song-item__record-label">
-        <img src="${cover}" alt="${alt}" />
+        <img src="${cover}" alt="${escapeHtml(alt)}" />
       </div>
       <div class="song-item__record-hole" aria-hidden="true"></div>
     `;
@@ -268,8 +269,8 @@ function renderizarDiscoCancion(song) {
 
   return `
     <div class="song-item__record-label song-item__record-label--fallback">
-      <span>${song?.title || "Tu foto"}</span>
-      <small>${song?.artist || "Portada"}</small>
+      <span>${escapeHtml(song?.title || "Tu foto")}</span>
+      <small>${escapeHtml(song?.artist || "Portada")}</small>
     </div>
     <div class="song-item__record-hole" aria-hidden="true"></div>
   `;
@@ -556,106 +557,6 @@ async function cargarRecuerdosFirestore() {
   }
 }
 
-function obtenerCanciones() {
-  return sincronizarCancionesSemilla();
-}
-
-function guardarCanciones(entries) {
-  escribirStorageJson(SONGS_KEY, ordenarCanciones(entries.map((song, index) => normalizarCancion(song, index))));
-}
-
-function limpiarCancionesLocalesLegacy() {
-  if (localStorage.getItem(SONGS_LEGACY_CLEANUP_KEY) === "true") {
-    return;
-  }
-
-  const canciones = obtenerCanciones();
-  const pareceColeccionLegacy = canciones.length === MOCK_SLOTS
-    && canciones.every((song) => typeof song?.id === "string" && song.id.startsWith("song:"));
-
-  if (pareceColeccionLegacy) {
-    guardarCanciones(SONGS_SEED);
-  }
-
-  localStorage.setItem(SONGS_LEGACY_CLEANUP_KEY, "true");
-}
-
-async function guardarCancionEnFirestore(song) {
-  if (!window.firebaseDb || !window.firebaseFns) {
-    return;
-  }
-
-  const db = window.firebaseDb;
-  const { collection, addDoc } = window.firebaseFns;
-
-  await addDoc(collection(db, "songs"), {
-    songId: song.id,
-    slot: Number(song.slot || 0),
-    title: song.title || "",
-    artist: song.artist || "",
-    coverImage: song.coverImage || song.image || "",
-    spotifyLink: song.spotifyLink || song.link || "",
-    appleLink: song.appleLink || "",
-    note: song.note || "",
-    createdAt: Date.now()
-  });
-}
-
-async function cargarCancionesFirestore() {
-  if (!window.firebaseDb || !window.firebaseFns) {
-    return;
-  }
-
-  const db = window.firebaseDb;
-  const { collection, getDocs, query, orderBy } = window.firebaseFns;
-
-  try {
-    const snapshot = await getDocs(query(collection(db, "songs"), orderBy("createdAt", "desc")));
-    const locales = obtenerCanciones();
-    const porId = new Map(locales.map((song) => [song.id, song]));
-
-    snapshot.forEach((doc) => {
-      const data = doc.data();
-      const songId = data.songId || `song:${doc.id}`;
-      const existente = porId.get(songId) || {};
-      const existenteCreatedAt = Number(existente.createdAt || 0);
-      const actualCreatedAt = Number(data.createdAt || 0);
-
-      if (existente.id && existenteCreatedAt > actualCreatedAt) {
-        return;
-      }
-
-      porId.set(songId, {
-        id: songId,
-        slot: Number(data.slot || existente.slot || 0),
-        title: data.title || "",
-        artist: data.artist || "",
-        coverImage: data.coverImage || existente.coverImage || "",
-        spotifyLink: data.spotifyLink || "",
-        appleLink: data.appleLink || "",
-        note: data.note || "",
-        createdAt: actualCreatedAt
-      });
-    });
-
-    guardarCanciones(Array.from(porId.values()));
-  } catch (error) {
-    console.error("Error cargando canciones:", error);
-  }
-}
-
-async function borrarCancionesFirestore() {
-  if (!window.firebaseDb || !window.firebaseFns) {
-    return;
-  }
-
-  const db = window.firebaseDb;
-  const { collection, getDocs, query, orderBy, deleteDoc } = window.firebaseFns;
-  const snapshot = await getDocs(query(collection(db, "songs"), orderBy("createdAt", "desc")));
-
-  await Promise.all(snapshot.docs.map((songDoc) => deleteDoc(songDoc.ref)));
-}
-
 async function guardarEstadoPlanEnFirestore(planId, status, extra = {}) {
   if (!window.firebaseDb || !window.firebaseFns) {
     return;
@@ -750,9 +651,9 @@ function leerArchivoComoDataUrl(file) {
   });
 }
 
-async function subirImagenAFirebase(file, folder = "recuerdos") {
-  if (!file || !file.type.startsWith("image/")) {
-    throw new Error("El archivo debe ser una imagen.");
+async function subirArchivoAFirebase(file, folder, typePrefix, validationMessage) {
+  if (!file || !file.type.startsWith(typePrefix)) {
+    throw new Error(validationMessage);
   }
 
   if (!window.firebaseStorage || !window.firebaseFns) {
@@ -767,6 +668,14 @@ async function subirImagenAFirebase(file, folder = "recuerdos") {
 
   await uploadBytes(fileRef, file);
   return getDownloadURL(fileRef);
+}
+
+async function subirImagenAFirebase(file, folder = "recuerdos") {
+  return subirArchivoAFirebase(file, folder, "image/", "El archivo debe ser una imagen.");
+}
+
+async function subirAudioAFirebase(file, folder = "musica/audios") {
+  return subirArchivoAFirebase(file, folder, "audio/", "El archivo debe ser un audio.");
 }
 
 function esperarAuthFirebase() {
@@ -1077,44 +986,55 @@ function renderizarCanciones() {
   const canciones = obtenerCanciones();
   contenedor.innerHTML = "";
   if (songActualIndex >= canciones.length) {
-    songActualIndex = canciones.length ? canciones.length - 1 : -1;
+    songActualIndex = canciones.length ? 0 : -1;
   }
   actualizarTocadiscos(canciones);
 
   if (!canciones.length) {
     empty.hidden = false;
-    empty.textContent = "Aqui abajo ves la plantilla de 10 canciones para que puedas imaginar la coleccion terminada.";
+    empty.textContent = "Todavia no hay canciones en la biblioteca. Anade la primera con el formulario.";
   } else {
     empty.hidden = true;
   }
 
   canciones.forEach((song, index) => {
-    const spotifyLink = song.spotifyLink || song.link || "";
-    const appleLink = song.appleLink || "";
+    const isActive = index === songActualIndex;
+    const isPlaying = isActive && turntablePlaying;
     const item = document.createElement("article");
-    item.className = "song-item";
+    item.className = `song-item${isActive ? " song-item--active" : ""}${isPlaying ? " is-playing" : ""}`;
+    item.tabIndex = 0;
+    item.setAttribute("role", "button");
+    item.setAttribute("aria-label", `${isPlaying ? "Pausar" : "Reproducir"} ${song.title} de ${song.artist}`);
     item.innerHTML = `
       <div class="song-item__sleeve">
         <div class="song-item__record" aria-hidden="true">
           ${renderizarDiscoCancion(song)}
         </div>
+        <span class="song-item__play-state">${isPlaying ? "Sonando" : (song.audio ? "Play" : "Sin audio")}</span>
       </div>
       <div class="song-item__content">
         <p class="song-item__eyebrow">Pista ${String(song.slot || index + 1).padStart(2, "0")}</p>
-        <h4>${song.title}</h4>
-        <p class="song-item__artist">${song.artist}</p>
-        <p>${song.note || DEFAULT_SONG_NOTE}</p>
+        <h4>${escapeHtml(song.title)}</h4>
+        <p class="song-item__artist">${escapeHtml(song.artist)}</p>
+        <p>${escapeHtml(song.note || DEFAULT_SONG_NOTE)}</p>
         <div class="song-item__links">
-          ${spotifyLink ? `<a class="song-item__link" href="${spotifyLink}" target="_blank" rel="noopener noreferrer">Spotify</a>` : ""}
-          ${appleLink ? `<a class="song-item__link" href="${appleLink}" target="_blank" rel="noopener noreferrer">Apple Music</a>` : ""}
+          ${song.spotifyUrl ? `<a class="song-item__link" href="${escapeHtml(song.spotifyUrl)}" target="_blank" rel="noopener noreferrer">Spotify</a>` : ""}
+          ${song.appleMusicUrl ? `<a class="song-item__link" href="${escapeHtml(song.appleMusicUrl)}" target="_blank" rel="noopener noreferrer">Apple Music</a>` : ""}
         </div>
       </div>
     `;
-    item.addEventListener("click", () => {
-      songActualIndex = index;
-      turntablePlaying = true;
-      actualizarTocadiscos(canciones);
-      marcarCancionActiva();
+    item.addEventListener("click", (event) => {
+      if (event.target.closest("a")) {
+        return;
+      }
+
+      alternarCancion(index);
+    });
+    item.addEventListener("keydown", (event) => {
+      if (event.key === "Enter" || event.key === " ") {
+        event.preventDefault();
+        alternarCancion(index);
+      }
     });
     contenedor.appendChild(item);
   });
@@ -1122,7 +1042,7 @@ function renderizarCanciones() {
   for (let i = canciones.length; i < MOCK_SLOTS; i += 1) {
     const item = document.createElement("article");
     item.className = "song-item song-item--placeholder";
-    const slot = obtenerNumeroHuecoCancion(i, canciones);
+    const slot = obtenerNumeroHuecoCancion(canciones) + (i - canciones.length);
     item.innerHTML = `
       <div class="song-item__sleeve">
         <div class="song-item__record" aria-hidden="true">
@@ -1145,13 +1065,109 @@ function renderizarCanciones() {
 
 function marcarCancionActiva() {
   document.querySelectorAll(".songs-list .song-item").forEach((item, index) => {
-    item.classList.toggle("song-item--active", index === songActualIndex);
+    const activa = index === songActualIndex;
+    item.classList.toggle("song-item--active", activa);
+    item.classList.toggle("is-playing", activa && turntablePlaying);
   });
 
   const activa = document.querySelector(".songs-list .song-item--active");
   if (activa) {
     activa.scrollIntoView({ behavior: "smooth", inline: "center", block: "nearest" });
   }
+}
+
+function asegurarAudioGlobal() {
+  if (audioPlayer) {
+    return audioPlayer;
+  }
+
+  audioPlayer = document.getElementById("song-audio-player");
+  if (!audioPlayer) {
+    audioPlayer = new Audio();
+    audioPlayer.preload = "metadata";
+  }
+
+  audioPlayer.addEventListener("play", () => {
+    turntablePlaying = true;
+    actualizarTocadiscos(obtenerCanciones());
+    marcarCancionActiva();
+  });
+
+  audioPlayer.addEventListener("pause", () => {
+    if (!audioPlayer.ended) {
+      turntablePlaying = false;
+      actualizarTocadiscos(obtenerCanciones());
+      marcarCancionActiva();
+    }
+  });
+
+  audioPlayer.addEventListener("ended", () => {
+    turntablePlaying = false;
+    audioPlayer.currentTime = 0;
+    actualizarTocadiscos(obtenerCanciones());
+    marcarCancionActiva();
+  });
+
+  return audioPlayer;
+}
+
+function reproducirCancion(index, { restart = false } = {}) {
+  const canciones = obtenerCanciones();
+  const song = canciones[index];
+
+  if (!song) {
+    return;
+  }
+
+  songActualIndex = index;
+  const audioUrl = resolveSongAudio(song);
+  if (!audioUrl) {
+    turntablePlaying = false;
+    actualizarTocadiscos(canciones);
+    marcarCancionActiva();
+    return;
+  }
+
+  const player = asegurarAudioGlobal();
+  const mismaCancion = player.dataset.songId === song.id;
+
+  if (!mismaCancion) {
+    player.src = audioUrl;
+    player.dataset.songId = song.id;
+  } else if (restart) {
+    player.currentTime = 0;
+  }
+
+  player.play().catch((error) => {
+    turntablePlaying = false;
+    console.error(`No se pudo reproducir la cancion ${song.title}.`, error);
+    actualizarTocadiscos(canciones);
+    marcarCancionActiva();
+  });
+}
+
+function detenerCancionActual() {
+  const player = asegurarAudioGlobal();
+  if (player.src) {
+    player.pause();
+    player.currentTime = 0;
+  }
+
+  turntablePlaying = false;
+  actualizarTocadiscos(obtenerCanciones());
+  marcarCancionActiva();
+}
+
+function alternarCancion(index) {
+  const player = asegurarAudioGlobal();
+  const mismaCancion = songActualIndex === index && player.dataset.songId === obtenerCanciones()[index]?.id;
+
+  if (mismaCancion && !player.paused) {
+    player.pause();
+    return;
+  }
+
+  reproducirCancion(index);
 }
 
 function actualizarTocadiscos(canciones) {
@@ -1162,15 +1178,17 @@ function actualizarTocadiscos(canciones) {
   const appleLink = document.getElementById("turntable-link-apple");
   const coverImage = document.getElementById("turntable-cover-image");
   const coverFallback = document.getElementById("turntable-cover-fallback");
+  const nowPlaying = document.getElementById("turntable-now-playing");
 
-  if (!record || !title || !artist || !spotifyLink || !appleLink || !coverImage || !coverFallback) {
+  if (!record || !title || !artist || !spotifyLink || !appleLink || !coverImage || !coverFallback || !nowPlaying) {
     return;
   }
 
   if (!canciones.length) {
     record.classList.remove("is-spinning");
     title.textContent = "Sin cancion";
-    artist.textContent = "Toca el tocadiscos para ver la coleccion";
+    artist.textContent = "Abre la biblioteca y anade la primera cancion.";
+    nowPlaying.textContent = "Todavia no esta sonando nada.";
     coverImage.hidden = true;
     coverImage.removeAttribute("src");
     coverFallback.hidden = false;
@@ -1183,16 +1201,21 @@ function actualizarTocadiscos(canciones) {
   }
 
   if (songActualIndex < 0) {
-    songActualIndex = canciones.length - 1;
+    songActualIndex = 0;
   }
 
   const song = canciones[songActualIndex];
-  const spotifyUrl = song.spotifyLink || song.link || "";
-  const appleUrl = song.appleLink || "";
+  const spotifyUrl = song.spotifyUrl || "";
+  const appleUrl = song.appleMusicUrl || "";
   const coverUrl = resolveSongCover(song);
+  const player = asegurarAudioGlobal();
+  turntablePlaying = Boolean(player.src && !player.paused && player.dataset.songId === song.id);
   record.classList.toggle("is-spinning", turntablePlaying);
-  title.textContent = song.title;
-  artist.textContent = song.note || song.artist;
+  title.textContent = song.title || "Sin titulo";
+  artist.textContent = song.artist || "Sin artista";
+  nowPlaying.textContent = turntablePlaying
+    ? `Reproduciendo ahora: ${song.title} de ${song.artist}.`
+    : (song.audio ? `Seleccionada: ${song.title}. Pulsa play para escucharla.` : `Seleccionada: ${song.title}. Falta anadir el archivo de audio.`);
 
   if (coverUrl) {
     coverImage.hidden = false;
@@ -1237,9 +1260,7 @@ function moverTocadiscos(direccion) {
     songActualIndex = (songActualIndex + direccion + canciones.length) % canciones.length;
   }
 
-  turntablePlaying = true;
-  actualizarTocadiscos(canciones);
-  marcarCancionActiva();
+  reproducirCancion(songActualIndex, { restart: true });
 }
 
 function prepararCarruselCanciones() {
@@ -1805,20 +1826,19 @@ function prepararTocadiscos() {
   prev.addEventListener("click", () => moverTocadiscos(-1));
   next.addEventListener("click", () => moverTocadiscos(1));
   stop.addEventListener("click", () => {
-    turntablePlaying = false;
-    actualizarTocadiscos(obtenerCanciones());
+    detenerCancionActual();
   });
   play.addEventListener("click", () => {
-    if (!obtenerCanciones().length) {
+    const canciones = obtenerCanciones();
+    if (!canciones.length) {
       return;
     }
 
     if (songActualIndex < 0) {
-      songActualIndex = obtenerCanciones().length - 1;
+      songActualIndex = 0;
     }
 
-    turntablePlaying = true;
-    actualizarTocadiscos(obtenerCanciones());
+    reproducirCancion(songActualIndex);
   });
 }
 
@@ -1832,79 +1852,89 @@ function prepararFormularioCanciones() {
   form.addEventListener("submit", async (event) => {
     event.preventDefault();
 
+    const slotInput = document.getElementById("song-slot");
     const titleInput = document.getElementById("song-title");
     const artistInput = document.getElementById("song-artist");
-    const spotifyInput = document.getElementById("song-link-spotify");
-    const appleInput = document.getElementById("song-link-apple");
     const noteInput = document.getElementById("song-note");
     const coverInput = document.getElementById("song-cover-image");
+    const coverFileInput = document.getElementById("song-cover-file");
+    const audioInput = document.getElementById("song-audio");
+    const audioFileInput = document.getElementById("song-audio-file");
+    const spotifyInput = document.getElementById("song-link-spotify");
+    const appleInput = document.getElementById("song-link-apple");
+    const submitButton = form.querySelector('button[type="submit"]');
 
     if (!titleInput.value.trim() || !artistInput.value.trim()) {
       alert("La cancion necesita al menos titulo y artista.");
       return;
     }
 
-    const canciones = obtenerCanciones();
-    const nuevaCancion = {
-      id: `song:${Date.now()}`,
-      slot: canciones.length + 1,
-      title: titleInput.value.trim(),
-      artist: artistInput.value.trim(),
-      coverImage: coverInput ? coverInput.value.trim() : "",
-      spotifyLink: spotifyInput.value.trim(),
-      appleLink: appleInput.value.trim(),
-      note: noteInput.value.trim()
-    };
-    canciones.push(nuevaCancion);
+    try {
+      let coverImage = coverInput ? coverInput.value.trim() : "";
+      let audio = audioInput ? audioInput.value.trim() : "";
 
-    guardarCanciones(canciones);
-    await guardarCancionEnFirestore(nuevaCancion);
-    renderizarCanciones();
-    form.reset();
+      if (!coverImage && coverFileInput?.files?.[0]) {
+        if (submitButton) {
+          submitButton.disabled = true;
+          submitButton.textContent = "Subiendo portada...";
+        }
+        coverImage = await subirImagenAFirebase(coverFileInput.files[0], "musica/portadas");
+      }
 
-    const shell = document.getElementById("song-form-shell");
-    const button = document.querySelector('[data-toggle-form="song-form-shell"]');
-    if (shell) {
-      shell.hidden = true;
-    }
-    if (button) {
-      button.textContent = "Anadir nueva cancion";
+      if (!audio && audioFileInput?.files?.[0]) {
+        if (submitButton) {
+          submitButton.disabled = true;
+          submitButton.textContent = "Subiendo audio...";
+        }
+        audio = await subirAudioAFirebase(audioFileInput.files[0], "musica/audios");
+      }
+
+      if (!audio) {
+        throw new Error("Para anadir una cancion reproducible necesitas una ruta de audio o subir un archivo.");
+      }
+
+      const canciones = obtenerCanciones();
+      const nuevaCancion = normalizarCancion({
+        id: `song:${Date.now()}`,
+        slot: slotInput?.value ? Number(slotInput.value) : obtenerNumeroHuecoCancion(canciones),
+        title: titleInput.value.trim(),
+        artist: artistInput.value.trim(),
+        note: noteInput.value.trim(),
+        coverImage,
+        audio,
+        spotifyUrl: spotifyInput.value.trim(),
+        appleMusicUrl: appleInput.value.trim(),
+        isCustom: true
+      }, canciones.length);
+
+      songLibraryState = ordenarCanciones([...canciones, nuevaCancion]);
+      songActualIndex = songLibraryState.findIndex((song) => song.id === nuevaCancion.id);
+      renderizarCanciones();
+      actualizarTocadiscos(obtenerCanciones());
+      form.reset();
+
+      const shell = document.getElementById("song-form-shell");
+      const button = document.querySelector('[data-toggle-form="song-form-shell"]');
+      if (shell) {
+        shell.hidden = true;
+      }
+      if (button) {
+        button.textContent = "Anadir nueva cancion";
+      }
+    } catch (error) {
+      alert(error.message || "No se pudo anadir la cancion.");
+    } finally {
+      if (submitButton) {
+        submitButton.disabled = false;
+        submitButton.textContent = "Anadir cancion";
+      }
     }
   });
 }
 
-function prepararBorradoCanciones() {
-  const button = document.getElementById("songs-clear-button");
-
-  if (!button) {
-    return;
-  }
-
-  button.addEventListener("click", async () => {
-    const confirmar = window.confirm("Se van a borrar todas las canciones guardadas. Quieres continuar?");
-
-    if (!confirmar) {
-      return;
-    }
-
-    const textoOriginal = button.textContent;
-    button.disabled = true;
-    button.textContent = "Borrando...";
-
-    try {
-      await borrarCancionesFirestore();
-      guardarCanciones([]);
-      songActualIndex = -1;
-      turntablePlaying = false;
-      renderizarCanciones();
-    } catch (error) {
-      console.error("No se pudieron borrar las canciones.", error);
-      alert("No se pudieron borrar las canciones. Revisa la consola o vuelve a intentarlo.");
-    } finally {
-      button.disabled = false;
-      button.textContent = textoOriginal;
-    }
-  });
+function inicializarMusica() {
+  inicializarBibliotecaCanciones();
+  asegurarAudioGlobal();
 }
 
 window.onload = async function () {
@@ -1914,18 +1944,16 @@ window.onload = async function () {
   actualizarEstados();
   prepararTarjetas();
   prepararFormularioTimeline();
+  inicializarMusica();
   prepararFormularioCanciones();
-  prepararBorradoCanciones();
   prepararTogglesDeFormulario();
   prepararModalRecuerdo();
   prepararTabs();
   prepararTocadiscos();
-  limpiarCancionesLocalesLegacy();
   await esperarAuthFirebase();
   await cargarAssetsDesdeStorage();
   await cargarEstadosPlanesFirestore();
   await cargarRecuerdosFirestore();
-  await cargarCancionesFirestore();
   actualizarEstados();
   renderizarTimeline();
   renderizarCanciones();

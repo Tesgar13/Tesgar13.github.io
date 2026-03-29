@@ -99,6 +99,7 @@ window.addEventListener("load", () => {
       try {
         await signInWithEmailAndPassword(auth, email, password);
         passwordInput.value = "";
+        window.location.reload();
       } catch (error) {
         loginError.textContent = "Correo o clave incorrectos.";
       } finally {

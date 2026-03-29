@@ -372,7 +372,7 @@
         <article class="card" data-plan="plan9" data-plan-title="Plan sorpresa">
           <div class="card__inner">
             <div class="card__face card__face--front">
-              <img src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///ywAAAAAAQABAAACAUwAOw==" data-asset-path="img/cocina.jpg" alt="Plan 9" class="card__image" />
+              <img src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///ywAAAAAAQABAAACAUwAOw==" data-asset-path="img/cocina.jpg" alt="Plan 9 - Cocina" class="card__image" />
               <div class="card__content">
                 <p class="card__number">Plan 9</p>
                 <h3>COCINO YO</h3>
@@ -509,7 +509,8 @@
                 <div class="turntable__label">
                   <p class="turntable__eyebrow">Musiquita</p>
                   <h3 id="turntable-title">Sin cancion</h3>
-                  <p id="turntable-artist">Toca el tocadiscos para ver la colección</p>
+                  <p id="turntable-artist">Abre la biblioteca y elige una cancion.</p>
+                  <p class="turntable__now-playing" id="turntable-now-playing">Todavia no esta sonando nada.</p>
                 </div>
                 <div class="turntable__tonearm">
                   <span class="turntable__tonearm-base"></span>
@@ -535,12 +536,15 @@
                 <p class="panel-action__eyebrow">Colección</p>
                 <div class="panel-action__buttons">
                   <button class="timeline-form__button panel-action__button" type="button" data-toggle-form="song-form-shell">Anadir nueva canción</button>
-                  <button class="timeline-form__button timeline-form__button--ghost panel-action__button" type="button" id="songs-clear-button">Borrar canciones</button>
                 </div>
               </div>
             <div class="form-shell" id="song-form-shell" hidden>
-              <h3>Guardar una nueva canción</h3>
+              <h3>Anadir una nueva canción</h3>
               <form id="song-form" class="timeline-form">
+                <label class="field">
+                  <span>Numero / slot</span>
+                  <input id="song-slot" type="number" min="1" placeholder="5" />
+                </label>
                 <label class="field">
                   <span>Titulo</span>
                   <input id="song-title" type="text" maxlength="80" placeholder="Titulo de la cancion" required />
@@ -562,10 +566,22 @@
                   <textarea id="song-note" rows="4" maxlength="180" placeholder="Que la hace especial"></textarea>
                 </label>
                 <label class="field">
-                  <span>Imagen del vinilo</span>
+                  <span>Imagen del vinilo (ruta o URL)</span>
                   <input id="song-cover-image" type="text" maxlength="240" placeholder="img/fotofav.jpeg o https://..." />
                 </label>
-                <button class="timeline-form__button" type="submit">Guardar cancion</button>
+                <label class="field">
+                  <span>Portada desde archivo</span>
+                  <input id="song-cover-file" type="file" accept="image/*" />
+                </label>
+                <label class="field">
+                  <span>Audio (ruta o URL)</span>
+                  <input id="song-audio" type="text" maxlength="260" placeholder="audio/tu-cancion.mp3 o https://..." />
+                </label>
+                <label class="field">
+                  <span>Audio desde archivo</span>
+                  <input id="song-audio-file" type="file" accept="audio/*" />
+                </label>
+                <button class="timeline-form__button" type="submit">Anadir cancion</button>
               </form>
             </div>
             <div class="songs-carousel">
@@ -576,6 +592,7 @@
             <div class="timeline-empty" id="songs-empty">
               Todavia no hay canciones guardadas en vuestra banda sonora.
             </div>
+            <audio id="song-audio-player" preload="none"></audio>
           </section>
         </div>
       </section>
