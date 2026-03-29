@@ -57,14 +57,14 @@ const planes = [
 const STATIC_IMAGE_PATHS = [
   "img/Entrada.png",
   "img/fotofav.jpeg",
-  "img/GH.jpg",
-  "img/Marias.jpg",
-  "img/Lentejas.jpg",
-  "img/BocadilloJ.jpg"
+  "img/MCD.jpg",
+  "img/Desayuno.jpg",
+  "img/Hamburguesa.jpg",
+  "img/Aceitunas.jpg",
+  "img/Jamon.jpg",
+  "img/cocina.jpg"
 ];
-const ASSET_STORAGE_NAME_MAP = {
-  "img/BocadilloJ.jpg": "Bocadillo.jpg"
-};
+const ASSET_STORAGE_NAME_MAP = {};
 const MIGRATABLE_ASSET_PATHS = Array.from(new Set([
   ...STATIC_IMAGE_PATHS,
   ...TIMELINE_SEED.map((entry) => entry.image)
