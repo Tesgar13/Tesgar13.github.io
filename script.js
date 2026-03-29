@@ -113,7 +113,7 @@ const STATIC_IMAGE_PATHS = [
   "img/Hamburguesa.jpg",
   "img/Aceitunas.jpg",
   "img/Jamon.jpg",
-  "img/cocina.jpg"
+  "img/Cocina.jpg"
 ];
 const ASSET_STORAGE_NAME_MAP = {
   "img/GH.jpg": "GH",
@@ -124,7 +124,7 @@ const ASSET_STORAGE_NAME_MAP = {
   "img/Aceitunas.jpg": "Aceitunas",
   "img/Jamon.jpg": "Jamon",
   "img/MCD.jpg": "MCD",
-  "img/cocina.jpg": "cocina"
+  "img/Cocina.jpg": "Cocina"
 };
 const MIGRATABLE_ASSET_PATHS = Array.from(new Set([
   ...STATIC_IMAGE_PATHS,
@@ -244,6 +244,77 @@ function obtenerCanciones() {
   }
 
   return songLibraryState;
+}
+
+async function guardarCancionEnFirestore(song) {
+  if (!window.firebaseDb || !window.firebaseFns) {
+    throw new Error("Firebase no esta cargado.");
+  }
+
+  const db = window.firebaseDb;
+  const { collection, addDoc } = window.firebaseFns;
+
+  await addDoc(collection(db, "songs"), {
+    songId: song.id,
+    slot: Number(song.slot || 0),
+    title: song.title || "",
+    artist: song.artist || "",
+    note: song.note || "",
+    coverImage: song.coverImage || "",
+    audio: song.audio || "",
+    spotifyUrl: song.spotifyUrl || "",
+    appleMusicUrl: song.appleMusicUrl || "",
+    createdAt: Date.now()
+  });
+}
+
+async function cargarCancionesFirestore() {
+  if (!window.firebaseDb || !window.firebaseFns) {
+    return;
+  }
+
+  const db = window.firebaseDb;
+  const { collection, getDocs, query, orderBy } = window.firebaseFns;
+
+  try {
+    const snapshot = await getDocs(query(collection(db, "songs"), orderBy("createdAt", "desc")));
+    const base = obtenerCanciones();
+    const porId = new Map(base.map((song) => [song.id, song]));
+    const idsRemotos = new Set();
+
+    snapshot.forEach((doc) => {
+      const data = doc.data();
+      const songId = data.songId || `song:${doc.id}`;
+      idsRemotos.add(songId);
+
+      if (porId.has(songId)) {
+        return;
+      }
+
+      porId.set(songId, normalizarCancion({
+        id: songId,
+        slot: Number(data.slot || 0),
+        title: data.title || "",
+        artist: data.artist || "",
+        note: data.note || "",
+        coverImage: data.coverImage || "",
+        audio: data.audio || "",
+        spotifyUrl: data.spotifyUrl || "",
+        appleMusicUrl: data.appleMusicUrl || "",
+        isCustom: true
+      }, porId.size));
+    });
+
+    await Promise.all(base
+      .filter((song) => !idsRemotos.has(song.id))
+      .map((song) => guardarCancionEnFirestore(song).catch((error) => {
+        console.error(`No se pudo respaldar la cancion ${song.title} en Firestore.`, error);
+      })));
+
+    songLibraryState = ordenarCanciones(Array.from(porId.values()));
+  } catch (error) {
+    console.error("No se pudieron cargar las canciones desde Firestore.", error);
+  }
 }
 
 function resolveSongCover(song) {
@@ -1907,6 +1978,12 @@ function prepararFormularioCanciones() {
         isCustom: true
       }, canciones.length);
 
+      if (submitButton) {
+        submitButton.disabled = true;
+        submitButton.textContent = "Guardando cancion...";
+      }
+
+      await guardarCancionEnFirestore(nuevaCancion);
       songLibraryState = ordenarCanciones([...canciones, nuevaCancion]);
       songActualIndex = songLibraryState.findIndex((song) => song.id === nuevaCancion.id);
       renderizarCanciones();
@@ -1954,6 +2031,7 @@ window.onload = async function () {
   await cargarAssetsDesdeStorage();
   await cargarEstadosPlanesFirestore();
   await cargarRecuerdosFirestore();
+  await cargarCancionesFirestore();
   actualizarEstados();
   renderizarTimeline();
   renderizarCanciones();
