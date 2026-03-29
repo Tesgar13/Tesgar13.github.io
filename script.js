@@ -2784,11 +2784,11 @@ prepararTocadiscos = function () {
   prev.addEventListener("click", () => moverTocadiscos(-1));
   next.addEventListener("click", () => moverTocadiscos(1));
   stop.addEventListener("click", () => {
-    detenerCancionActual();
+    detenercanciÃ³nActual();
   });
   play.addEventListener("click", () => {
-    const canciones = obtenerCanciones();
-    if (!canciones.length) {
+    const canciÃ³nes = obtenercanciÃ³nes();
+    if (!canciÃ³nes.length) {
       return;
     }
 
@@ -2796,6 +2796,6 @@ prepararTocadiscos = function () {
       songActualIndex = 0;
     }
 
-    reproducirCancion(songActualIndex);
+    reproducircanciÃ³n(songActualIndex);
   });
 };
