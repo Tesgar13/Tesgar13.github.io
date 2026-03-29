@@ -4,9 +4,11 @@ const ASSET_MAP_KEY = "firebaseAssetMap";
 const MOCK_SLOTS = 10;
 let songActualIndex = -1;
 let turntablePlaying = false;
+let planLibraryState = [];
+let memoryLibraryState = [];
 let songLibraryState = [];
 let audioPlayer = null;
-const PORTADA_DESTACADA_ID = "seed:fotofav";
+const PORTADA_DESTACADA_ID = "memory:fotofav";
 const DEFAULT_MEMORY_NOTE = "Escribe aqui una frase vuestra.";
 const DEFAULT_MEMORY_DESCRIPTION = "Pon aqui una descripcion pequena que luego cambiaras.";
 const DEFAULT_SONG_NOTE = "Escribe aqui por que esta cancion es vuestra.";
@@ -28,6 +30,28 @@ const TIMELINE_SEED = [
   { id: "seed:nopuc", type: "seed", date: "2024-04-23", title: "", note: "", description: "", image: "img/nopuc.jpeg" },
   { id: PORTADA_DESTACADA_ID, type: "seed", date: "2024-04-27", title: "", note: "", description: "", image: "img/fotofav.jpeg" }
 ];
+const PLAN_SEED = [
+  { id: "plan1", number: 1, slug: "plan1", title: "Donde todo empezo", frontText: "¿Recuerdas donde fue nuestra primera comida juntos?", backText: "Nuestra primera comida juntos, aunque no fue todo lo bien que podia ir. Esta vez prometo no parecer raro y no comer nada, ya no voy a estar nervioso (espero jjj).", metaLabel: "Pista", metaText: "Uno de tus sitios de hamburguesas favoritos.", status: "pendiente", active: true, visible: true, order: 1, imagePath: "img/GH.jpg", message: "Para completarlo, sube una foto y guarda el recuerdo." },
+  { id: "plan2", number: 2, slug: "plan2", title: "¿Hay sitio para aparcar?", frontText: "Uno de tus sitios favoritos, primera vez cenando juntos, ¿donde sera?", backText: "Yo habia salido de entrenar, fui a STZ y mi mayor preocupacion era donde aparcar (no habia tantos sitios como decias).", metaLabel: "Promesa", metaText: "Esta vez no me preocupare por aparcar (me vienes a buscar).", status: "pendiente", active: true, visible: true, order: 2, imagePath: "img/Marias.jpg", message: "Para completarlo, sube una foto y guarda el recuerdo." },
+  { id: "plan3", number: 3, slug: "plan3", title: "¿Comida de viejas o de Naroa?", frontText: "Ummm... que puede ser?", backText: "Ya sean del mercadona, de bote, de la uni, de tu ama, de un restaurante, con curry... de cualquier manera estan buenas.", metaLabel: "Problema", metaText: "Nunca las hemos comido juntos, si tu tenias lentejas yo tenia otra cosa, NO PUEDE SER ESO.", status: "pendiente", active: true, visible: true, order: 3, imagePath: "img/Lentejas.jpg", message: "Para completarlo, sube una foto y guarda el recuerdo." },
+  { id: "plan4", number: 4, slug: "plan4", title: "Solo para darle sabor", frontText: "Una de las cosas que mas veces hemos comido, en uno de los sitios donde mas hemos estado.", backText: "Un clasico, bocadillo de jamon CON pimiento, aunque despues me lo comia yo. Cuantas veces lo habremos hecho, aunque a veces no daba ni tiempo a comerlo...", metaLabel: "Plan", metaText: "Comernos un bocadillito juntos aunque no tiene por que ser donde siempre, pero si con la de siempre.", status: "pendiente", active: true, visible: true, order: 4, imagePath: "img/Jamon.jpg", message: "Para completarlo, sube una foto y guarda el recuerdo." },
+  { id: "plan5", number: 5, slug: "plan5", title: "¿Paso con el coche y comemos?", frontText: "Pausa para comer, llevo comida, un paseo.", backText: "Una Naroa no tan jefa como ahora, salio a comer con un chico que le llevo la comida.", metaLabel: "Plan", metaText: "CBO, en el coche, en la calle o donde sea.", status: "pendiente", active: true, visible: true, order: 5, imagePath: "img/MCD.jpg", message: "Para completarlo, sube una foto y guarda el recuerdo." },
+  { id: "plan6", number: 6, slug: "plan6", title: "En que momento dije que pagaba yo...", frontText: "De los mejores desayunos, pero mi tarjeta sigue sufriendo.", backText: "TOP desayunos de mi vida, pero en que momento dije que pagaba yo. Es bromiii contigo no me importa arruinarme jjj", metaLabel: "Plan", metaText: "Desayunito rico donde sea, con jamon obviamente y zumo jjj.", status: "pendiente", active: true, visible: true, order: 6, imagePath: "img/Desayuno.jpg", message: "Para completarlo, sube una foto y guarda el recuerdo." },
+  { id: "plan7", number: 7, slug: "plan7", title: "¿Te apetece una hamburguesa?", frontText: "Cuantas veces hemos comido hamburguesas juntos... y en que sitios tan ricos.", backText: "No podia faltar una parada en la rutita para comer hamburguesas (la primera no cuenta). Take a Buey, Champions Burger, Aitaren...", metaLabel: "Propuesta", metaText: "Hamburguesa en un sitio rico, el que quieras, hayamos comido ya o no. ¿Aceptas?.", status: "pendiente", active: true, visible: true, order: 7, imagePath: "img/Hamburguesa.jpg", message: "Para completarlo, sube una foto y guarda el recuerdo." },
+  { id: "plan8", number: 8, slug: "plan8", title: "Unas aceitunas", frontText: "Aceitunas, vinito, algun juego y la mejor compania. ¿Que mas se puede pedir?", backText: "De los mejores planes juntos, vinito y aceitunas, no se puede anadir nada mas.", metaLabel: "Plan", metaText: "Unas aceitunitas ricas con la mejor compania.", status: "pendiente", active: true, visible: true, order: 8, imagePath: "img/Aceitunas.jpg", message: "Para completarlo, sube una foto y guarda el recuerdo." },
+  { id: "plan9", number: 9, slug: "plan9", title: "COCINO YO", frontText: "Ahora me toca a mi.", backText: "COMO PUEDE SER QUE YO NUNCA TE HAYA COCINADO?????. Tu me hiciste una hamburguesa muuuy rica, pero yo a ti nunca nada como puede ser eso???", metaLabel: "Pista", metaText: "Tengo ya algo en mente, lo hemos comido muchas veces.", status: "pendiente", active: true, visible: true, order: 9, imagePath: "img/Cocina.jpg", message: "Para completarlo, sube una foto y guarda el recuerdo." }
+];
+const MEMORY_SEED = TIMELINE_SEED.map((entry, index) => ({
+  id: entry.id === "seed:fotofav" ? PORTADA_DESTACADA_ID : entry.id.replace("seed:", "memory:"),
+  type: entry.type,
+  date: entry.date,
+  title: entry.title,
+  note: entry.note,
+  description: entry.description,
+  imagePath: entry.image,
+  visible: true,
+  order: index + 1
+}));
 const LETTERS = [
   {
     id: "letter1",
@@ -98,10 +122,6 @@ const SONG_LIBRARY = [
   }
 ];
 
-const planes = [
-  "plan1", "plan2", "plan3", "plan4", "plan5",
-  "plan6", "plan7", "plan8", "plan9"
-];
 const STATIC_IMAGE_PATHS = [
   "img/Entrada.png",
   "img/fotofav.jpeg",
@@ -128,7 +148,9 @@ const ASSET_STORAGE_NAME_MAP = {
 };
 const MIGRATABLE_ASSET_PATHS = Array.from(new Set([
   ...STATIC_IMAGE_PATHS,
-  ...TIMELINE_SEED.map((entry) => entry.image)
+  ...TIMELINE_SEED.map((entry) => entry.image),
+  ...PLAN_SEED.map((entry) => entry.imagePath),
+  ...SONG_LIBRARY.map((entry) => entry.coverImage)
 ]));
 let assetUrlMap = leerStorageRecord(ASSET_MAP_KEY);
 
@@ -200,23 +222,31 @@ function escapeHtml(value) {
 
 function normalizarCancion(song, fallbackIndex = 0) {
   const slotNumber = Number(song?.slot);
+  const orderNumber = Number(song?.order || slotNumber || fallbackIndex + 1);
 
   return {
     id: song?.id || `song:${Date.now()}-${fallbackIndex}`,
     slot: Number.isFinite(slotNumber) && slotNumber > 0 ? slotNumber : fallbackIndex + 1,
+    order: Number.isFinite(orderNumber) && orderNumber > 0 ? orderNumber : fallbackIndex + 1,
     title: song?.title || "",
     artist: song?.artist || "",
     note: song?.note || "",
-    coverImage: song?.coverImage || song?.image || "",
-    audio: song?.audio || song?.audioUrl || "",
-    spotifyUrl: song?.spotifyUrl || "",
-    appleMusicUrl: song?.appleMusicUrl || "",
+    coverImage: song?.coverImage || song?.imagePath || song?.imageUrl || song?.image || "",
+    audio: song?.audio || song?.audioUrl || song?.audioPath || "",
+    spotifyUrl: song?.spotifyUrl || song?.spotifyLink || song?.link || "",
+    appleMusicUrl: song?.appleMusicUrl || song?.appleLink || "",
+    visible: song?.visible !== false,
     isCustom: Boolean(song?.isCustom)
   };
 }
 
 function ordenarCanciones(canciones) {
   return [...canciones].sort((a, b) => {
+    const porOrden = Number(a.order || 0) - Number(b.order || 0);
+    if (porOrden !== 0) {
+      return porOrden;
+    }
+
     const porSlot = Number(a.slot || 0) - Number(b.slot || 0);
     if (porSlot !== 0) {
       return porSlot;
@@ -243,7 +273,57 @@ function obtenerCanciones() {
     inicializarBibliotecaCanciones();
   }
 
-  return songLibraryState;
+  return songLibraryState.filter((song) => song.visible !== false);
+}
+
+function normalizarPlan(plan, fallbackIndex = 0) {
+  return {
+    id: plan?.id || `plan${fallbackIndex + 1}`,
+    number: Number(plan?.number || fallbackIndex + 1),
+    slug: plan?.slug || plan?.id || `plan${fallbackIndex + 1}`,
+    title: plan?.title || `Plan ${fallbackIndex + 1}`,
+    frontText: plan?.frontText || "",
+    backText: plan?.backText || "",
+    metaLabel: plan?.metaLabel || "Pista",
+    metaText: plan?.metaText || "",
+    status: plan?.status || "pendiente",
+    active: plan?.active !== false,
+    visible: plan?.visible !== false,
+    order: Number(plan?.order || fallbackIndex + 1),
+    imagePath: plan?.imagePath || (typeof plan?.image === "string" && plan.image.startsWith("img/") ? plan.image : ""),
+    imageUrl: plan?.imageUrl || (typeof plan?.image === "string" && !plan.image.startsWith("img/") ? plan.image : ""),
+    message: plan?.message || "Para completarlo, sube una foto y guarda el recuerdo.",
+    completionPhotoUrl: plan?.completionPhotoUrl || "",
+    completionDate: plan?.completionDate || ""
+  };
+}
+
+function normalizarRecuerdo(entry, fallbackIndex = 0) {
+  const rawImage = entry?.image || "";
+  const imagePath = entry?.imagePath || (typeof rawImage === "string" && rawImage.startsWith("img/") ? rawImage : "");
+  const imageUrl = entry?.imageUrl || (typeof rawImage === "string" && !rawImage.startsWith("img/") ? rawImage : "");
+  return {
+    id: entry?.id || `memory:${Date.now()}-${fallbackIndex}`,
+    type: entry?.type || "manual",
+    planId: entry?.planId || "",
+    date: entry?.date || hoyIso(),
+    title: entry?.title || "",
+    note: entry?.note || "",
+    description: entry?.description || "",
+    imagePath,
+    imageUrl,
+    image: imageUrl || imagePath,
+    visible: entry?.visible !== false,
+    order: Number(entry?.order || fallbackIndex + 1)
+  };
+}
+
+function obtenerPlanes() {
+  return [...planLibraryState].filter((plan) => plan.visible !== false).sort((a, b) => a.order - b.order);
+}
+
+function obtenerTimeline() {
+  return [...memoryLibraryState].filter((entry) => entry.visible !== false).sort((a, b) => new Date(b.date) - new Date(a.date));
 }
 
 async function guardarCancionEnFirestore(song) {
@@ -399,6 +479,24 @@ function resolveStorageAssetUrl(path) {
   }
 
   return assetUrlMap[path] || "";
+}
+
+async function resolverStoragePath(path, kind = "archivo") {
+  if (!path || path.startsWith("img/") || /^https?:/i.test(path) || path.startsWith("data:")) {
+    return path;
+  }
+
+  if (!window.firebaseStorage || !window.firebaseFns) {
+    return path;
+  }
+
+  try {
+    const { ref, getDownloadURL } = window.firebaseFns;
+    return await getDownloadURL(ref(window.firebaseStorage, path));
+  } catch (error) {
+    console.error(`No se pudo resolver ${kind} desde Firebase Storage: ${path}`, error);
+    return "";
+  }
 }
 
 function aplicarAssetsRemotosAlDom() {
@@ -2014,14 +2112,413 @@ function inicializarMusica() {
   asegurarAudioGlobal();
 }
 
-window.onload = async function () {
-  insertarControlesDePlan();
-  limpiarPlanesActivadosDePrueba();
-  actualizarCountdown();
-  actualizarEstados();
-  prepararTarjetas();
-  prepararFormularioTimeline();
+function inicializarContenidoDesdeSemillas() {
+  planLibraryState = PLAN_SEED.map((plan, index) => normalizarPlan(plan, index));
+  memoryLibraryState = MEMORY_SEED.map((memory, index) => normalizarRecuerdo(memory, index));
   inicializarMusica();
+}
+
+function renderizarPlanes() {
+  const grid = document.getElementById("plans-grid");
+  if (!grid) {
+    return;
+  }
+
+  grid.innerHTML = "";
+  obtenerPlanes().forEach((plan) => {
+    const imageSource = plan.imageUrl
+      ? escapeHtml(plan.imageUrl)
+      : 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///ywAAAAAAQABAAACAUwAOw==';
+    const imageAttrs = plan.imagePath
+      ? `src="${imageSource}" data-asset-path="${escapeHtml(plan.imagePath)}"`
+      : `src="${imageSource}"`;
+    const article = document.createElement("article");
+    article.className = "card";
+    article.dataset.plan = plan.id;
+    article.dataset.planTitle = plan.title;
+    article.innerHTML = `
+      <div class="card__inner">
+        <div class="card__face card__face--front">
+          <img ${imageAttrs} alt="${escapeHtml(plan.title)}" class="card__image" />
+          <div class="card__content">
+            <p class="card__number">Plan ${plan.number}</p>
+            <h3>${escapeHtml(plan.title)}</h3>
+            <p>${escapeHtml(plan.frontText)}</p>
+            <span class="card__status" id="estado-${plan.id}">Pendiente</span>
+          </div>
+        </div>
+        <div class="card__face card__face--back">
+          <div class="card__details">
+            <p class="card__number">Plan ${plan.number}</p>
+            <h3>${escapeHtml(plan.title)}</h3>
+            <p class="card__detail-text">${escapeHtml(plan.backText)}</p>
+            <p class="card__detail-meta"><strong>${escapeHtml(plan.metaLabel)}:</strong> ${escapeHtml(plan.metaText)}</p>
+            <p id="mensaje-${plan.id}" class="plan-message">${escapeHtml(plan.message)}</p>
+            <div class="card__actions">
+              <button id="activar-${plan.id}" class="activate-button activate-button--ghost" type="button">Activar plan</button>
+              <button id="boton-${plan.id}" class="activate-button" type="button">Completar con foto</button>
+              <button class="card__close" type="button" data-close-card>Cerrar</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    `;
+    grid.appendChild(article);
+  });
+
+  aplicarAssetsRemotosAlDom();
+  prepararTarjetas();
+  insertarControlesDePlan();
+}
+
+async function seedFirebaseContent() {
+  if (!window.firebaseDb || !window.firebaseFns) {
+    return;
+  }
+
+  const db = window.firebaseDb;
+  const { collection, getDocs, query, orderBy, doc, setDoc } = window.firebaseFns;
+  const colecciones = [
+    { name: "plans", items: PLAN_SEED, normalize: normalizarPlan },
+    { name: "memories", items: MEMORY_SEED, normalize: normalizarRecuerdo },
+    { name: "songs", items: SONG_LIBRARY, normalize: normalizarCancion }
+  ];
+
+  for (const collectionInfo of colecciones) {
+    const snapshot = await getDocs(collection(db, collectionInfo.name));
+    const existingIds = new Set(snapshot.docs.map((item) => {
+      const data = item.data();
+      return data.songId || data.id || item.id;
+    }));
+
+    for (let index = 0; index < collectionInfo.items.length; index += 1) {
+      const item = collectionInfo.normalize(collectionInfo.items[index], index);
+      if (existingIds.has(item.id)) {
+        continue;
+      }
+
+      await setDoc(doc(db, collectionInfo.name, item.id), item, { merge: true });
+    }
+  }
+
+  const recuerdosLegacy = await getDocs(collection(db, "recuerdos"));
+  for (const legacyDoc of recuerdosLegacy.docs) {
+    const data = legacyDoc.data();
+    const memoryId = data.entryId || legacyDoc.id;
+    await setDoc(doc(db, "memories", memoryId), normalizarRecuerdo({
+      id: memoryId,
+      planId: data.planId || "",
+      type: data.type || "manual",
+      date: data.date || hoyIso(),
+      title: data.title || "",
+      note: data.note || "",
+      description: data.description || "",
+      imageUrl: data.url || data.image || "",
+      visible: true
+    }), { merge: true });
+  }
+
+  const planStatesLegacy = await getDocs(query(collection(db, "planStates"), orderBy("createdAt", "desc")));
+  const latestPlanState = new Map();
+  planStatesLegacy.forEach((legacyDoc) => {
+    const data = legacyDoc.data();
+    if (!data.planId || latestPlanState.has(data.planId)) {
+      return;
+    }
+
+    latestPlanState.set(data.planId, data);
+  });
+
+  for (const [planId, data] of latestPlanState.entries()) {
+    await setDoc(doc(db, "plans", planId), {
+      status: data.status || "pendiente",
+      completionPhotoUrl: data.photoUrl || "",
+      completionDate: data.date || ""
+    }, { merge: true });
+  }
+}
+
+window.seedFirebaseContent = seedFirebaseContent;
+
+async function cargarPlanesFirestore() {
+  if (!window.firebaseDb || !window.firebaseFns) {
+    planLibraryState = PLAN_SEED.map((plan, index) => normalizarPlan(plan, index));
+    return;
+  }
+
+  const db = window.firebaseDb;
+  const { collection, getDocs, query, orderBy } = window.firebaseFns;
+  try {
+    const snapshot = await getDocs(query(collection(db, "plans"), orderBy("order", "asc")));
+    planLibraryState = snapshot.docs.length
+      ? await Promise.all(snapshot.docs.map(async (item, index) => {
+        const plan = normalizarPlan({ id: item.id, ...item.data() }, index);
+        if (!plan.imageUrl && plan.imagePath && !plan.imagePath.startsWith("img/")) {
+          plan.imageUrl = await resolverStoragePath(plan.imagePath, "imagen del plan");
+        }
+        return plan;
+      }))
+      : PLAN_SEED.map((plan, index) => normalizarPlan(plan, index));
+  } catch (error) {
+    console.error("No se pudieron cargar los planes desde Firestore.", error);
+    planLibraryState = PLAN_SEED.map((plan, index) => normalizarPlan(plan, index));
+  }
+}
+
+async function cargarRecuerdosFirestore() {
+  if (!window.firebaseDb || !window.firebaseFns) {
+    memoryLibraryState = MEMORY_SEED.map((entry, index) => normalizarRecuerdo(entry, index));
+    return;
+  }
+
+  const db = window.firebaseDb;
+  const { collection, getDocs, query, orderBy } = window.firebaseFns;
+  try {
+    const snapshot = await getDocs(query(collection(db, "memories"), orderBy("order", "asc")));
+    memoryLibraryState = snapshot.docs.length
+      ? await Promise.all(snapshot.docs.map(async (item, index) => {
+        const memory = normalizarRecuerdo({ id: item.id, ...item.data() }, index);
+        if (!memory.imageUrl && memory.imagePath && !memory.imagePath.startsWith("img/")) {
+          memory.imageUrl = await resolverStoragePath(memory.imagePath, "imagen del recuerdo");
+          memory.image = memory.imageUrl || memory.imagePath;
+        }
+        return memory;
+      }))
+      : MEMORY_SEED.map((entry, index) => normalizarRecuerdo(entry, index));
+  } catch (error) {
+    console.error("No se pudieron cargar los recuerdos desde Firestore.", error);
+    memoryLibraryState = MEMORY_SEED.map((entry, index) => normalizarRecuerdo(entry, index));
+  }
+}
+
+async function cargarCancionesFirestore() {
+  if (!window.firebaseDb || !window.firebaseFns) {
+    inicializarMusica();
+    return;
+  }
+
+  const db = window.firebaseDb;
+  const { collection, getDocs, query, orderBy } = window.firebaseFns;
+  try {
+    const snapshot = await getDocs(query(collection(db, "songs"), orderBy("order", "asc")));
+    songLibraryState = snapshot.docs.length
+      ? ordenarCanciones(await Promise.all(snapshot.docs.map(async (item, index) => {
+        const song = normalizarCancion({ id: item.data().songId || item.id, ...item.data() }, index);
+        if (song.coverImage && !song.coverImage.startsWith("img/") && !/^https?:/i.test(song.coverImage)) {
+          song.coverImage = await resolverStoragePath(song.coverImage, "portada de la cancion");
+        }
+        if (song.audio && !/^https?:/i.test(song.audio)) {
+          song.audio = await resolverStoragePath(song.audio, "audio de la cancion");
+        }
+        return song;
+      })))
+      : ordenarCanciones(SONG_LIBRARY.map((song, index) => normalizarCancion(song, index)));
+  } catch (error) {
+    console.error("No se pudieron cargar las canciones desde Firestore.", error);
+    songLibraryState = ordenarCanciones(SONG_LIBRARY.map((song, index) => normalizarCancion(song, index)));
+  }
+}
+
+async function guardarCancionEnFirestore(song) {
+  if (!window.firebaseDb || !window.firebaseFns) {
+    throw new Error("Firebase no esta cargado.");
+  }
+
+  const db = window.firebaseDb;
+  const { doc, setDoc } = window.firebaseFns;
+  const normalizada = normalizarCancion(song);
+  await setDoc(doc(db, "songs", normalizada.id), { ...normalizada, songId: normalizada.id }, { merge: true });
+}
+
+async function guardarRecuerdoEnFirestore(entry) {
+  if (!window.firebaseDb || !window.firebaseFns) {
+    throw new Error("Firebase no esta cargado.");
+  }
+
+  const db = window.firebaseDb;
+  const { doc, setDoc } = window.firebaseFns;
+  const normalizada = normalizarRecuerdo(entry);
+  await setDoc(doc(db, "memories", normalizada.id), { ...normalizada, id: normalizada.id }, { merge: true });
+  memoryLibraryState = memoryLibraryState.some((item) => item.id === normalizada.id)
+    ? memoryLibraryState.map((item) => (item.id === normalizada.id ? normalizada : item))
+    : [...memoryLibraryState, normalizada];
+}
+
+async function guardarPlanEnFirestore(plan) {
+  if (!window.firebaseDb || !window.firebaseFns) {
+    throw new Error("Firebase no esta cargado.");
+  }
+
+  const db = window.firebaseDb;
+  const { doc, setDoc } = window.firebaseFns;
+  const normalizado = normalizarPlan(plan);
+  await setDoc(doc(db, "plans", normalizado.id), { ...normalizado, id: normalizado.id }, { merge: true });
+  planLibraryState = planLibraryState.some((item) => item.id === normalizado.id)
+    ? planLibraryState.map((item) => (item.id === normalizado.id ? normalizado : item))
+    : [...planLibraryState, normalizado];
+}
+
+function guardarTimeline(entries) {
+  memoryLibraryState = entries.map((entry, index) => normalizarRecuerdo(entry, index));
+}
+
+function obtenerTimeline() {
+  return [...memoryLibraryState].filter((entry) => entry.visible !== false).sort((a, b) => new Date(b.date) - new Date(a.date));
+}
+
+function insertarControlesDePlan() {
+  document.querySelectorAll(".card[data-plan]").forEach((card) => {
+    const planId = card.dataset.plan;
+    const activar = card.querySelector(`#activar-${planId}`);
+    const completar = card.querySelector(`#boton-${planId}`);
+
+    if (activar) {
+      activar.onclick = null;
+      activar.addEventListener("click", (event) => {
+        event.stopPropagation();
+        activarPlan(planId);
+      }, { once: false });
+    }
+
+    if (completar) {
+      completar.onclick = null;
+      completar.addEventListener("click", (event) => {
+        event.stopPropagation();
+        completarPlan(planId);
+      }, { once: false });
+    }
+  });
+}
+
+function actualizarEstados() {
+  const planes = obtenerPlanes();
+  let activados = 0;
+  let completados = 0;
+
+  planes.forEach((plan) => {
+    const estadoEl = document.getElementById(`estado-${plan.id}`);
+    const botonActivar = document.getElementById(`activar-${plan.id}`);
+    const botonCompletar = document.getElementById(`boton-${plan.id}`);
+    const mensaje = document.getElementById(`mensaje-${plan.id}`);
+    const card = document.querySelector(`.card[data-plan="${plan.id}"]`);
+    const estaActivado = plan.status === "activado" || plan.status === "completado";
+    const estaCompletado = plan.status === "completado" && plan.completionPhotoUrl && plan.completionDate;
+
+    if (estaActivado) activados += 1;
+    if (estaCompletado) completados += 1;
+
+    if (estadoEl) {
+      estadoEl.textContent = estaCompletado ? "Completado" : (estaActivado ? "Activado" : "Pendiente");
+      estadoEl.classList.toggle("card__status--active", estaActivado && !estaCompletado);
+      estadoEl.classList.toggle("card__status--complete", estaCompletado);
+    }
+
+    if (botonActivar) {
+      botonActivar.disabled = estaActivado || !plan.active;
+      botonActivar.textContent = estaActivado ? "Plan activado" : "Activar plan";
+    }
+
+    if (botonCompletar) {
+      botonCompletar.disabled = estaCompletado || !estaActivado;
+      botonCompletar.textContent = estaCompletado ? "Recuerdo guardado" : "Completar plan";
+      botonCompletar.classList.toggle("is-disabled-look", !estaActivado && !estaCompletado);
+    }
+
+    if (mensaje) {
+      mensaje.textContent = estaCompletado
+        ? "Este plan ya esta completado y su foto ya forma parte de la linea del tiempo."
+        : (estaActivado
+          ? "El plan esta activado. Cuando le des a completar, te pedira una foto y se guardara automaticamente con la fecha de hoy."
+          : (plan.message || "Primero activa el plan. Cuando lo hagais, podras completarlo con una foto."));
+    }
+
+    if (card) {
+      card.classList.toggle("card--active", estaActivado && !estaCompletado);
+      card.classList.toggle("card--completed", estaCompletado);
+    }
+  });
+
+  const contador = document.getElementById("contador-planes");
+  const contadorComidas = document.getElementById("contador-planes-comidas");
+  const restantes = document.getElementById("planes-restantes");
+  if (contador) contador.textContent = `${activados} / ${planes.length}`;
+  if (contadorComidas) contadorComidas.textContent = `${activados} / ${planes.length}`;
+  if (restantes) restantes.textContent = String(planes.length - completados);
+  const final = document.getElementById("mensaje-final");
+  if (final) final.hidden = completados !== planes.length;
+  renderizarCartas(completados);
+}
+
+async function activarPlan(planId) {
+  const plan = planLibraryState.find((item) => item.id === planId);
+  if (!plan || plan.status === "activado" || plan.status === "completado") {
+    return;
+  }
+
+  await guardarPlanEnFirestore({ ...plan, status: "activado" });
+  actualizarEstados();
+}
+
+async function completarPlan(planId) {
+  const plan = planLibraryState.find((item) => item.id === planId);
+  if (!plan) {
+    return;
+  }
+
+  if (plan.status === "pendiente") {
+    alert("Primero activa el plan y luego completalo.");
+    return;
+  }
+
+  if (plan.status === "completado") {
+    return;
+  }
+
+  const foto = await pedirFotoParaPlan();
+  if (!foto) return;
+  if (!foto.type.startsWith("image/")) {
+    alert("El archivo debe ser una imagen.");
+    return;
+  }
+
+  const boton = document.getElementById(`boton-${planId}`);
+  try {
+    if (boton) {
+      boton.disabled = true;
+      boton.textContent = "Subiendo foto...";
+    }
+
+    const imageUrl = await subirImagenAFirebase(foto, `plans/${planId}`);
+    const fecha = hoyIso();
+    await guardarPlanEnFirestore({ ...plan, status: "completado", completionPhotoUrl: imageUrl, completionDate: fecha });
+    await guardarRecuerdoEnFirestore({
+      id: `plan:${planId}`,
+      type: "plan",
+      planId,
+      date: fecha,
+      title: plan.title,
+      note: plan.title,
+      description: plan.backText,
+      imageUrl,
+      visible: true,
+      order: 100 + Number(plan.order || 0)
+    });
+    renderizarTimeline();
+    actualizarEstados();
+  } catch (error) {
+    if (boton) {
+      boton.disabled = false;
+      boton.textContent = "Completar plan";
+    }
+    alert(error.message || "No se pudo subir la foto. Intentalo otra vez.");
+  }
+}
+
+window.onload = async function () {
+  inicializarContenidoDesdeSemillas();
+  actualizarCountdown();
+  renderizarPlanes();
+  prepararFormularioTimeline();
   prepararFormularioCanciones();
   prepararTogglesDeFormulario();
   prepararModalRecuerdo();
@@ -2029,9 +2526,11 @@ window.onload = async function () {
   prepararTocadiscos();
   await esperarAuthFirebase();
   await cargarAssetsDesdeStorage();
-  await cargarEstadosPlanesFirestore();
+  await seedFirebaseContent();
+  await cargarPlanesFirestore();
   await cargarRecuerdosFirestore();
   await cargarCancionesFirestore();
+  renderizarPlanes();
   actualizarEstados();
   renderizarTimeline();
   renderizarCanciones();
