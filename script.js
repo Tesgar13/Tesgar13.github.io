@@ -482,19 +482,52 @@ function resolveStorageAssetUrl(path) {
 }
 
 async function resolverStoragePath(path, kind = "archivo") {
-  if (!path || path.startsWith("img/") || /^https?:/i.test(path) || path.startsWith("data:")) {
+  if (!path) {
     return path;
   }
 
+  const normalizedPath = String(path).trim();
+  if (!normalizedPath) {
+    return "";
+  }
+
+  if (
+    normalizedPath.startsWith("img/")
+    || /^https?:/i.test(normalizedPath)
+    || normalizedPath.startsWith("data:")
+    || normalizedPath.startsWith("blob:")
+  ) {
+    return normalizedPath;
+  }
+
+  if (/^gs:\/\//i.test(normalizedPath)) {
+    if (!window.firebaseStorage || !window.firebaseFns) {
+      return "";
+    }
+
+    try {
+      const { ref, getDownloadURL } = window.firebaseFns;
+      return await getDownloadURL(ref(window.firebaseStorage, normalizedPath));
+    } catch (error) {
+      console.error(`No se pudo resolver ${kind} desde Firebase Storage: ${normalizedPath}`, error);
+      return "";
+    }
+  }
+
+  const cleanedPath = normalizedPath.replace(/^\/+/, "");
+  if (cleanedPath.startsWith("img/")) {
+    return cleanedPath;
+  }
+
   if (!window.firebaseStorage || !window.firebaseFns) {
-    return path;
+    return cleanedPath;
   }
 
   try {
     const { ref, getDownloadURL } = window.firebaseFns;
-    return await getDownloadURL(ref(window.firebaseStorage, path));
+    return await getDownloadURL(ref(window.firebaseStorage, cleanedPath));
   } catch (error) {
-    console.error(`No se pudo resolver ${kind} desde Firebase Storage: ${path}`, error);
+    console.error(`No se pudo resolver ${kind} desde Firebase Storage: ${cleanedPath}`, error);
     return "";
   }
 }
@@ -1255,6 +1288,7 @@ function asegurarAudioGlobal() {
     audioPlayer = new Audio();
     audioPlayer.preload = "metadata";
   }
+  audioPlayer.crossOrigin = "anonymous";
 
   audioPlayer.addEventListener("play", () => {
     turntablePlaying = true;
@@ -1303,13 +1337,14 @@ function reproducirCancion(index, { restart = false } = {}) {
   if (!mismaCancion) {
     player.src = audioUrl;
     player.dataset.songId = song.id;
+    player.load();
   } else if (restart) {
     player.currentTime = 0;
   }
 
   player.play().catch((error) => {
     turntablePlaying = false;
-    console.error(`No se pudo reproducir la cancion ${song.title}.`, error);
+    console.error(`No se pudo reproducir la cancion ${song.title}. URL usada: ${audioUrl}`, error);
     actualizarTocadiscos(canciones);
     marcarCancionActiva();
   });
