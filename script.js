@@ -1290,7 +1290,7 @@ function renderizarcanciónes() {
         <p class="song-item__eyebrow">Pista ${String(song.slot || index + 1).padStart(2, "0")}</p>
         <h4>${escapeHtml(song.title)}</h4>
         <p class="song-item__artist">${escapeHtml(song.artist)}</p>
-        <p>${escapeHtml(song.note || DEFAULT_SONG_NOTE)}</p>
+        <p class="song-item__description">${escapeHtml(song.note || DEFAULT_SONG_NOTE)}</p>
         <div class="song-item__links">
           ${song.spotifyUrl ? `<a class="song-item__link" href="${escapeHtml(song.spotifyUrl)}" target="_blank" rel="noopener noreferrer">Spotify</a>` : ""}
           ${song.appleMusicUrl ? `<a class="song-item__link" href="${escapeHtml(song.appleMusicUrl)}" target="_blank" rel="noopener noreferrer">Apple Music</a>` : ""}
@@ -2741,4 +2741,61 @@ window.onload = async function () {
   renderizarTimeline();
   renderizarcanciónes();
   setInterval(actualizarCountdown, 1000);
+};
+
+actualizarControlesAudio = function () {
+};
+
+prepararTocadiscos = function () {
+  const toggle = document.getElementById("turntable-toggle");
+  const library = document.getElementById("song-library");
+  const prev = document.getElementById("turntable-prev");
+  const next = document.getElementById("turntable-next");
+  const stop = document.getElementById("turntable-stop");
+  const play = document.getElementById("turntable-play");
+
+  if (!toggle || !library || !prev || !next || !stop || !play) {
+    return;
+  }
+
+  const alternarBiblioteca = () => {
+    const abierto = !library.hidden;
+    library.hidden = abierto;
+    toggle.setAttribute("aria-expanded", abierto ? "false" : "true");
+  };
+
+  toggle.addEventListener("click", (event) => {
+    if (event.target.closest("a")) {
+      return;
+    }
+
+    alternarBiblioteca();
+  });
+
+  toggle.addEventListener("keydown", (event) => {
+    if (event.key !== "Enter" && event.key !== " ") {
+      return;
+    }
+
+    event.preventDefault();
+    alternarBiblioteca();
+  });
+
+  prev.addEventListener("click", () => moverTocadiscos(-1));
+  next.addEventListener("click", () => moverTocadiscos(1));
+  stop.addEventListener("click", () => {
+    detenerCancionActual();
+  });
+  play.addEventListener("click", () => {
+    const canciones = obtenerCanciones();
+    if (!canciones.length) {
+      return;
+    }
+
+    if (songActualIndex < 0) {
+      songActualIndex = 0;
+    }
+
+    reproducirCancion(songActualIndex);
+  });
 };
