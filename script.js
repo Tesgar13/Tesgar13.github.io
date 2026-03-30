@@ -345,6 +345,10 @@ function obtenerClaveUnicaRecuerdo(entry) {
   ].join("|");
 }
 
+function esRecuerdoVisible(entry) {
+  return entry?.visible !== false;
+}
+
 function puntuarRecuerdo(entry) {
   let score = 0;
 
@@ -430,7 +434,7 @@ function obtenerPlanes() {
 }
 
 function obtenerTimeline() {
-  return deduplicarRecuerdos(memoryLibraryState).filter((entry) => entry.visible !== false);
+  return deduplicarRecuerdos(memoryLibraryState).filter(esRecuerdoVisible);
 }
 
 async function guardarcanciónEnFirestore(song) {
@@ -2004,6 +2008,11 @@ async function borrarRecuerdoActual() {
     return;
   }
 
+  const confirmacion = window.confirm("¿Quieres ocultar esta tarjeta? Solo se quitará la polaroid/documento; la foto no se borrará de Firebase Storage.");
+  if (!confirmacion) {
+    return;
+  }
+
   try {
     if (deleteButton) {
       deleteButton.disabled = true;
@@ -2560,11 +2569,17 @@ async function seedFirebaseContent() {
     }
   }
 
+  const memoriesSnapshot = await getDocs(collection(db, "memories"));
+  const existingMemoryKeys = new Set(memoriesSnapshot.docs.map((item, index) => {
+    const memory = normalizarRecuerdo({ id: item.id, ...item.data() }, index);
+    return obtenerClaveUnicaRecuerdo(memory);
+  }));
+
   const recuerdosLegacy = await getDocs(collection(db, "recuerdos"));
   for (const legacyDoc of recuerdosLegacy.docs) {
     const data = legacyDoc.data();
     const memoryId = data.entryId || legacyDoc.id;
-    await setDoc(doc(db, "memories", memoryId), normalizarRecuerdo({
+    const memory = normalizarRecuerdo({
       id: memoryId,
       planId: data.planId || "",
       type: data.type || "manual",
@@ -2574,7 +2589,15 @@ async function seedFirebaseContent() {
       description: data.description || "",
       imageUrl: data.url || data.image || "",
       visible: true
-    }), { merge: true });
+    });
+    const memoryKey = obtenerClaveUnicaRecuerdo(memory);
+
+    if (existingMemoryKeys.has(memoryKey)) {
+      continue;
+    }
+
+    await setDoc(doc(db, "memories", memoryId), memory, { merge: true });
+    existingMemoryKeys.add(memoryKey);
   }
 
   const planStatesLegacy = await getDocs(query(collection(db, "planStates"), orderBy("createdAt", "desc")));
