@@ -303,8 +303,14 @@ function normalizarRecuerdo(entry, fallbackIndex = 0) {
   const rawImage = entry?.image || "";
   const imagePath = entry?.imagePath || (typeof rawImage === "string" && rawImage.startsWith("img/") ? rawImage : "");
   const imageUrl = entry?.imageUrl || (typeof rawImage === "string" && !rawImage.startsWith("img/") ? rawImage : "");
+  const docId = entry?.docId || entry?.id || `memory:${Date.now()}-${fallbackIndex}`;
+  const sourceDocIds = Array.isArray(entry?.sourceDocIds)
+    ? entry.sourceDocIds.filter(Boolean)
+    : [docId].filter(Boolean);
   return {
     id: entry?.id || `memory:${Date.now()}-${fallbackIndex}`,
+    docId,
+    sourceDocIds: Array.from(new Set(sourceDocIds)),
     type: entry?.type || "manual",
     planId: entry?.planId || "",
     date: entry?.date || hoyIso(),
@@ -349,6 +355,15 @@ function esRecuerdoVisible(entry) {
   return entry?.visible !== false;
 }
 
+function obtenerDocIdsRecuerdo(entry) {
+  return Array.from(new Set(
+    (Array.isArray(entry?.sourceDocIds) && entry.sourceDocIds.length
+      ? entry.sourceDocIds
+      : [entry?.docId || entry?.id]
+    ).filter(Boolean)
+  ));
+}
+
 function puntuarRecuerdo(entry) {
   let score = 0;
 
@@ -371,11 +386,17 @@ function fusionarRecuerdos(base, extra) {
   const imagen = extra.imageUrl || base.imageUrl || extra.imagePath || base.imagePath || extra.image || base.image || "";
   const imagePath = extra.imagePath || base.imagePath || "";
   const imageUrl = extra.imageUrl || base.imageUrl || (!imagen.startsWith("img/") ? imagen : "");
+  const sourceDocIds = Array.from(new Set([
+    ...(Array.isArray(base.sourceDocIds) ? base.sourceDocIds : [base.docId || base.id]),
+    ...(Array.isArray(extra.sourceDocIds) ? extra.sourceDocIds : [extra.docId || extra.id])
+  ].filter(Boolean)));
 
   return {
     ...base,
     ...extra,
     id: base.id || extra.id,
+    docId: base.docId || extra.docId || sourceDocIds[0] || base.id || extra.id,
+    sourceDocIds,
     type: extra.type || base.type,
     planId: extra.planId || base.planId,
     date: extra.date || base.date,
@@ -1980,6 +2001,8 @@ function abrirModalRecuerdo(entryId) {
   descriptionInput.value = obtenerDescripciónRecuerdo(entry);
   saved.hidden = true;
   modal.dataset.entryId = entryId;
+  modal.dataset.docIds = JSON.stringify(obtenerDocIdsRecuerdo(entry));
+  modal.dataset.memoryKey = obtenerClaveUnicaRecuerdo(entry);
   modal.hidden = false;
   document.body.style.overflow = "hidden";
 }
@@ -1994,21 +2017,46 @@ function cerrarModalRecuerdo() {
 
   flip.classList.remove("is-flipped");
   delete modal.dataset.entryId;
+  delete modal.dataset.docIds;
+  delete modal.dataset.memoryKey;
   modal.hidden = true;
   document.body.style.overflow = "";
 }
 
-async function borrarRecuerdoActual() {
+async function borrarRecuerdoActual(event) {
+  event?.preventDefault?.();
+  event?.stopPropagation?.();
+
   const modal = document.getElementById("memory-modal");
   const deleteButton = document.getElementById("memory-modal-delete");
   const entryId = modal?.dataset?.entryId;
+  const memoryKey = modal?.dataset?.memoryKey || "";
+  const docIds = (() => {
+    try {
+      return JSON.parse(modal?.dataset?.docIds || "[]");
+    } catch (error) {
+      console.error("[timeline:delete] No se pudieron leer los docIds del modal.", error);
+      return [];
+    }
+  })();
   const entry = obtenerTimeline().find((item) => item.id === entryId);
 
   if (!modal || !entryId || !entry) {
+    console.error("[timeline:delete] No se pudo resolver el recuerdo seleccionado.", {
+      entryId,
+      docIds,
+      collection: "memories"
+    });
     return;
   }
 
-  const confirmacion = window.confirm("¿Quieres ocultar esta tarjeta? Solo se quitará la polaroid/documento; la foto no se borrará de Firebase Storage.");
+  console.info("[timeline:delete] Click en borrar polaroid.", {
+    entryId,
+    docIds,
+    collection: "memories"
+  });
+
+  const confirmacion = window.confirm("¿Quieres borrar esta tarjeta? Solo se borrará el documento en Firestore; la foto no se borrará de Firebase Storage.");
   if (!confirmacion) {
     return;
   }
@@ -2019,26 +2067,43 @@ async function borrarRecuerdoActual() {
       deleteButton.textContent = "Borrando...";
     }
 
-    memoryLibraryState = deduplicarRecuerdos(
-      memoryLibraryState.map((item) => (
-        item.id === entryId
-          ? { ...item, visible: false }
-          : item
-      ))
-    );
-    renderizarTimeline();
-    cerrarModalRecuerdo();
+    if (!window.firebaseDb || !window.firebaseFns?.doc || !window.firebaseFns?.deleteDoc) {
+      throw new Error("Firebase deleteDoc no está disponible en esta sesión.");
+    }
 
-    if (window.firebaseDb && window.firebaseFns?.doc && window.firebaseFns?.setDoc) {
-      const { doc, setDoc } = window.firebaseFns;
+    const idsABorrar = docIds.length ? docIds : obtenerDocIdsRecuerdo(entry);
+    const { doc, deleteDoc, setDoc } = window.firebaseFns;
+
+    console.info("[timeline:delete] Borrando documentos en Firestore.", {
+      entryId,
+      docIds: idsABorrar,
+      collection: "memories"
+    });
+
+    await Promise.all(idsABorrar.map(async (docId) => {
+      await deleteDoc(doc(window.firebaseDb, "memories", docId));
+    }));
+
+    if (setDoc && memoryKey) {
       await setDoc(
-        doc(window.firebaseDb, "memories", entryId),
-        { ...entry, id: entryId, visible: false },
+        doc(window.firebaseDb, "memoryDeletions", memoryKey),
+        { key: memoryKey, deletedAt: Date.now(), docIds: idsABorrar },
         { merge: true }
       );
     }
+
+    memoryLibraryState = deduplicarRecuerdos(
+      memoryLibraryState.filter((item) => !obtenerDocIdsRecuerdo(item).some((docId) => idsABorrar.includes(docId)))
+    );
+    cerrarModalRecuerdo();
+    renderizarTimeline();
   } catch (error) {
-    console.error("No se pudo borrar el recuerdo:", error);
+    console.error("[timeline:delete] No se pudo borrar el recuerdo.", {
+      entryId,
+      docIds,
+      collection: "memories",
+      error
+    });
     alert("No se pudo borrar la polaroid. Intentalo otra vez.");
   } finally {
     if (deleteButton) {
@@ -2546,6 +2611,12 @@ async function seedFirebaseContent() {
 
   const db = window.firebaseDb;
   const { collection, getDocs, query, orderBy, doc, setDoc } = window.firebaseFns;
+  const deletedMemoriesSnapshot = await getDocs(collection(db, "memoryDeletions"));
+  const deletedMemoryKeys = new Set(
+    deletedMemoriesSnapshot.docs
+      .map((item) => item.data()?.key)
+      .filter(Boolean)
+  );
   const colecciones = [
     { name: "plans", items: PLAN_SEED, normalize: normalizarPlan },
     { name: "memories", items: MEMORY_SEED, normalize: normalizarRecuerdo },
@@ -2561,6 +2632,9 @@ async function seedFirebaseContent() {
 
     for (let index = 0; index < collectionInfo.items.length; index += 1) {
       const item = collectionInfo.normalize(collectionInfo.items[index], index);
+      if (collectionInfo.name === "memories" && deletedMemoryKeys.has(obtenerClaveUnicaRecuerdo(item))) {
+        continue;
+      }
       if (existingIds.has(item.id)) {
         continue;
       }
@@ -2571,7 +2645,8 @@ async function seedFirebaseContent() {
 
   const memoriesSnapshot = await getDocs(collection(db, "memories"));
   const existingMemoryKeys = new Set(memoriesSnapshot.docs.map((item, index) => {
-    const memory = normalizarRecuerdo({ id: item.id, ...item.data() }, index);
+    const data = item.data();
+    const memory = normalizarRecuerdo({ ...data, id: data.id || item.id, docId: item.id }, index);
     return obtenerClaveUnicaRecuerdo(memory);
   }));
 
@@ -2592,7 +2667,7 @@ async function seedFirebaseContent() {
     });
     const memoryKey = obtenerClaveUnicaRecuerdo(memory);
 
-    if (existingMemoryKeys.has(memoryKey)) {
+    if (deletedMemoryKeys.has(memoryKey) || existingMemoryKeys.has(memoryKey)) {
       continue;
     }
 
@@ -2663,7 +2738,8 @@ async function cargarRecuerdosFirestore() {
     }
 
     const loadedMemories = await Promise.all(snapshot.docs.map(async (item, index) => {
-        const memory = normalizarRecuerdo({ id: item.id, ...item.data() }, index);
+        const data = item.data();
+        const memory = normalizarRecuerdo({ ...data, id: data.id || item.id, docId: item.id }, index);
         if (!memory.imageUrl && memory.imagePath && !memory.imagePath.startsWith("img/")) {
           memory.imageUrl = await resolverStoragePath(memory.imagePath, "imagen del recuerdo");
           memory.image = memory.imageUrl || memory.imagePath;
