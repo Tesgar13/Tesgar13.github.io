@@ -1994,6 +1994,42 @@ function cerrarModalRecuerdo() {
   document.body.style.overflow = "";
 }
 
+async function borrarRecuerdoActual() {
+  const modal = document.getElementById("memory-modal");
+  const deleteButton = document.getElementById("memory-modal-delete");
+  const entryId = modal?.dataset?.entryId;
+
+  if (!modal || !entryId) {
+    return;
+  }
+
+  try {
+    if (deleteButton) {
+      deleteButton.disabled = true;
+      deleteButton.textContent = "Borrando...";
+    }
+
+    if (window.firebaseDb && window.firebaseFns?.doc && window.firebaseFns?.deleteDoc) {
+      const { doc, deleteDoc } = window.firebaseFns;
+      await deleteDoc(doc(window.firebaseDb, "memories", entryId));
+    }
+
+    memoryLibraryState = deduplicarRecuerdos(
+      memoryLibraryState.filter((entry) => entry.id !== entryId)
+    );
+    renderizarTimeline();
+    cerrarModalRecuerdo();
+  } catch (error) {
+    console.error("No se pudo borrar el recuerdo:", error);
+    alert("No se pudo borrar la polaroid. Intentalo otra vez.");
+  } finally {
+    if (deleteButton) {
+      deleteButton.disabled = false;
+      deleteButton.textContent = "Borrar polaroid";
+    }
+  }
+}
+
 function guardarTextoRecuerdoActual() {
   const modal = document.getElementById("memory-modal");
   const descriptionInput = document.getElementById("memory-modal-description-input");
@@ -2039,10 +2075,11 @@ function prepararModalRecuerdo() {
   const turn = document.getElementById("memory-modal-turn");
   const back = document.getElementById("memory-modal-return");
   const save = document.getElementById("memory-modal-save");
+  const remove = document.getElementById("memory-modal-delete");
   const descriptionInput = document.getElementById("memory-modal-description-input");
   const saved = document.getElementById("memory-modal-saved");
 
-  if (!modal || !flip || !turn || !back || !save || !descriptionInput || !saved) {
+  if (!modal || !flip || !turn || !back || !save || !remove || !descriptionInput || !saved) {
     return;
   }
 
@@ -2059,6 +2096,7 @@ function prepararModalRecuerdo() {
   });
 
   save.addEventListener("click", guardarTextoRecuerdoActual);
+  remove.addEventListener("click", borrarRecuerdoActual);
   descriptionInput.addEventListener("input", () => {
     saved.hidden = true;
   });
