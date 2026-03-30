@@ -2596,6 +2596,16 @@ body.card-overlay-open {
   gap: 10px;
 }
 
+.tab-panel--musica .turntable__label,
+.tab-panel--musica .turntable__label h3,
+.tab-panel--musica .turntable__label p,
+.tab-panel--musica .turntable__eyebrow,
+.tab-panel--musica .turntable__links .song-item__link,
+.tab-panel--musica .turntable__platter-center span {
+  color: #ffffff;
+  text-shadow: 0 2px 10px rgba(0, 0, 0, 0.35);
+}
+
 .turntable__eyebrow {
   margin: 0;
   text-transform: uppercase;
@@ -2947,6 +2957,16 @@ body.card-overlay-open {
   border-radius: 28px 24px 34px 20px / 24px 30px 22px 34px;
   background: linear-gradient(180deg, rgba(249, 236, 221, 0.98), rgba(236, 214, 190, 0.98));
   box-shadow: 0 18px 34px rgba(15, 7, 4, 0.2);
+}
+
+.tab-panel--musica .song-library .song-item__content,
+.tab-panel--musica .song-library .song-item__content h4,
+.tab-panel--musica .song-library .song-item__content p,
+.tab-panel--musica .song-library .song-item__artist,
+.tab-panel--musica .song-library .song-item__eyebrow,
+.tab-panel--musica .song-library .song-item__links .song-item__link {
+  color: #000000 !important;
+  text-shadow: none;
 }
 
 .song-item--active {

@@ -319,12 +319,83 @@ function normalizarRecuerdo(entry, fallbackIndex = 0) {
   };
 }
 
+function obtenerClaveUnicaRecuerdo(entry) {
+  if (entry?.id) {
+    return `id:${entry.id}`;
+  }
+
+  return [
+    entry?.type || "manual",
+    entry?.planId || "",
+    entry?.date || "",
+    entry?.title || "",
+    entry?.note || "",
+    entry?.imageUrl || entry?.imagePath || entry?.image || ""
+  ].join("|");
+}
+
+function puntuarRecuerdo(entry) {
+  let score = 0;
+
+  if (entry?.imageUrl || entry?.imagePath || entry?.image) score += 8;
+  if (entry?.description) score += 4;
+  if (entry?.note) score += 3;
+  if (entry?.title) score += 2;
+  if (entry?.planId) score += 1;
+
+  return score;
+}
+
+function deduplicarRecuerdos(entries) {
+  const recuerdosPorClave = new Map();
+
+  entries.forEach((entry, index) => {
+    const normalizado = normalizarRecuerdo(entry, index);
+    const clave = obtenerClaveUnicaRecuerdo(normalizado);
+    const existente = recuerdosPorClave.get(clave);
+
+    if (!existente) {
+      recuerdosPorClave.set(clave, normalizado);
+      return;
+    }
+
+    const candidato = {
+      ...existente,
+      ...normalizado,
+      id: existente.id || normalizado.id,
+      order: Math.min(
+        Number.isFinite(existente.order) ? existente.order : Number.MAX_SAFE_INTEGER,
+        Number.isFinite(normalizado.order) ? normalizado.order : Number.MAX_SAFE_INTEGER
+      )
+    };
+
+    recuerdosPorClave.set(
+      clave,
+      puntuarRecuerdo(normalizado) >= puntuarRecuerdo(existente) ? candidato : existente
+    );
+  });
+
+  return Array.from(recuerdosPorClave.values())
+    .sort((a, b) => {
+      const porFecha = new Date(b.date) - new Date(a.date);
+      if (porFecha !== 0) {
+        return porFecha;
+      }
+
+      return (a.order || 0) - (b.order || 0);
+    })
+    .map((entry, index) => ({
+      ...entry,
+      order: Number.isFinite(entry.order) && entry.order > 0 ? entry.order : index + 1
+    }));
+}
+
 function obtenerPlanes() {
   return [...planLibraryState].filter((plan) => plan.visible !== false).sort((a, b) => a.order - b.order);
 }
 
 function obtenerTimeline() {
-  return [...memoryLibraryState].filter((entry) => entry.visible !== false).sort((a, b) => new Date(b.date) - new Date(a.date));
+  return deduplicarRecuerdos(memoryLibraryState).filter((entry) => entry.visible !== false);
 }
 
 async function guardarcanciónEnFirestore(song) {
@@ -2473,7 +2544,7 @@ async function cargarPlanesFirestore() {
 
 async function cargarRecuerdosFirestore() {
   if (!window.firebaseDb || !window.firebaseFns) {
-    memoryLibraryState = MEMORY_SEED.map((entry, index) => normalizarRecuerdo(entry, index));
+    memoryLibraryState = deduplicarRecuerdos(MEMORY_SEED);
     return;
   }
 
@@ -2481,19 +2552,24 @@ async function cargarRecuerdosFirestore() {
   const { collection, getDocs, query, orderBy } = window.firebaseFns;
   try {
     const snapshot = await getDocs(query(collection(db, "memories"), orderBy("order", "asc")));
-    memoryLibraryState = snapshot.docs.length
-      ? await Promise.all(snapshot.docs.map(async (item, index) => {
+    if (!snapshot.docs.length) {
+      memoryLibraryState = deduplicarRecuerdos(MEMORY_SEED);
+      return;
+    }
+
+    const loadedMemories = await Promise.all(snapshot.docs.map(async (item, index) => {
         const memory = normalizarRecuerdo({ id: item.id, ...item.data() }, index);
         if (!memory.imageUrl && memory.imagePath && !memory.imagePath.startsWith("img/")) {
           memory.imageUrl = await resolverStoragePath(memory.imagePath, "imagen del recuerdo");
           memory.image = memory.imageUrl || memory.imagePath;
         }
         return memory;
-      }))
-      : MEMORY_SEED.map((entry, index) => normalizarRecuerdo(entry, index));
+      }));
+
+    memoryLibraryState = deduplicarRecuerdos(loadedMemories);
   } catch (error) {
     console.error("No se pudieron cargar los recuerdos desde Firestore.", error);
-    memoryLibraryState = MEMORY_SEED.map((entry, index) => normalizarRecuerdo(entry, index));
+    memoryLibraryState = deduplicarRecuerdos(MEMORY_SEED);
   }
 }
 
@@ -2548,6 +2624,7 @@ async function guardarRecuerdoEnFirestore(entry) {
   memoryLibraryState = memoryLibraryState.some((item) => item.id === normalizada.id)
     ? memoryLibraryState.map((item) => (item.id === normalizada.id ? normalizada : item))
     : [...memoryLibraryState, normalizada];
+  memoryLibraryState = deduplicarRecuerdos(memoryLibraryState);
 }
 
 async function guardarPlanEnFirestore(plan) {
@@ -2565,7 +2642,7 @@ async function guardarPlanEnFirestore(plan) {
 }
 
 function guardarTimeline(entries) {
-  memoryLibraryState = entries.map((entry, index) => normalizarRecuerdo(entry, index));
+  memoryLibraryState = deduplicarRecuerdos(entries);
 }
 
 function obtenerTimeline() {
