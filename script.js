@@ -320,17 +320,28 @@ function normalizarRecuerdo(entry, fallbackIndex = 0) {
 }
 
 function obtenerClaveUnicaRecuerdo(entry) {
+  if (entry?.planId) {
+    return `plan:${entry.planId}`;
+  }
+
+  const texto = (entry?.note || entry?.title || "").trim().toLowerCase();
+  const imagen = (entry?.imageUrl || entry?.imagePath || entry?.image || "").trim().toLowerCase();
+  const fecha = (entry?.date || "").trim();
+  const tipo = (entry?.type || "manual").trim().toLowerCase();
+
+  if (fecha || imagen || texto) {
+    return [tipo, fecha, texto, imagen].join("|");
+  }
+
   if (entry?.id) {
     return `id:${entry.id}`;
   }
 
   return [
-    entry?.type || "manual",
-    entry?.planId || "",
-    entry?.date || "",
-    entry?.title || "",
-    entry?.note || "",
-    entry?.imageUrl || entry?.imagePath || entry?.image || ""
+    tipo,
+    fecha,
+    texto,
+    imagen
   ].join("|");
 }
 
@@ -346,6 +357,38 @@ function puntuarRecuerdo(entry) {
   return score;
 }
 
+function elegirTextoMasCompleto(...values) {
+  return values
+    .map((value) => String(value || "").trim())
+    .sort((a, b) => b.length - a.length)[0] || "";
+}
+
+function fusionarRecuerdos(base, extra) {
+  const imagen = extra.imageUrl || base.imageUrl || extra.imagePath || base.imagePath || extra.image || base.image || "";
+  const imagePath = extra.imagePath || base.imagePath || "";
+  const imageUrl = extra.imageUrl || base.imageUrl || (!imagen.startsWith("img/") ? imagen : "");
+
+  return {
+    ...base,
+    ...extra,
+    id: base.id || extra.id,
+    type: extra.type || base.type,
+    planId: extra.planId || base.planId,
+    date: extra.date || base.date,
+    title: elegirTextoMasCompleto(base.title, extra.title),
+    note: elegirTextoMasCompleto(base.note, extra.note, base.title, extra.title),
+    description: elegirTextoMasCompleto(base.description, extra.description),
+    imagePath,
+    imageUrl,
+    image: imageUrl || imagePath || imagen,
+    visible: base.visible !== false || extra.visible !== false,
+    order: Math.min(
+      Number.isFinite(base.order) ? base.order : Number.MAX_SAFE_INTEGER,
+      Number.isFinite(extra.order) ? extra.order : Number.MAX_SAFE_INTEGER
+    )
+  };
+}
+
 function deduplicarRecuerdos(entries) {
   const recuerdosPorClave = new Map();
 
@@ -359,19 +402,11 @@ function deduplicarRecuerdos(entries) {
       return;
     }
 
-    const candidato = {
-      ...existente,
-      ...normalizado,
-      id: existente.id || normalizado.id,
-      order: Math.min(
-        Number.isFinite(existente.order) ? existente.order : Number.MAX_SAFE_INTEGER,
-        Number.isFinite(normalizado.order) ? normalizado.order : Number.MAX_SAFE_INTEGER
-      )
-    };
+    const fusionado = fusionarRecuerdos(existente, normalizado);
 
     recuerdosPorClave.set(
       clave,
-      puntuarRecuerdo(normalizado) >= puntuarRecuerdo(existente) ? candidato : existente
+      puntuarRecuerdo(fusionado) >= puntuarRecuerdo(existente) ? fusionado : existente
     );
   });
 
