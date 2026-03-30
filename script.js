@@ -1998,8 +1998,9 @@ async function borrarRecuerdoActual() {
   const modal = document.getElementById("memory-modal");
   const deleteButton = document.getElementById("memory-modal-delete");
   const entryId = modal?.dataset?.entryId;
+  const entry = obtenerTimeline().find((item) => item.id === entryId);
 
-  if (!modal || !entryId) {
+  if (!modal || !entryId || !entry) {
     return;
   }
 
@@ -2009,16 +2010,24 @@ async function borrarRecuerdoActual() {
       deleteButton.textContent = "Borrando...";
     }
 
-    if (window.firebaseDb && window.firebaseFns?.doc && window.firebaseFns?.deleteDoc) {
-      const { doc, deleteDoc } = window.firebaseFns;
-      await deleteDoc(doc(window.firebaseDb, "memories", entryId));
-    }
-
     memoryLibraryState = deduplicarRecuerdos(
-      memoryLibraryState.filter((entry) => entry.id !== entryId)
+      memoryLibraryState.map((item) => (
+        item.id === entryId
+          ? { ...item, visible: false }
+          : item
+      ))
     );
     renderizarTimeline();
     cerrarModalRecuerdo();
+
+    if (window.firebaseDb && window.firebaseFns?.doc && window.firebaseFns?.setDoc) {
+      const { doc, setDoc } = window.firebaseFns;
+      await setDoc(
+        doc(window.firebaseDb, "memories", entryId),
+        { ...entry, id: entryId, visible: false },
+        { merge: true }
+      );
+    }
   } catch (error) {
     console.error("No se pudo borrar el recuerdo:", error);
     alert("No se pudo borrar la polaroid. Intentalo otra vez.");
